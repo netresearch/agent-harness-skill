@@ -208,8 +208,8 @@ check_commands() {
         done < <(grep -oP '`make\s+\K[a-zA-Z0-9_-]+' "AGENTS.md" 2>/dev/null || true)
         if [[ "$has_make_issue" == false ]]; then
             local make_count
-            make_count=$(grep -oP '`make\s+\K[a-zA-Z0-9_-]+' "AGENTS.md" 2>/dev/null | wc -l)
-            if (( make_count > 0 )); then
+            make_count=$(grep -oP '`make\s+\K[a-zA-Z0-9_-]+' "AGENTS.md" 2>/dev/null | wc -l || true)
+            if [[ "$make_count" -gt 0 ]]; then
                 pass 2 "All make targets verified (${make_count} targets)"
             fi
         fi
@@ -229,8 +229,8 @@ check_commands() {
         done < <(grep -oP '`composer\s+\K[a-zA-Z0-9:_-]+' "AGENTS.md" 2>/dev/null || true)
         if [[ "$has_composer_issue" == false ]]; then
             local composer_count
-            composer_count=$(grep -oP '`composer\s+\K[a-zA-Z0-9:_-]+' "AGENTS.md" 2>/dev/null | wc -l)
-            if (( composer_count > 0 )); then
+            composer_count=$(grep -oP '`composer\s+\K[a-zA-Z0-9:_-]+' "AGENTS.md" 2>/dev/null | wc -l || true)
+            if [[ "$composer_count" -gt 0 ]]; then
                 pass 2 "All composer scripts verified (${composer_count} scripts)"
             fi
         fi
@@ -248,8 +248,8 @@ check_commands() {
         done < <(grep -oP '`npm run\s+\K[a-zA-Z0-9:_-]+' "AGENTS.md" 2>/dev/null || true)
         if [[ "$has_npm_issue" == false ]]; then
             local npm_count
-            npm_count=$(grep -oP '`npm run\s+\K[a-zA-Z0-9:_-]+' "AGENTS.md" 2>/dev/null | wc -l)
-            if (( npm_count > 0 )); then
+            npm_count=$(grep -oP '`npm run\s+\K[a-zA-Z0-9:_-]+' "AGENTS.md" 2>/dev/null | wc -l || true)
+            if [[ "$npm_count" -gt 0 ]]; then
                 pass 2 "All npm scripts verified (${npm_count} scripts)"
             fi
         fi
