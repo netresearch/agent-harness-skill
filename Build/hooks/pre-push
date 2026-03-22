@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Pre-push hook: full verification before pushing
+
+# Validate JSON files
+for f in .claude-plugin/plugin.json composer.json renovate.json; do
+  if [ -f "$f" ]; then
+    python3 -c "import json; json.load(open('$f'))" 2>/dev/null || {
+      echo "ERROR: Invalid JSON in $f"
+      exit 1
+    }
+  fi
+done
+
+# Check plugin.json and SKILL.md versions match
+if [ -f .claude-plugin/plugin.json ] && [ -f skills/agent-harness/SKILL.md ]; then
+  PLUGIN_V=$(python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")
+  SKILL_V=$(grep -oP 'version:\s*"?\K[^"]+' skills/agent-harness/SKILL.md | head -1)
+  if [ -n "$SKILL_V" ] && [ "$PLUGIN_V" != "$SKILL_V" ]; then
+    echo "ERROR: plugin.json version ($PLUGIN_V) does not match SKILL.md version ($SKILL_V)"
+    exit 1
+  fi
+fi
+
+echo "Pre-push checks passed"

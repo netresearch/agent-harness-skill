@@ -1,0 +1,9 @@
+extends: default
+rules:
+  line-length:
+    max: 200
+  truthy:
+    check-keys: false
+  document-start: disable
+  empty-lines:
+    max: 1

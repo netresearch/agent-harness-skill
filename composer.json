@@ -1,0 +1,24 @@
+{
+  "name": "netresearch/agent-harness-skill",
+  "description": "Agent Skill for bootstrapping, verifying, and enforcing agent-harness infrastructure in repositories",
+  "type": "ai-agent-skill",
+  "keywords": ["ai-agent", "skill", "harness", "agent-ready"],
+  "license": "(MIT AND CC-BY-SA-4.0)",
+  "authors": [
+    {
+      "name": "Netresearch DTT GmbH",
+      "homepage": "https://www.netresearch.de/",
+      "role": "Manufacturer"
+    }
+  ],
+  "require": {
+    "netresearch/composer-agent-skill-plugin": "*"
+  },
+  "extra": {
+    "ai-agent-skill": "skills/agent-harness/SKILL.md"
+  },
+  "support": {
+    "issues": "https://github.com/netresearch/agent-harness-skill/issues",
+    "source": "https://github.com/netresearch/agent-harness-skill"
+  }
+}

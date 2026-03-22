@@ -1,0 +1,39 @@
+# Architecture
+
+<!-- Keep this document current. It's referenced from AGENTS.md and read by agents
+     when they need to understand the system before making changes. -->
+
+## System Overview
+
+{{ONE_PARAGRAPH_DESCRIPTION}}
+
+## Component Map
+
+| Component | Responsibility | Key Files |
+|---|---|---|
+| {{COMPONENT_1}} | {{RESPONSIBILITY}} | `{{PATH}}` |
+| {{COMPONENT_2}} | {{RESPONSIBILITY}} | `{{PATH}}` |
+
+## Dependency Rules
+
+<!-- Define what can import/depend on what. This prevents architectural drift. -->
+
+{{DEPENDENCY_RULES}}
+
+<!-- Example:
+- `src/domain/` MUST NOT depend on `src/infrastructure/`
+- `src/api/` may depend on `src/domain/` and `src/infrastructure/`
+- `tests/` may depend on anything
+-->
+
+## Data Flow
+
+{{DATA_FLOW_DESCRIPTION}}
+
+## Key Decisions
+
+<!-- Link to ADRs or summarise key architectural decisions -->
+
+| Decision | Rationale | Date |
+|---|---|---|
+| {{DECISION}} | {{WHY}} | {{DATE}} |

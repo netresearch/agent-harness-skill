@@ -1,0 +1,42 @@
+# {{PROJECT_NAME}}
+
+<!-- This file is an INDEX, not an encyclopedia. Keep it under 150 lines.
+     Detail belongs in docs/. Agents read this every session — every line costs context. -->
+
+## Repo Structure
+
+- `src/` — Application source code
+- `tests/` — Test suites
+- `docs/` — Documentation (see [ARCHITECTURE.md](docs/ARCHITECTURE.md))
+- `docs/exec-plans/` — Execution plans ([active](docs/exec-plans/active/), [completed](docs/exec-plans/completed/))
+- `.github/workflows/` — CI/CD pipelines
+
+## Commands
+
+```bash
+# Build
+{{BUILD_COMMAND}}
+
+# Test
+{{TEST_COMMAND}}
+
+# Lint
+{{LINT_COMMAND}}
+
+# Verify harness consistency
+make verify-harness
+```
+
+## Rules
+
+- **Commits:** Use [Conventional Commits](https://www.conventionalcommits.org/) format
+- **Architecture:** See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for dependency rules
+- **Plans:** Multi-file changes require an exec-plan in `docs/exec-plans/active/`
+- **AGENTS.md:** This file is an index — details go in `docs/`
+- **Updates:** Update this file when adding new commands or changing repo structure
+
+## References
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Active Execution Plans](docs/exec-plans/active/)
+- [Completed Plans](docs/exec-plans/completed/)

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Pre-commit hook: basic checks before committing
+
+# Check SKILL.md word count
+if [ -f skills/agent-harness/SKILL.md ]; then
+  BODY=$(sed -n '/^---$/,/^---$/d; p' skills/agent-harness/SKILL.md)
+  WORDS=$(echo "$BODY" | wc -w)
+  if [ "$WORDS" -gt 500 ]; then
+    echo "ERROR: SKILL.md body exceeds 500 words ($WORDS words)"
+    exit 1
+  fi
+fi
+
+# Check for trailing whitespace in modified files
+if git diff --cached --check 2>/dev/null; then
+  :
+fi
+
+echo "Pre-commit checks passed"
