@@ -11,14 +11,14 @@ jobs:
     name: Markdown Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: DavidAnson/markdownlint-cli2-action@v19
 
   yaml:
     name: YAML Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: pip install yamllint
       - run: yamllint -c .yamllint.yml .
 
@@ -26,5 +26,5 @@ jobs:
     name: ShellCheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: shellcheck skills/agent-harness/scripts/verify-harness.sh
