@@ -131,7 +131,7 @@ check_agents_md_commands() {
         fail 1 "Commands section check skipped (AGENTS.md missing)"
         return
     fi
-    if grep -qi '^## *commands' "AGENTS.md"; then
+    if grep -qi '^## *\(available \)\?commands' "AGENTS.md"; then
         pass 1 "Commands section found"
     else
         fail 1 "AGENTS.md missing ## Commands section"
