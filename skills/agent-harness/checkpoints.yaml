@@ -47,17 +47,17 @@ mechanical:
     desc: "Architecture documentation exists"
 
   - id: AH-12
-    type: file_exists
-    target: .github/workflows/harness-verify.yml
+    type: command
+    target: "test -f .github/workflows/harness-verify.yml || (test -f .gitlab-ci.yml && grep -q 'harness-verify\\|verify-harness' .gitlab-ci.yml)"
     severity: warning
-    desc: "CI harness verification workflow exists"
+    desc: "CI harness verification workflow exists (GitHub Actions or GitLab CI)"
 
   # Level 3 — Enforced
   - id: AH-20
-    type: file_exists
-    target: .github/pull_request_template.md
+    type: command
+    target: "test -f .github/pull_request_template.md || test -d .github/PULL_REQUEST_TEMPLATE || test -d .gitlab/merge_request_templates"
     severity: warning
-    desc: "PR template with harness checklist exists"
+    desc: "PR/MR template with harness checklist exists"
 
   - id: AH-21
     type: command
