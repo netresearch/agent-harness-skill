@@ -36,7 +36,10 @@ mechanical:
   # Level 2 — Verified
   - id: AH-10
     type: command
-    target: "! grep -oP '\\[.*?\\]\\(\\K[^)]+' AGENTS.md 2>/dev/null | grep -v '^http' | grep -v '^#' | sed 's/#.*//' | while read -r ref; do test -e \"$ref\" || { echo \"Dead ref: $ref\"; exit 1; }; done"
+    target: >-
+      ! grep -oP '\\[.*?\\]\\(\\K[^)]+' AGENTS.md 2>/dev/null
+      | grep -v '^http' | grep -v '^#' | sed 's/#.*//'
+      | while read -r ref; do test -e "$ref" || { echo "Dead ref: $ref"; exit 1; }; done
     severity: error
     desc: "All AGENTS.md references resolve to existing files"
 
