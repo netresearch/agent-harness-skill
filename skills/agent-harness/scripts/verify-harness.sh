@@ -112,7 +112,7 @@ fail() {
     (( LEVEL_TOTAL[$level]++ )) || true
     OUTPUT_LINES+=("  FAIL|${level}|${msg}")
     GITHUB_LINES+=("::error file=${file}::${msg} -- required for Level ${level} harness maturity")
-    GITLAB_LINES+=("ERROR: [Level ${level}] ${msg} (${file})")
+    GITLAB_LINES+=("ERROR: [Level ${level}] ${msg}${file:+ (${file})}")
     # Capture first actionable suggestion for --status
     if [[ -z "$NEXT_STEP" ]]; then
         NEXT_STEP="$msg"
@@ -128,7 +128,7 @@ warn() {
     (( LEVEL_TOTAL[$level]++ )) || true
     OUTPUT_LINES+=("  WARN|${level}|${msg}")
     GITHUB_LINES+=("::warning file=${file}::${msg}")
-    GITLAB_LINES+=("WARNING: [Level ${level}] ${msg} (${file})")
+    GITLAB_LINES+=("WARNING: [Level ${level}] ${msg}${file:+ (${file})}")
     if [[ -z "$NEXT_STEP" ]]; then
         NEXT_STEP="$msg"
     fi
@@ -518,19 +518,25 @@ render_text() {
 }
 
 render_github() {
-    for line in "${GITHUB_LINES[@]}"; do
-        echo "$line"
-    done
+    if (( ${#GITHUB_LINES[@]} > 0 )); then
+        for line in "${GITHUB_LINES[@]}"; do
+            echo "$line"
+        done
+    fi
 }
 
 render_gitlab() {
-    echo -e "\e[0Ksection_start:$(date +%s):harness_verify[collapsed=false]\r\e[0KAgent Harness Verification"
-    for line in "${GITLAB_LINES[@]}"; do
-        echo "$line"
-    done
+    local ts
+    ts=$(date +%s)
+    echo -e "\e[0Ksection_start:${ts}:harness_verify[collapsed=false]\r\e[0KAgent Harness Verification"
+    if (( ${#GITLAB_LINES[@]} > 0 )); then
+        for line in "${GITLAB_LINES[@]}"; do
+            echo "$line"
+        done
+    fi
     echo ""
     echo "Summary: ${ERRORS} error(s), ${WARNINGS} warning(s)"
-    echo -e "\e[0Ksection_end:$(date +%s):harness_verify\r\e[0K"
+    echo -e "\e[0Ksection_end:${ts}:harness_verify\r\e[0K"
 }
 
 render_status() {
