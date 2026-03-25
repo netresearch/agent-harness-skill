@@ -106,6 +106,7 @@ All of Level 1, plus:
 3. Audit every command in AGENTS.md. Ensure each one matches an actual Makefile target, composer script, or npm script.
 4. Create `docs/ARCHITECTURE.md`. Include at minimum: system overview (1 paragraph), component map, and dependency rules.
 5. Create `.github/workflows/harness-verify.yml` using the template. This workflow runs `verify-harness.sh` on every PR.
+6. **GitLab alternative:** If using GitLab, add a `harness-verify` job to `.gitlab-ci.yml` using the template. This job runs `verify-harness.sh` on every merge request.
 
 **With skill bootstrap:**
 
@@ -170,12 +171,12 @@ All of Level 2, plus:
 **Manual:**
 
 1. Complete all Level 2 requirements.
-2. Configure branch protection: add `harness-verify` as a required status check on the default branch. Use GitHub UI (Settings > Branches) or API.
+2. Configure branch protection: on GitHub, add `harness-verify` as a required status check on the default branch. On GitLab, enable 'Pipelines must succeed' under Settings > Merge requests.
 3. Set up hook auto-activation using one or more of:
    - `.envrc` with `git config core.hooksPath .githooks` (for direnv users).
    - `composer.json` `post-install-cmd` (for PHP projects).
    - `package.json` `prepare` script (for Node projects).
-4. Create `.github/pull_request_template.md` with a harness checklist.
+4. Create the PR/MR template. For GitHub: copy to `.github/pull_request_template.md`. For GitLab: copy to `.gitlab/merge_request_templates/Default.md`.
 5. Ensure `.githooks/pre-commit` and `.githooks/pre-push` exist and are executable.
 
 **With skill bootstrap:**
@@ -259,6 +260,17 @@ bash scripts/verify-harness.sh --check=refs --format=text
 
 The default output format uses GitHub Actions annotation syntax (`::error::`, `::warning::`), which makes results visible directly on the PR Files Changed tab.
 
+```yaml
+# .gitlab-ci.yml
+harness-verify:
+  stage: test
+  script: bash scripts/verify-harness.sh --level=2 --format=gitlab
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+```
+
+The GitLab format uses structured log output. Enable "Pipelines must succeed" in GitLab merge request settings to make it a hard gate.
+
 ### Automated assessment usage
 
 The `checkpoints.yaml` file integrates with automated-assessment-skill for batch auditing across multiple repositories:
@@ -281,7 +293,7 @@ automated-assessment:audit --skill=agent-harness --org=netresearch
 | AH-10 | 2 | No dead references in AGENTS.md | Error | command |
 | AH-11 | 2 | Commands match actual targets | Warning | command |
 | AH-12 | 2 | docs/ARCHITECTURE.md exists | Warning | file_exists |
-| AH-13 | 2 | CI harness workflow exists | Warning | file_exists |
-| AH-20 | 3 | PR template with harness checklist | Warning | file_exists |
+| AH-13 | 2 | CI harness workflow exists (GitHub Actions or GitLab CI) | Warning | file_exists |
+| AH-20 | 3 | PR/MR template with harness checklist | Warning | file_exists |
 | AH-21 | 3 | Git hooks auto-activate | Warning | command |
 | AH-22 | 3 | Drift detection active | Warning | command |

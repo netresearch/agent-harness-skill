@@ -39,6 +39,12 @@ This document covers all 10 enforcement instruments available for making reposit
 
 **Limitations:** Requires repository admin access. Does not provide fast local feedback.
 
+**GitLab equivalent:**
+
+- Configure via GitLab UI: Settings > Repository > Protected branches, or Settings > Merge requests > Merge checks.
+- Configure via API: `glab api projects/:id/protected_branches`.
+- Add `harness-verify` as a required pipeline job. Under Settings > Merge requests, enable "Pipelines must succeed".
+
 ---
 
 ### 2. CI Workflows
@@ -75,6 +81,21 @@ The workflow uses only `actions/checkout` and bash -- no external action depende
 **Reports:** Results appear as GitHub Actions annotations (`::error::`, `::warning::`) visible on the PR Files Changed tab.
 
 **Limitations:** Requires a round-trip to CI. Local feedback is faster via hooks.
+
+**GitLab equivalent:**
+
+A GitLab CI job in `.gitlab-ci.yml` that runs `verify-harness.sh` on every merge request:
+
+```yaml
+harness-verify:
+  stage: test
+  script:
+    - bash scripts/verify-harness.sh --level=2 --format=gitlab
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+```
+
+Results appear in the job log. GitLab does not have inline file annotations, but the structured output is visible in the pipeline job output.
 
 ---
 
@@ -310,6 +331,26 @@ Create `.github/pull_request_template.md`:
 
 **Limitations:** Reminder, not enforcement. Contributors can delete the template text. No merge blocking.
 
+**GitLab equivalent:**
+
+GitLab uses merge request templates stored in `.gitlab/merge_request_templates/`:
+
+```markdown
+<!-- .gitlab/merge_request_templates/Default.md -->
+## Changes
+
+<!-- Describe your changes -->
+
+## Harness Checklist
+
+- [ ] AGENTS.md updated (if commands or structure changed)
+- [ ] docs/ updated (if architecture or design changed)
+- [ ] New subsystems documented in ARCHITECTURE.md
+- [ ] Exec plan created (if multi-file structural change)
+```
+
+The `Default.md` template is automatically applied to new merge requests. Additional named templates can coexist in the same directory.
+
 ---
 
 ### 10. pre-commit Framework
@@ -368,11 +409,11 @@ Developer clones repo
   |       +---> verify-harness.sh --level=2 (full check)
   |       +---> Push succeeds or fails with feedback
   |
-  +---> PR created on GitHub
-  |       +---> PR template pre-fills harness checklist
-  |       +---> CI workflow triggers (harness-verify.yml)
+  +---> PR/MR created
+  |       +---> PR/MR template pre-fills harness checklist
+  |       +---> CI workflow/pipeline triggers
   |       +---> verify-harness.sh runs in CI
-  |       +---> Results reported as annotations
+  |       +---> Results reported as annotations (GitHub) or job log (GitLab)
   |
   +---> Merge attempted
           +---> Branch protection checks required status

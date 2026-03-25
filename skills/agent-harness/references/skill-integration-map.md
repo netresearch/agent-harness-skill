@@ -36,16 +36,21 @@ This means:
 
 ---
 
-### 2. github-project-skill
+### 2. github-project-skill / GitLab project settings
 
-**What it provides:** Configures GitHub platform features: branch protection rules, PR templates, CODEOWNERS, repository settings, label schemas.
+**What it provides:** Configures platform features: branch protection rules, PR/MR templates, CODEOWNERS/code owners, repository settings, label schemas.
+
+**Platform notes:**
+
+- **GitHub:** Delegates to `github-project-skill` for branch protection and PR template setup.
+- **GitLab:** No equivalent skill exists yet. Configure branch protection and merge request settings manually via GitLab UI (Settings > Repository > Protected branches, Settings > Merge requests).
 
 **When harness delegates to it:** When Level 3 enforcement needs to be set up. The harness skill delegates branch protection configuration and PR template creation to github-project-skill.
 
 **What harness expects back:**
 
-- Branch protection rule on the default branch with `harness-verify` as a required status check.
-- PR template at `.github/pull_request_template.md` containing a harness checklist.
+- Branch protection rule on the default branch with `harness-verify` as a required status/pipeline check.
+- PR template at `.github/pull_request_template.md` (GitHub) or MR template at `.gitlab/merge_request_templates/Default.md` (GitLab).
 - CODEOWNERS file if the project has designated maintainers.
 
 **What harness verifies:**
