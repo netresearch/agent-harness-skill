@@ -79,11 +79,10 @@ Level 1: PASS (4/4 checks passed)
 All of Level 1, plus:
 
 | Checkpoint | Check | Severity |
-|------------|-------|----------|
+| ---------- | ----- | -------- |
 | AH-10 | All references in `AGENTS.md` resolve to existing files | Error |
-| AH-11 | Documented commands match actual Makefile/composer/npm targets | Warning |
-| AH-12 | `docs/ARCHITECTURE.md` exists with system overview | Warning |
-| AH-13 | CI workflow runs harness verification on every PR | Warning |
+| AH-11 | `docs/ARCHITECTURE.md` exists with system overview | Warning |
+| AH-12 | CI workflow runs harness verification on every PR/MR | Warning |
 
 ### What it gives you
 
@@ -128,13 +127,12 @@ Example output:
 [PASS] AH-01: AGENTS.md exists
 [PASS] AH-02: AGENTS.md is 87 lines (under 150)
 [PASS] AH-03: AGENTS.md contains commands section
-[PASS] docs/ directory exists
+[PASS] AH-04: docs/ directory exists
 [PASS] AH-10: All 12 references in AGENTS.md resolve
-[WARN] AH-11: Command 'make deploy' in AGENTS.md has no Makefile target
-[PASS] AH-12: docs/ARCHITECTURE.md exists
-[PASS] AH-13: .github/workflows/harness-verify.yml exists
+[PASS] AH-11: docs/ARCHITECTURE.md exists
+[PASS] AH-12: CI harness workflow exists
 
-Level 2: WARN (7/8 checks passed, 1 warning)
+Level 2: PASS (7/7 checks passed)
 ```
 
 ---
@@ -199,16 +197,15 @@ Example output:
 [PASS] AH-01: AGENTS.md exists
 [PASS] AH-02: AGENTS.md is 92 lines (under 150)
 [PASS] AH-03: AGENTS.md contains commands section
-[PASS] docs/ directory exists
+[PASS] AH-04: docs/ directory exists
 [PASS] AH-10: All 15 references in AGENTS.md resolve
-[PASS] AH-11: All 6 documented commands match targets
-[PASS] AH-12: docs/ARCHITECTURE.md exists
-[PASS] AH-13: .github/workflows/harness-verify.yml exists
-[PASS] AH-20: PR template with harness checklist exists
+[PASS] AH-11: docs/ARCHITECTURE.md exists
+[PASS] AH-12: CI harness workflow exists
+[PASS] AH-20: PR/MR template with harness checklist exists
 [PASS] AH-21: Git hooks auto-activate (.envrc configures hooksPath)
-[PASS] AH-22: No drift detected
+[PASS] No drift detected
 
-Level 3: PASS (11/11 checks passed)
+Level 3: PASS (10/10 checks passed)
 ```
 
 ---
@@ -286,14 +283,13 @@ automated-assessment:audit --skill=agent-harness --org=netresearch
 ## Checkpoint Reference
 
 | ID | Level | Check | Severity | Type |
-|----|-------|-------|----------|------|
+| ---- | ----- | ----- | -------- | ---- |
 | AH-01 | 1 | AGENTS.md exists | Error | file_exists |
 | AH-02 | 1 | AGENTS.md under 150 lines | Warning | command |
-| AH-03 | 1 | AGENTS.md has commands section | Warning | contains |
+| AH-03 | 1 | AGENTS.md has commands section | Warning | regex |
+| AH-04 | 1 | docs/ directory exists | Warning | command |
 | AH-10 | 2 | No dead references in AGENTS.md | Error | command |
-| AH-11 | 2 | Commands match actual targets | Warning | command |
-| AH-12 | 2 | docs/ARCHITECTURE.md exists | Warning | file_exists |
-| AH-13 | 2 | CI harness workflow exists (GitHub Actions or GitLab CI) | Warning | file_exists |
-| AH-20 | 3 | PR/MR template with harness checklist | Warning | file_exists |
+| AH-11 | 2 | docs/ARCHITECTURE.md exists | Warning | file_exists |
+| AH-12 | 2 | CI harness verification workflow exists (GitHub Actions or GitLab CI) | Warning | command |
+| AH-20 | 3 | PR/MR template with harness checklist | Warning | command |
 | AH-21 | 3 | Git hooks auto-activate | Warning | command |
-| AH-22 | 3 | Drift detection active | Warning | command |
