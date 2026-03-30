@@ -182,7 +182,7 @@ This means:
 
 **What harness provides to it:**
 
-- `checkpoints.yaml` with maturity-level checks (AH-01 through AH-22).
+- `checkpoints.yaml` with maturity-level checks (AH-01 through AH-21).
 - Preconditions (must be a git repository).
 - Severity levels (error vs. warning) for each checkpoint.
 

@@ -158,10 +158,10 @@ Summary: Level 2 COMPLETE | 0 error(s), 0 warning(s)
 All of Level 2, plus:
 
 | Checkpoint | Check | Severity |
-|------------|-------|----------|
-| AH-20 | PR template includes harness checklist | Warning |
+| ---------- | ----- | -------- |
+| AH-20 | PR/MR template includes harness checklist | Warning |
 | AH-21 | Git hooks auto-activate on clone (via .envrc, composer, or npm) | Warning |
-| AH-22 | Drift detection: structural file changes trigger warnings if AGENTS.md is not also updated | Warning |
+| -- | Drift detection: structural file changes trigger warnings if AGENTS.md is not also updated | Warning |
 
 ### What it gives you
 
