@@ -30,16 +30,18 @@ Analyse the output. Fix issues directly or suggest fixes to the user. Verificati
 
 When artefacts are missing, create them from templates:
 
-| Artefact | Template |
-|---|---|
-| `AGENTS.md` | `templates/AGENTS.md.tmpl` |
-| `docs/ARCHITECTURE.md` | `templates/ARCHITECTURE.md.tmpl` |
-| `docs/exec-plans/{active,completed}/` | Create directories |
-| `.github/workflows/harness-verify.yml` | `templates/harness-verify.yml.tmpl` |
-| `.github/pull_request_template.md` | `templates/pull_request_template.md.tmpl` |
-| `.envrc` | `templates/envrc.tmpl` |
-| Makefile harness targets | `templates/Makefile.harness.tmpl` |
-| `scripts/verify-harness.sh` | `scripts/verify-harness.sh` (copy directly) |
+| Artefact | Template | Platform |
+|---|---|---|
+| `AGENTS.md` | `templates/AGENTS.md.tmpl` | All |
+| `docs/ARCHITECTURE.md` | `templates/ARCHITECTURE.md.tmpl` | All |
+| `docs/exec-plans/{active,completed}/` | Create directories | All |
+| `.github/workflows/harness-verify.yml` | `templates/harness-verify.yml.tmpl` | GitHub |
+| `.gitlab-ci.yml` (harness-verify job) | `templates/gitlab-ci-harness-verify.yml.tmpl` | GitLab |
+| `.github/pull_request_template.md` | `templates/pull_request_template.md.tmpl` | GitHub |
+| `.gitlab/merge_request_templates/Default.md` | `templates/merge_request_template.md.tmpl` | GitLab |
+| `.envrc` | `templates/envrc.tmpl` | All |
+| Makefile harness targets | `templates/Makefile.harness.tmpl` | All |
+| `scripts/verify-harness.sh` | `scripts/verify-harness.sh` (copy directly) | All |
 
 Populate templates with repo-specific values (project name, tech stack, existing conventions). Do not overwrite files that already exist without user confirmation.
 
@@ -54,7 +56,7 @@ Report the repo's maturity level (1, 2, or 3) and show what is needed to reach t
 - **Verify first, bootstrap second.** Always run verification before creating artefacts. The skill checks artefacts, not tools.
 - **Delegate specialist work.** Route concerns to the appropriate skill:
   - AGENTS.md content rules: `@agent-rules`
-  - Branch protection setup: `@github-project`
+  - Branch protection / merge checks setup: `@github-project` (GitHub) or manual GitLab settings
   - Quality gates and CI pipelines: `@enterprise-readiness`
 
 ## Maturity Levels

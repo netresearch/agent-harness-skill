@@ -13,10 +13,12 @@ FORMAT=""
 MAX_LEVEL=3
 SINGLE_CHECK=""
 STATUS_ONLY=false
+PLATFORM="${PLATFORM:-}"
 
 # Collected output lines (for final rendering)
 declare -a OUTPUT_LINES=()
 declare -a GITHUB_LINES=()
+declare -a GITLAB_LINES=()
 
 # Per-level pass/total counters
 declare -A LEVEL_PASS=( [1]=0 [2]=0 [3]=0 )
@@ -38,6 +40,9 @@ Must be run from the repo root.
 Options:
   --format=text     Plain text output (default for terminals)
   --format=github   GitHub Actions annotations (auto-detected in CI)
+  --format=gitlab   GitLab CI section annotations (auto-detected in CI)
+  --platform=P      Target platform: github or gitlab (auto-detected from
+                    CI environment or git remote URL if not specified)
   --level=N         Only check up to level N (1, 2, or 3; default: all)
   --check=NAME      Run single check category: refs, commands, drift, structure
   --status          Show current maturity level summary only
@@ -58,8 +63,38 @@ detect_format() {
     fi
     if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
         FORMAT="github"
+    elif [[ "${GITLAB_CI:-}" == "true" ]]; then
+        FORMAT="gitlab"
     else
         FORMAT="text"
+    fi
+}
+
+# Detect hosting platform from CI env, git remote, or flag
+detect_platform() {
+    if [[ -n "$PLATFORM" ]]; then
+        if [[ "$PLATFORM" != "github" && "$PLATFORM" != "gitlab" ]]; then
+            echo "Error: Unsupported PLATFORM '${PLATFORM}'. Expected 'github' or 'gitlab'." >&2
+            exit 1
+        fi
+        return
+    fi
+    if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+        PLATFORM="github"
+        return
+    fi
+    if [[ "${GITLAB_CI:-}" == "true" ]]; then
+        PLATFORM="gitlab"
+        return
+    fi
+    local remote_url=""
+    remote_url=$(git remote get-url origin 2>/dev/null || true)
+    if [[ "$remote_url" == *"gitlab"* ]]; then
+        PLATFORM="gitlab"
+    elif [[ "$remote_url" == *"github"* ]]; then
+        PLATFORM="github"
+    else
+        PLATFORM="github"
     fi
 }
 
@@ -76,11 +111,12 @@ pass() {
 fail() {
     local level="$1"
     local msg="$2"
-    local file="${3:-AGENTS.md}"
+    local file="${3-AGENTS.md}"
     (( ERRORS++ )) || true
     (( LEVEL_TOTAL[$level]++ )) || true
     OUTPUT_LINES+=("  FAIL|${level}|${msg}")
     GITHUB_LINES+=("::error file=${file}::${msg} -- required for Level ${level} harness maturity")
+    GITLAB_LINES+=("ERROR: [Level ${level}] ${msg}${file:+ (${file})}")
     # Capture first actionable suggestion for --status
     if [[ -z "$NEXT_STEP" ]]; then
         NEXT_STEP="$msg"
@@ -91,11 +127,12 @@ fail() {
 warn() {
     local level="$1"
     local msg="$2"
-    local file="${3:-AGENTS.md}"
+    local file="${3-AGENTS.md}"
     (( WARNINGS++ )) || true
     (( LEVEL_TOTAL[$level]++ )) || true
     OUTPUT_LINES+=("  WARN|${level}|${msg}")
     GITHUB_LINES+=("::warning file=${file}::${msg}")
+    GITLAB_LINES+=("WARNING: [Level ${level}] ${msg}${file:+ (${file})}")
     if [[ -z "$NEXT_STEP" ]]; then
         NEXT_STEP="$msg"
     fi
@@ -275,10 +312,22 @@ check_architecture_doc() {
 }
 
 check_ci_workflow() {
-    if [[ -f ".github/workflows/harness-verify.yml" ]]; then
-        pass 2 "CI harness workflow exists"
+    if [[ "$PLATFORM" == "gitlab" ]]; then
+        if [[ -f ".gitlab-ci.yml" ]]; then
+            if grep -q "harness-verify\|verify-harness" ".gitlab-ci.yml"; then
+                pass 2 "CI harness job found in .gitlab-ci.yml"
+            else
+                warn 2 "CI config exists (.gitlab-ci.yml) but no harness-verify job found"
+            fi
+        else
+            fail 2 "CI harness workflow missing -- create .gitlab-ci.yml with a harness-verify job" ""
+        fi
     else
-        fail 2 "CI harness workflow missing -- create .github/workflows/harness-verify.yml" ""
+        if [[ -f ".github/workflows/harness-verify.yml" ]]; then
+            pass 2 "CI harness workflow exists"
+        else
+            fail 2 "CI harness workflow missing -- create .github/workflows/harness-verify.yml" ""
+        fi
     fi
 }
 
@@ -325,32 +374,37 @@ check_hooks_autosetup() {
 }
 
 check_pr_template() {
-    # Check local repo first
-    if [[ -f ".github/pull_request_template.md" ]]; then
-        pass 3 "PR template exists (repo-level)"
-        return
-    fi
-
-    # Check for templates in subdirectory form
-    if [[ -d ".github/PULL_REQUEST_TEMPLATE" ]]; then
-        pass 3 "PR template exists (directory form)"
-        return
-    fi
-
-    # Try to detect org-level template via GitHub API (graceful fallback)
-    local org=""
-    org=$(git remote get-url origin 2>/dev/null | sed -n 's|.*github\.com[:/]\([^/]*\)/.*|\1|p')
-    if [[ -n "$org" ]]; then
-        # Try GitHub API — if accessible, check org .github repo for template
-        local api_result=""
-        api_result=$(gh api "repos/${org}/.github/contents/pull_request_template.md" --jq '.name' 2>/dev/null || true)
-        if [[ "$api_result" == "pull_request_template.md" ]]; then
-            pass 3 "PR template exists (org-level via ${org}/.github)"
+    if [[ "$PLATFORM" == "gitlab" ]]; then
+        if [[ -d ".gitlab/merge_request_templates" ]]; then
+            local tmpl_count
+            tmpl_count=$(find .gitlab/merge_request_templates -maxdepth 1 -type f -name '*.md' 2>/dev/null | wc -l)
+            if (( tmpl_count > 0 )); then
+                pass 3 "MR template exists (.gitlab/merge_request_templates/, ${tmpl_count} template(s))"
+                return
+            fi
+        fi
+        warn 3 "MR template missing (create .gitlab/merge_request_templates/Default.md)"
+    else
+        if [[ -f ".github/pull_request_template.md" ]]; then
+            pass 3 "PR template exists (repo-level)"
             return
         fi
+        if [[ -d ".github/PULL_REQUEST_TEMPLATE" ]]; then
+            pass 3 "PR template exists (directory form)"
+            return
+        fi
+        local org=""
+        org=$(git remote get-url origin 2>/dev/null | sed -n 's|.*github\.com[:/]\([^/]*\)/.*|\1|p')
+        if [[ -n "$org" ]]; then
+            local api_result=""
+            api_result=$(gh api "repos/${org}/.github/contents/pull_request_template.md" --jq '.name' 2>/dev/null || true)
+            if [[ "$api_result" == "pull_request_template.md" ]]; then
+                pass 3 "PR template exists (org-level via ${org}/.github)"
+                return
+            fi
+        fi
+        warn 3 "PR template missing (.github/pull_request_template.md or org-level)"
     fi
-
-    warn 3 "PR template missing (.github/pull_request_template.md or org-level)"
 }
 
 check_drift() {
@@ -378,7 +432,7 @@ check_drift() {
 
     while IFS= read -r changed_file; do
         case "$changed_file" in
-            Makefile|composer.json|package.json|.github/workflows/*)
+            Makefile|composer.json|package.json|.github/workflows/*|.gitlab-ci.yml)
                 build_files_changed=true
                 ;;
             AGENTS.md)
@@ -468,9 +522,25 @@ render_text() {
 }
 
 render_github() {
-    for line in "${GITHUB_LINES[@]}"; do
-        echo "$line"
-    done
+    if (( ${#GITHUB_LINES[@]} > 0 )); then
+        for line in "${GITHUB_LINES[@]}"; do
+            echo "$line"
+        done
+    fi
+}
+
+render_gitlab() {
+    local ts
+    ts=$(date +%s)
+    echo -e "\e[0Ksection_start:${ts}:harness_verify[collapsed=false]\r\e[0KAgent Harness Verification"
+    if (( ${#GITLAB_LINES[@]} > 0 )); then
+        for line in "${GITLAB_LINES[@]}"; do
+            echo "$line"
+        done
+    fi
+    echo ""
+    echo "Summary: ${ERRORS} error(s), ${WARNINGS} warning(s)"
+    echo -e "\e[0Ksection_end:${ts}:harness_verify\r\e[0K"
 }
 
 render_status() {
@@ -521,6 +591,13 @@ main() {
             --format=*)
                 FORMAT="${1#--format=}"
                 ;;
+            --platform=*)
+                PLATFORM="${1#--platform=}"
+                if [[ ! "$PLATFORM" =~ ^(github|gitlab)$ ]]; then
+                    echo "Error: --platform must be 'github' or 'gitlab'" >&2
+                    exit 1
+                fi
+                ;;
             --level=*)
                 MAX_LEVEL="${1#--level=}"
                 if [[ ! "$MAX_LEVEL" =~ ^[123]$ ]]; then
@@ -547,6 +624,7 @@ main() {
     done
 
     detect_format
+    detect_platform
 
     # Run single check category if requested
     if [[ -n "$SINGLE_CHECK" ]]; then
@@ -585,6 +663,8 @@ main() {
         render_status
     elif [[ "$FORMAT" == "github" ]]; then
         render_github
+    elif [[ "$FORMAT" == "gitlab" ]]; then
+        render_gitlab
     else
         render_text
     fi

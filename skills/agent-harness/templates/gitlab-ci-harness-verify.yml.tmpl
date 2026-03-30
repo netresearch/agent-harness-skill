@@ -1,0 +1,14 @@
+# Agent Harness Verification job for GitLab CI
+# Add this to your .gitlab-ci.yml or include it via !reference
+
+harness-verify:
+  stage: test
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache bash git coreutils grep
+  script:
+    - bash scripts/verify-harness.sh --level=2 --format=gitlab
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  allow_failure: false

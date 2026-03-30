@@ -36,16 +36,21 @@ This means:
 
 ---
 
-### 2. github-project-skill
+### 2. github-project-skill / GitLab project settings
 
-**What it provides:** Configures GitHub platform features: branch protection rules, PR templates, CODEOWNERS, repository settings, label schemas.
+**What it provides:** Configures platform features: branch protection rules, PR/MR templates, CODEOWNERS/code owners, repository settings, label schemas.
 
-**When harness delegates to it:** When Level 3 enforcement needs to be set up. The harness skill delegates branch protection configuration and PR template creation to github-project-skill.
+**Platform notes:**
+
+- **GitHub:** Delegates to `github-project-skill` for branch protection and PR template setup.
+- **GitLab:** No equivalent skill exists yet. Configure branch protection and merge request settings manually via GitLab UI (Settings > Repository > Protected branches, Settings > Merge requests).
+
+**When harness delegates to it (GitHub):** When Level 3 enforcement needs to be set up on GitHub, the harness skill delegates branch protection configuration and PR template creation to `github-project-skill`. On GitLab, the harness does not delegate these actions; it only verifies that branch protection and merge request templates have been configured manually as described above.
 
 **What harness expects back:**
 
-- Branch protection rule on the default branch with `harness-verify` as a required status check.
-- PR template at `.github/pull_request_template.md` containing a harness checklist.
+- Branch protection rule on the default branch with `harness-verify` as a required status/pipeline check.
+- PR template at `.github/pull_request_template.md` (GitHub) or MR template at `.gitlab/merge_request_templates/Default.md` (GitLab).
 - CODEOWNERS file if the project has designated maintainers.
 
 **What harness verifies:**
@@ -177,7 +182,7 @@ This means:
 
 **What harness provides to it:**
 
-- `checkpoints.yaml` with maturity-level checks (AH-01 through AH-22).
+- `checkpoints.yaml` with maturity-level checks (AH-01 through AH-21).
 - Preconditions (must be a git repository).
 - Severity levels (error vs. warning) for each checkpoint.
 

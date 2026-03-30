@@ -112,7 +112,7 @@ See [maturity-levels.md](skills/agent-harness/references/maturity-levels.md) for
 The skill sets up enforcement that works for ALL contributors:
 
 | Mechanism | Layer | Works without skill? |
-|---|---|---|
+| --- | --- | --- |
 | CI Workflow | Hard | Yes -- runs on GitHub |
 | Branch Protection | Hard | Yes -- GitHub server-side |
 | .envrc (direnv) | Automatic | Yes -- in repo |
@@ -129,7 +129,7 @@ See [enforcement-mechanisms.md](skills/agent-harness/references/enforcement-mech
 The harness skill delegates specialised work:
 
 | Skill | Delegation | What harness verifies |
-|---|---|---|
+| --- | --- | --- |
 | agent-rules | AGENTS.md content | Index format, length, references |
 | github-project | Branch protection, PR templates | Required checks configured |
 | enterprise-readiness | Quality gates, SLSA | Gates present |

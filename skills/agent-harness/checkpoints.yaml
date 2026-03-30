@@ -36,7 +36,10 @@ mechanical:
   # Level 2 — Verified
   - id: AH-10
     type: command
-    target: "! grep -oP '\\[.*?\\]\\(\\K[^)]+' AGENTS.md 2>/dev/null | grep -v '^http' | grep -v '^#' | sed 's/#.*//' | while read -r ref; do test -e \"$ref\" || { echo \"Dead ref: $ref\"; exit 1; }; done"
+    target: >-
+      ! grep -oP '\\[.*?\\]\\(\\K[^)]+' AGENTS.md 2>/dev/null
+      | grep -v '^http' | grep -v '^#' | sed 's/[?#].*//'
+      | while read -r ref; do test -e "$ref" || { echo "Dead ref: $ref"; exit 1; }; done
     severity: error
     desc: "All AGENTS.md references resolve to existing files"
 
@@ -47,17 +50,17 @@ mechanical:
     desc: "Architecture documentation exists"
 
   - id: AH-12
-    type: file_exists
-    target: .github/workflows/harness-verify.yml
+    type: command
+    target: "test -f .github/workflows/harness-verify.yml || (test -f .gitlab-ci.yml && grep -q 'harness-verify\\|verify-harness' .gitlab-ci.yml)"
     severity: warning
-    desc: "CI harness verification workflow exists"
+    desc: "CI harness verification workflow exists (GitHub Actions or GitLab CI)"
 
   # Level 3 — Enforced
   - id: AH-20
-    type: file_exists
-    target: .github/pull_request_template.md
+    type: command
+    target: "test -f .github/pull_request_template.md || test -d .github/PULL_REQUEST_TEMPLATE || test -n \"$(find .gitlab/merge_request_templates -maxdepth 1 -name '*.md' -print -quit 2>/dev/null)\""
     severity: warning
-    desc: "PR template with harness checklist exists"
+    desc: "PR/MR template with harness checklist exists"
 
   - id: AH-21
     type: command

@@ -60,12 +60,16 @@ bash scripts/verify-harness.sh --level=1 --format=text
 Example output:
 
 ```
-[PASS] AH-01: AGENTS.md exists
-[PASS] AH-02: AGENTS.md is 87 lines (under 150)
-[PASS] AH-03: AGENTS.md contains commands section
-[PASS] docs/ directory exists
+Agent Harness Verification
+==========================
 
-Level 1: PASS (4/4 checks passed)
+Level 1 -- Basic
+  ✓ AGENTS.md exists
+  ✓ AGENTS.md is index-format (87 lines)
+  ✓ Commands section found
+  ✓ docs/ directory exists
+
+Summary: Level 1 COMPLETE | 0 error(s), 0 warning(s)
 ```
 
 ---
@@ -79,11 +83,11 @@ Level 1: PASS (4/4 checks passed)
 All of Level 1, plus:
 
 | Checkpoint | Check | Severity |
-|------------|-------|----------|
+| ---------- | ----- | -------- |
 | AH-10 | All references in `AGENTS.md` resolve to existing files | Error |
-| AH-11 | Documented commands match actual Makefile/composer/npm targets | Warning |
-| AH-12 | `docs/ARCHITECTURE.md` exists with system overview | Warning |
-| AH-13 | CI workflow runs harness verification on every PR | Warning |
+| -- | Documented commands match actual Makefile/composer/npm targets | Warning |
+| AH-11 | `docs/ARCHITECTURE.md` exists with system overview | Warning |
+| AH-12 | CI workflow runs harness verification on every PR/MR | Warning |
 
 ### What it gives you
 
@@ -106,6 +110,7 @@ All of Level 1, plus:
 3. Audit every command in AGENTS.md. Ensure each one matches an actual Makefile target, composer script, or npm script.
 4. Create `docs/ARCHITECTURE.md`. Include at minimum: system overview (1 paragraph), component map, and dependency rules.
 5. Create `.github/workflows/harness-verify.yml` using the template. This workflow runs `verify-harness.sh` on every PR.
+6. **GitLab alternative:** If using GitLab, add a `harness-verify` job to `.gitlab-ci.yml` using the template. This job runs `verify-harness.sh` on every merge request.
 
 **With skill bootstrap:**
 
@@ -124,16 +129,22 @@ bash scripts/verify-harness.sh --level=2 --format=text
 Example output:
 
 ```
-[PASS] AH-01: AGENTS.md exists
-[PASS] AH-02: AGENTS.md is 87 lines (under 150)
-[PASS] AH-03: AGENTS.md contains commands section
-[PASS] docs/ directory exists
-[PASS] AH-10: All 12 references in AGENTS.md resolve
-[WARN] AH-11: Command 'make deploy' in AGENTS.md has no Makefile target
-[PASS] AH-12: docs/ARCHITECTURE.md exists
-[PASS] AH-13: .github/workflows/harness-verify.yml exists
+Agent Harness Verification
+==========================
 
-Level 2: WARN (7/8 checks passed, 1 warning)
+Level 1 -- Basic
+  ✓ AGENTS.md exists
+  ✓ AGENTS.md is index-format (87 lines)
+  ✓ Commands section found
+  ✓ docs/ directory exists
+
+Level 2 -- Verified
+  ✓ All references resolve
+  ✓ All make targets verified (3 targets)
+  ✓ docs/ARCHITECTURE.md exists
+  ✓ CI harness workflow exists
+
+Summary: Level 2 COMPLETE | 0 error(s), 0 warning(s)
 ```
 
 ---
@@ -147,10 +158,10 @@ Level 2: WARN (7/8 checks passed, 1 warning)
 All of Level 2, plus:
 
 | Checkpoint | Check | Severity |
-|------------|-------|----------|
-| AH-20 | PR template includes harness checklist | Warning |
+| ---------- | ----- | -------- |
+| AH-20 | PR/MR template includes harness checklist | Warning |
 | AH-21 | Git hooks auto-activate on clone (via .envrc, composer, or npm) | Warning |
-| AH-22 | Drift detection: structural file changes trigger warnings if AGENTS.md is not also updated | Warning |
+| -- | Drift detection: structural file changes trigger warnings if AGENTS.md is not also updated | Warning |
 
 ### What it gives you
 
@@ -170,12 +181,12 @@ All of Level 2, plus:
 **Manual:**
 
 1. Complete all Level 2 requirements.
-2. Configure branch protection: add `harness-verify` as a required status check on the default branch. Use GitHub UI (Settings > Branches) or API.
+2. Configure branch protection: on GitHub, add `harness-verify` as a required status check on the default branch. On GitLab, enable 'Pipelines must succeed' under Settings > Merge requests.
 3. Set up hook auto-activation using one or more of:
    - `.envrc` with `git config core.hooksPath .githooks` (for direnv users).
    - `composer.json` `post-install-cmd` (for PHP projects).
    - `package.json` `prepare` script (for Node projects).
-4. Create `.github/pull_request_template.md` with a harness checklist.
+4. Create the PR/MR template. For GitHub: copy to `.github/pull_request_template.md`. For GitLab: copy to `.gitlab/merge_request_templates/Default.md`.
 5. Ensure `.githooks/pre-commit` and `.githooks/pre-push` exist and are executable.
 
 **With skill bootstrap:**
@@ -195,19 +206,27 @@ bash scripts/verify-harness.sh --level=3 --format=text
 Example output:
 
 ```
-[PASS] AH-01: AGENTS.md exists
-[PASS] AH-02: AGENTS.md is 92 lines (under 150)
-[PASS] AH-03: AGENTS.md contains commands section
-[PASS] docs/ directory exists
-[PASS] AH-10: All 15 references in AGENTS.md resolve
-[PASS] AH-11: All 6 documented commands match targets
-[PASS] AH-12: docs/ARCHITECTURE.md exists
-[PASS] AH-13: .github/workflows/harness-verify.yml exists
-[PASS] AH-20: PR template with harness checklist exists
-[PASS] AH-21: Git hooks auto-activate (.envrc configures hooksPath)
-[PASS] AH-22: No drift detected
+Agent Harness Verification
+==========================
 
-Level 3: PASS (11/11 checks passed)
+Level 1 -- Basic
+  ✓ AGENTS.md exists
+  ✓ AGENTS.md is index-format (92 lines)
+  ✓ Commands section found
+  ✓ docs/ directory exists
+
+Level 2 -- Verified
+  ✓ All references resolve
+  ✓ All make targets verified (6 targets)
+  ✓ docs/ARCHITECTURE.md exists
+  ✓ CI harness workflow exists
+
+Level 3 -- Enforced
+  ✓ Git hooks auto-setup via .envrc
+  ✓ PR template exists (repo-level)
+  ✓ No drift detected
+
+Summary: Level 3 COMPLETE | 0 error(s), 0 warning(s)
 ```
 
 ---
@@ -259,6 +278,17 @@ bash scripts/verify-harness.sh --check=refs --format=text
 
 The default output format uses GitHub Actions annotation syntax (`::error::`, `::warning::`), which makes results visible directly on the PR Files Changed tab.
 
+```yaml
+# .gitlab-ci.yml
+harness-verify:
+  stage: test
+  script: bash scripts/verify-harness.sh --level=2 --format=gitlab
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+```
+
+The GitLab format uses structured log output. Enable "Pipelines must succeed" in GitLab merge request settings to make it a hard gate.
+
 ### Automated assessment usage
 
 The `checkpoints.yaml` file integrates with automated-assessment-skill for batch auditing across multiple repositories:
@@ -274,14 +304,13 @@ automated-assessment:audit --skill=agent-harness --org=netresearch
 ## Checkpoint Reference
 
 | ID | Level | Check | Severity | Type |
-|----|-------|-------|----------|------|
+| ---- | ----- | ----- | -------- | ---- |
 | AH-01 | 1 | AGENTS.md exists | Error | file_exists |
 | AH-02 | 1 | AGENTS.md under 150 lines | Warning | command |
-| AH-03 | 1 | AGENTS.md has commands section | Warning | contains |
+| AH-03 | 1 | AGENTS.md has commands section | Warning | regex |
+| AH-04 | 1 | docs/ directory exists | Warning | command |
 | AH-10 | 2 | No dead references in AGENTS.md | Error | command |
-| AH-11 | 2 | Commands match actual targets | Warning | command |
-| AH-12 | 2 | docs/ARCHITECTURE.md exists | Warning | file_exists |
-| AH-13 | 2 | CI harness workflow exists | Warning | file_exists |
-| AH-20 | 3 | PR template with harness checklist | Warning | file_exists |
+| AH-11 | 2 | docs/ARCHITECTURE.md exists | Warning | file_exists |
+| AH-12 | 2 | CI harness verification workflow exists (GitHub Actions or GitLab CI) | Warning | command |
+| AH-20 | 3 | PR/MR template with harness checklist | Warning | command |
 | AH-21 | 3 | Git hooks auto-activate | Warning | command |
-| AH-22 | 3 | Drift detection active | Warning | command |
