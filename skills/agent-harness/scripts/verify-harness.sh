@@ -377,7 +377,7 @@ check_pr_template() {
     if [[ "$PLATFORM" == "gitlab" ]]; then
         if [[ -d ".gitlab/merge_request_templates" ]]; then
             local tmpl_count
-            tmpl_count=$(find .gitlab/merge_request_templates -name '*.md' 2>/dev/null | wc -l)
+            tmpl_count=$(find .gitlab/merge_request_templates -maxdepth 1 -type f -name '*.md' 2>/dev/null | wc -l)
             if (( tmpl_count > 0 )); then
                 pass 3 "MR template exists (.gitlab/merge_request_templates/, ${tmpl_count} template(s))"
                 return

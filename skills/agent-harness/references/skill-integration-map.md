@@ -45,7 +45,7 @@ This means:
 - **GitHub:** Delegates to `github-project-skill` for branch protection and PR template setup.
 - **GitLab:** No equivalent skill exists yet. Configure branch protection and merge request settings manually via GitLab UI (Settings > Repository > Protected branches, Settings > Merge requests).
 
-**When harness delegates to it:** When Level 3 enforcement needs to be set up. The harness skill delegates branch protection configuration and PR template creation to github-project-skill.
+**When harness delegates to it (GitHub):** When Level 3 enforcement needs to be set up on GitHub, the harness skill delegates branch protection configuration and PR template creation to `github-project-skill`. On GitLab, the harness does not delegate these actions; it only verifies that branch protection and merge request templates have been configured manually as described above.
 
 **What harness expects back:**
 

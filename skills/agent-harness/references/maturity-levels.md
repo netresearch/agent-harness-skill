@@ -60,12 +60,16 @@ bash scripts/verify-harness.sh --level=1 --format=text
 Example output:
 
 ```
-[PASS] AH-01: AGENTS.md exists
-[PASS] AH-02: AGENTS.md is 87 lines (under 150)
-[PASS] AH-03: AGENTS.md contains commands section
-[PASS] docs/ directory exists
+Agent Harness Verification
+==========================
 
-Level 1: PASS (4/4 checks passed)
+Level 1 -- Basic
+  ✓ AGENTS.md exists
+  ✓ AGENTS.md is index-format (87 lines)
+  ✓ Commands section found
+  ✓ docs/ directory exists
+
+Summary: Level 1 COMPLETE | 0 error(s), 0 warning(s)
 ```
 
 ---
@@ -125,15 +129,22 @@ bash scripts/verify-harness.sh --level=2 --format=text
 Example output:
 
 ```
-[PASS] AH-01: AGENTS.md exists
-[PASS] AH-02: AGENTS.md is 87 lines (under 150)
-[PASS] AH-03: AGENTS.md contains commands section
-[PASS] AH-04: docs/ directory exists
-[PASS] AH-10: All 12 references in AGENTS.md resolve
-[PASS] AH-11: docs/ARCHITECTURE.md exists
-[PASS] AH-12: CI harness workflow exists
+Agent Harness Verification
+==========================
 
-Level 2: PASS (7/7 checks passed)
+Level 1 -- Basic
+  ✓ AGENTS.md exists
+  ✓ AGENTS.md is index-format (87 lines)
+  ✓ Commands section found
+  ✓ docs/ directory exists
+
+Level 2 -- Verified
+  ✓ All references resolve
+  ✓ All make targets verified (3 targets)
+  ✓ docs/ARCHITECTURE.md exists
+  ✓ CI harness workflow exists
+
+Summary: Level 2 COMPLETE | 0 error(s), 0 warning(s)
 ```
 
 ---
@@ -195,18 +206,27 @@ bash scripts/verify-harness.sh --level=3 --format=text
 Example output:
 
 ```
-[PASS] AH-01: AGENTS.md exists
-[PASS] AH-02: AGENTS.md is 92 lines (under 150)
-[PASS] AH-03: AGENTS.md contains commands section
-[PASS] AH-04: docs/ directory exists
-[PASS] AH-10: All 15 references in AGENTS.md resolve
-[PASS] AH-11: docs/ARCHITECTURE.md exists
-[PASS] AH-12: CI harness workflow exists
-[PASS] AH-20: PR/MR template with harness checklist exists
-[PASS] AH-21: Git hooks auto-activate (.envrc configures hooksPath)
-[PASS] No drift detected
+Agent Harness Verification
+==========================
 
-Level 3: PASS (10/10 checks passed)
+Level 1 -- Basic
+  ✓ AGENTS.md exists
+  ✓ AGENTS.md is index-format (92 lines)
+  ✓ Commands section found
+  ✓ docs/ directory exists
+
+Level 2 -- Verified
+  ✓ All references resolve
+  ✓ All make targets verified (6 targets)
+  ✓ docs/ARCHITECTURE.md exists
+  ✓ CI harness workflow exists
+
+Level 3 -- Enforced
+  ✓ Git hooks auto-setup via .envrc
+  ✓ PR template exists (repo-level)
+  ✓ No drift detected
+
+Summary: Level 3 COMPLETE | 0 error(s), 0 warning(s)
 ```
 
 ---
