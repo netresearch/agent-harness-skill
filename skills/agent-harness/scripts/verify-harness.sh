@@ -13,7 +13,7 @@ FORMAT=""
 MAX_LEVEL=3
 SINGLE_CHECK=""
 STATUS_ONLY=false
-PLATFORM=""
+PLATFORM="${PLATFORM:-}"
 
 # Collected output lines (for final rendering)
 declare -a OUTPUT_LINES=()
@@ -73,6 +73,10 @@ detect_format() {
 # Detect hosting platform from CI env, git remote, or flag
 detect_platform() {
     if [[ -n "$PLATFORM" ]]; then
+        if [[ "$PLATFORM" != "github" && "$PLATFORM" != "gitlab" ]]; then
+            echo "Error: Unsupported PLATFORM '${PLATFORM}'. Expected 'github' or 'gitlab'." >&2
+            exit 1
+        fi
         return
     fi
     if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
@@ -107,7 +111,7 @@ pass() {
 fail() {
     local level="$1"
     local msg="$2"
-    local file="${3:-AGENTS.md}"
+    local file="${3-AGENTS.md}"
     (( ERRORS++ )) || true
     (( LEVEL_TOTAL[$level]++ )) || true
     OUTPUT_LINES+=("  FAIL|${level}|${msg}")
@@ -123,7 +127,7 @@ fail() {
 warn() {
     local level="$1"
     local msg="$2"
-    local file="${3:-AGENTS.md}"
+    local file="${3-AGENTS.md}"
     (( WARNINGS++ )) || true
     (( LEVEL_TOTAL[$level]++ )) || true
     OUTPUT_LINES+=("  WARN|${level}|${msg}")

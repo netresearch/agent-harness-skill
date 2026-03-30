@@ -5,7 +5,7 @@ harness-verify:
   stage: test
   image: alpine:latest
   before_script:
-    - apk add --no-cache bash git coreutils
+    - apk add --no-cache bash git coreutils grep
   script:
     - bash scripts/verify-harness.sh --level=2 --format=gitlab
   rules:

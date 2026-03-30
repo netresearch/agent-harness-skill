@@ -38,7 +38,7 @@ mechanical:
     type: command
     target: >-
       ! grep -oP '\\[.*?\\]\\(\\K[^)]+' AGENTS.md 2>/dev/null
-      | grep -v '^http' | grep -v '^#' | sed 's/#.*//'
+      | grep -v '^http' | grep -v '^#' | sed 's/[?#].*//'
       | while read -r ref; do test -e "$ref" || { echo "Dead ref: $ref"; exit 1; }; done
     severity: error
     desc: "All AGENTS.md references resolve to existing files"
@@ -58,7 +58,7 @@ mechanical:
   # Level 3 — Enforced
   - id: AH-20
     type: command
-    target: "test -f .github/pull_request_template.md || test -d .github/PULL_REQUEST_TEMPLATE || test -d .gitlab/merge_request_templates"
+    target: "test -f .github/pull_request_template.md || test -d .github/PULL_REQUEST_TEMPLATE || test -n \"$(find .gitlab/merge_request_templates -maxdepth 1 -name '*.md' -print -quit 2>/dev/null)\""
     severity: warning
     desc: "PR/MR template with harness checklist exists"
 

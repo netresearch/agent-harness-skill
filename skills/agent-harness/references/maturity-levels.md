@@ -81,6 +81,7 @@ All of Level 1, plus:
 | Checkpoint | Check | Severity |
 | ---------- | ----- | -------- |
 | AH-10 | All references in `AGENTS.md` resolve to existing files | Error |
+| -- | Documented commands match actual Makefile/composer/npm targets | Warning |
 | AH-11 | `docs/ARCHITECTURE.md` exists with system overview | Warning |
 | AH-12 | CI workflow runs harness verification on every PR/MR | Warning |
 
