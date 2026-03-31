@@ -67,3 +67,46 @@ mechanical:
     target: "grep -qlr 'hooksPath\\|core.hookspath' .envrc .husky/husky.sh 2>/dev/null || grep -q 'post-install-cmd' composer.json 2>/dev/null"
     severity: warning
     desc: "Git hooks auto-activate on clone"
+
+  # === QUALITY DELEGATION ENFORCEMENT ===
+  # The harness delegates quality to specialist skills but MUST verify
+  # the delegation produces results. These checks verify that quality
+  # infrastructure exists and is properly configured.
+
+  - id: AH-30
+    type: file_exists
+    target: "{Build/Scripts/runTests.sh,Makefile}"
+    severity: warning
+    desc: "Test runner infrastructure must exist (runTests.sh or Makefile with test targets)"
+
+  - id: AH-31
+    type: command
+    command: "test -f Build/phpstan.neon && grep -cP 'level:\\s*(10|max|[89])' Build/phpstan.neon || echo 0"
+    expected: "^[1-9]"
+    severity: warning
+    desc: "PHPStan must be configured at level 8+ (level 10 recommended)"
+
+  - id: AH-32
+    type: file_exists
+    target: "{captainhook.json,.githooks/pre-commit}"
+    severity: warning
+    desc: "Git hooks must be configured for pre-commit quality checks"
+
+  - id: AH-33
+    type: command
+    command: "find Tests/ -name '*Test.php' 2>/dev/null | wc -l"
+    expected: "^[1-9]"
+    severity: error
+    desc: "Project must have at least one test file"
+
+  - id: AH-34
+    type: file_exists
+    target: "{infection.json5,infection.json}"
+    severity: info
+    desc: "Mutation testing configuration should exist for mature projects"
+
+  - id: AH-35
+    type: file_exists
+    target: codecov.yml
+    severity: info
+    desc: "Code coverage configuration should exist"

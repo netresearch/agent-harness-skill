@@ -88,6 +88,10 @@ All of Level 1, plus:
 | -- | Documented commands match actual Makefile/composer/npm targets | Warning |
 | AH-11 | `docs/ARCHITECTURE.md` exists with system overview | Warning |
 | AH-12 | CI workflow runs harness verification on every PR/MR | Warning |
+| AH-30 | Test runner infrastructure exists (runTests.sh or Makefile) | Warning |
+| AH-31 | PHPStan configured at level 8+ | Warning |
+| AH-32 | Git hooks configured for pre-commit quality checks | Warning |
+| AH-33 | At least one test file exists | Error |
 
 ### What it gives you
 
@@ -161,6 +165,9 @@ All of Level 2, plus:
 | ---------- | ----- | -------- |
 | AH-20 | PR/MR template includes harness checklist | Warning |
 | AH-21 | Git hooks auto-activate on clone (via .envrc, composer, or npm) | Warning |
+| AH-34 | Mutation testing configuration exists | Info |
+| AH-35 | Code coverage configuration exists | Info |
+| -- | Assessment checkpoints pass for all applicable skills | Warning |
 | -- | Drift detection: structural file changes trigger warnings if AGENTS.md is not also updated | Warning |
 
 ### What it gives you
@@ -314,3 +321,9 @@ automated-assessment:audit --skill=agent-harness --org=netresearch
 | AH-12 | 2 | CI harness verification workflow exists (GitHub Actions or GitLab CI) | Warning | command |
 | AH-20 | 3 | PR/MR template with harness checklist | Warning | command |
 | AH-21 | 3 | Git hooks auto-activate | Warning | command |
+| AH-30 | 2 | Test runner infrastructure exists | Warning | file_exists |
+| AH-31 | 2 | PHPStan level 8+ configured | Warning | command |
+| AH-32 | 2 | Git hooks for pre-commit quality checks | Warning | file_exists |
+| AH-33 | 2 | At least one test file exists | Error | command |
+| AH-34 | 3 | Mutation testing configuration exists | Info | file_exists |
+| AH-35 | 3 | Code coverage configuration exists | Info | file_exists |

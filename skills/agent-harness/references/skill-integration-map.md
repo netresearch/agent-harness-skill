@@ -193,6 +193,19 @@ This means:
 
 **What harness verifies:** N/A -- automated-assessment is the verifier, not the verified.
 
+### Integration Rule: Assessment Before Enhancement
+
+When any quality-related skill is invoked to ENHANCE (not just verify) a project's quality posture, the automated-assessment skill MUST run first. This applies to:
+
+- `typo3-testing` invoked with "enhance", "improve", "strengthen"
+- `enterprise-readiness` invoked with "audit", "production ready"
+- `php-modernization` invoked with "upgrade", "modernize"
+- `security-audit` invoked with "audit", "scan", "review"
+
+The assessment generates a structured gap report from checkpoints. This report becomes the task list, preventing iterative manual discovery of issues that checkpoints would catch automatically.
+
+**The harness enforces this through AH-30..AH-35**: if quality infrastructure is missing, the harness flags it before any enhancement work begins.
+
 ---
 
 ### 10. superpowers (writing-plans, executing-plans)
