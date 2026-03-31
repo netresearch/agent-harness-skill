@@ -89,9 +89,11 @@ All of Level 1, plus:
 | AH-11 | `docs/ARCHITECTURE.md` exists with system overview | Warning |
 | AH-12 | CI workflow runs harness verification on every PR/MR | Warning |
 | AH-30 | Test runner infrastructure exists (runTests.sh or Makefile) | Warning |
-| AH-31 | PHPStan configured at level 8+ | Warning |
+| AH-31 | PHPStan configured at level 8+ (PHP projects only) | Warning |
 | AH-32 | Git hooks configured for pre-commit quality checks | Warning |
-| AH-33 | At least one test file exists | Error |
+| AH-33 | At least one test file exists (multi-language) | Error |
+
+> **Note:** AH-30..AH-33 are assessed via the automated-assessment checkpoint runner (`/assess agent-harness`), not by `verify-harness.sh`. The verification script covers structural harness checks; quality delegation checkpoints are evaluated by the assessment skill.
 
 ### What it gives you
 
@@ -321,9 +323,9 @@ automated-assessment:audit --skill=agent-harness --org=netresearch
 | AH-12 | 2 | CI harness verification workflow exists (GitHub Actions or GitLab CI) | Warning | command |
 | AH-20 | 3 | PR/MR template with harness checklist | Warning | command |
 | AH-21 | 3 | Git hooks auto-activate | Warning | command |
-| AH-30 | 2 | Test runner infrastructure exists | Warning | file_exists |
-| AH-31 | 2 | PHPStan level 8+ configured | Warning | command |
-| AH-32 | 2 | Git hooks for pre-commit quality checks | Warning | file_exists |
-| AH-33 | 2 | At least one test file exists | Error | command |
+| AH-30 | 2 | Test runner infrastructure exists | Warning | command |
+| AH-31 | 2 | PHPStan level 8+ configured (PHP only) | Warning | command |
+| AH-32 | 2 | Git hooks for pre-commit quality checks | Warning | command |
+| AH-33 | 2 | At least one test file exists (multi-language) | Error | command |
 | AH-34 | 3 | Mutation testing configuration exists | Info | file_exists |
 | AH-35 | 3 | Code coverage configuration exists | Info | file_exists |

@@ -74,30 +74,30 @@ mechanical:
   # infrastructure exists and is properly configured.
 
   - id: AH-30
-    type: file_exists
-    target: "{Build/Scripts/runTests.sh,Makefile}"
+    type: command
+    command: "test -f Build/Scripts/runTests.sh -o -f Makefile"
     severity: warning
     desc: "Test runner infrastructure must exist (runTests.sh or Makefile with test targets)"
 
   - id: AH-31
     type: command
-    command: "test -f Build/phpstan.neon && grep -cP 'level:\\s*(10|max|[89])' Build/phpstan.neon || echo 0"
+    command: "grep -hP '^\\s*level:\\s*(10|max|[89])' phpstan.neon Build/phpstan.neon 2>/dev/null | wc -l"
     expected: "^[1-9]"
     severity: warning
-    desc: "PHPStan must be configured at level 8+ (level 10 recommended)"
+    desc: "PHPStan must be configured at level 8+ (PHP projects only; level 10 recommended)"
 
   - id: AH-32
-    type: file_exists
-    target: "{captainhook.json,.githooks/pre-commit}"
+    type: command
+    command: "test -f captainhook.json || test -f .githooks/pre-commit || test -f .husky/pre-commit"
     severity: warning
     desc: "Git hooks must be configured for pre-commit quality checks"
 
   - id: AH-33
     type: command
-    command: "find Tests/ -name '*Test.php' 2>/dev/null | wc -l"
+    command: "find . -name '*_test.go' -o -name '*Test.php' -o -name '*.test.js' -o -name '*.test.ts' -o -name 'test_*.py' | head -1 | wc -l"
     expected: "^[1-9]"
     severity: error
-    desc: "Project must have at least one test file"
+    desc: "Project must have at least one test file (supports Go, PHP, JS, TS, Python)"
 
   - id: AH-34
     type: file_exists
