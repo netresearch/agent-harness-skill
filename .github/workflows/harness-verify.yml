@@ -1,0 +1,52 @@
+name: Harness Verification
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify-harness:
+    name: Verify Harness Consistency
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 2
+
+      - name: Verify AGENTS.md exists
+        run: |
+          if [ ! -f AGENTS.md ]; then
+            echo "::error::AGENTS.md is missing"
+            exit 1
+          fi
+
+      - name: Verify AGENTS.md is index format
+        run: |
+          LINES=$(wc -l < AGENTS.md)
+          if [ "$LINES" -gt 150 ]; then
+            echo "::error::AGENTS.md is too long ($LINES lines, max 150)"
+            exit 1
+          fi
+
+      - name: Verify AGENTS.md references
+        run: |
+          ERRORS=0
+          while IFS= read -r ref; do
+            [[ "$ref" == http* ]] && continue
+            [[ "$ref" == \#* ]] && continue
+            ref="${ref%%#*}"
+            ref="${ref%%\?*}"
+            if [ ! -e "$ref" ]; then
+              echo "::error file=AGENTS.md::Dead reference: $ref"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done < <(grep -oP '\[.*?\]\(\K[^)]+' AGENTS.md 2>/dev/null || true)
+          exit $ERRORS
+
+      - name: Verify docs structure
+        run: |
+          if [ ! -f docs/ARCHITECTURE.md ]; then
+            echo "::warning::docs/ARCHITECTURE.md is missing"
+          fi
