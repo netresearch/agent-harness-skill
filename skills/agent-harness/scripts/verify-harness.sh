@@ -89,9 +89,14 @@ detect_platform() {
     fi
     local remote_url=""
     remote_url=$(git remote get-url origin 2>/dev/null || true)
-    if [[ "$remote_url" == *"gitlab"* ]]; then
+    if [[ "$remote_url" == *"github"* ]]; then
+        PLATFORM="github"
+    elif [[ "$remote_url" == *"gitlab"* ]]; then
         PLATFORM="gitlab"
-    elif [[ "$remote_url" == *"github"* ]]; then
+    elif [[ -f ".gitlab-ci.yml" ]]; then
+        # Infer GitLab from CI config presence (e.g. self-hosted GitLab)
+        PLATFORM="gitlab"
+    elif [[ -d ".github" ]]; then
         PLATFORM="github"
     else
         PLATFORM="github"
@@ -314,8 +319,45 @@ check_architecture_doc() {
 check_ci_workflow() {
     if [[ "$PLATFORM" == "gitlab" ]]; then
         if [[ -f ".gitlab-ci.yml" ]]; then
-            if grep -q "harness-verify\|verify-harness" ".gitlab-ci.yml"; then
-                pass 2 "CI harness job found in .gitlab-ci.yml"
+            # Search root file and all include:local files for harness job
+            local found_harness=false
+            if grep -qE "harness-verify|verify-harness" ".gitlab-ci.yml"; then
+                found_harness=true
+            else
+                # Check files referenced via include:local (supports globs).
+                # Portable parser using sed/awk — handles common GitLab CI forms:
+                #   include: { local: 'path' }
+                #   include:
+                #     - local: 'path'
+                #   include:
+                #     - local:
+                #         - path1
+                #         - path2
+                # Skips PCRE (-P) and lookaround for BSD/macOS grep portability.
+                while IFS= read -r inc_pattern; do
+                    [[ -z "$inc_pattern" ]] && continue
+                    # shellcheck disable=SC2086
+                    for inc_file in $inc_pattern; do
+                        if [[ -f "$inc_file" ]] && grep -qE "harness-verify|verify-harness" "$inc_file"; then
+                            found_harness=true
+                            break 2
+                        fi
+                    done
+                done < <(awk '
+                    /^[[:space:]]*-?[[:space:]]*local:[[:space:]]*\[/ {
+                        # inline list form: local: [a.yml, b.yml]
+                        s=$0; sub(/.*local:[[:space:]]*\[/,"",s); sub(/\].*/,"",s);
+                        n=split(s, a, /[[:space:]]*,[[:space:]]*/);
+                        for (i=1;i<=n;i++) print a[i]; next
+                    }
+                    /^[[:space:]]*-?[[:space:]]*local:[[:space:]]*[^[:space:]\[]/ {
+                        # scalar form: local: path or - local: path
+                        s=$0; sub(/.*local:[[:space:]]*/,"",s); print s; next
+                    }
+                ' ".gitlab-ci.yml" 2>/dev/null | tr -d "'\"" || true)
+            fi
+            if [[ "$found_harness" == true ]]; then
+                pass 2 "CI harness job found in GitLab CI config"
             else
                 warn 2 "CI config exists (.gitlab-ci.yml) but no harness-verify job found"
             fi
