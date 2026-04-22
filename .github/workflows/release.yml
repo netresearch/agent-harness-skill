@@ -1,34 +1,25 @@
 name: Release
+
 on:
   push:
     tags:
       - 'v*'
-
-permissions:
-  contents: write
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 jobs:
   release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Validate version
-        run: |
-          TAG="${GITHUB_REF#refs/tags/}"
-          VERSION="${TAG#v}"
-          PLUGIN_VERSION=$(python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")
-          if [ "$VERSION" != "$PLUGIN_VERSION" ]; then
-            echo "::error::Tag version ($VERSION) does not match plugin.json version ($PLUGIN_VERSION)"
-            exit 1
-          fi
-
-      - name: Create Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          TAG="${GITHUB_REF#refs/tags/}"
-          gh release create "$TAG" \
-            --title "$TAG" \
-            --generate-notes
+    uses: netresearch/skill-repo-skill/.github/workflows/release.yml@main
+    with:
+      bump: ${{ inputs.bump }}
+    permissions:
+      contents: write
+      pull-requests: write
