@@ -224,6 +224,23 @@ The assessment generates a structured gap report from checkpoints. This report b
 - If `docs/superpowers/plans/` is referenced in AGENTS.md, the directory exists (checkpoint AH-10 -- general reference check).
 - Plan template is available for bootstrap mode (`templates/exec-plan.md.tmpl`).
 
+---
+
+### 11. skill-repo-skill
+
+**What it provides:** Defines the structure of a *skill* repository: `.claude-plugin/plugin.json`, `skills/<name>/SKILL.md`, split licensing (MIT + CC-BY-SA-4.0), release workflows, composer integration.
+
+**When harness applies alongside it:** Skill repos benefit from both layers: `skill-repo-skill` verifies skill-specific structure (`.claude-plugin/plugin.json`, `skills/<name>/SKILL.md`, `composer.json` conventions) via its own `validate-skill.sh`; harness layers generic agent-readiness on top (`AGENTS.md` as index, `docs/` structure, `.github/workflows/harness-verify.yml`). The two verifiers don't overlap — they target different artefacts.
+
+**What harness expects back:**
+
+- An `AGENTS.md` index for the skill repo.
+- The standard harness workflows (`harness-verify.yml`).
+
+**What harness verifies in skill repos:**
+
+- The same generic harness checkpoints apply as for any other repo (`AH-01` `AGENTS.md` exists, `AH-02` line count, `AH-12` `harness-verify.yml` exists). Skill-specific structural validation is left to `skill-repo-skill`'s own `validate-skill.sh`.
+
 ## Integration Flow Diagram
 
 ```
