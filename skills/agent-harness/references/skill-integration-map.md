@@ -228,21 +228,18 @@ The assessment generates a structured gap report from checkpoints. This report b
 
 ### 11. skill-repo-skill
 
-**What it provides:** Defines the structure of a *skill* repository: `plugin.json`, `skills/<name>/SKILL.md`, split licensing (MIT + CC-BY-SA-4.0), release workflows, composer integration.
+**What it provides:** Defines the structure of a *skill* repository: `.claude-plugin/plugin.json`, `skills/<name>/SKILL.md`, split licensing (MIT + CC-BY-SA-4.0), release workflows, composer integration.
 
-**When harness delegates to it:** When the target repo is itself an Agent Skill repo (detected by presence of `.claude-plugin/plugin.json`). Skill-repo defines the inner-structure conventions; harness layers the outer agent-readiness conventions on top.
+**When harness applies alongside it:** Skill repos benefit from both layers: `skill-repo-skill` verifies skill-specific structure (`.claude-plugin/plugin.json`, `skills/<name>/SKILL.md`, `composer.json` conventions) via its own `validate-skill.sh`; harness layers generic agent-readiness on top (`AGENTS.md` as index, `docs/` structure, `.github/workflows/harness-verify.yml`). The two verifiers don't overlap — they target different artefacts.
 
 **What harness expects back:**
 
-- `.claude-plugin/plugin.json` exists and validates.
-- `skills/<name>/SKILL.md` exists for every entry in `plugin.json:skills`.
-- License files match split convention.
+- An `AGENTS.md` index for the skill repo.
+- The standard harness workflows (`harness-verify.yml`).
 
-**What harness verifies:**
+**What harness verifies in skill repos:**
 
-- `.claude-plugin/plugin.json` parses as JSON and contains the documented fields (checkpoint AH-12).
-- Each `skills/<name>/SKILL.md` referenced from `plugin.json` exists (checkpoint AH-12).
-- Standard skill-repo CI workflow (`validate.yml`) is wired up via `lint.yml` (checkpoint AH-13).
+- The same generic harness checkpoints apply as for any other repo (`AH-01` `AGENTS.md` exists, `AH-02` line count, `AH-12` `harness-verify.yml` exists). Skill-specific structural validation is left to `skill-repo-skill`'s own `validate-skill.sh`.
 
 ## Integration Flow Diagram
 
