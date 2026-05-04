@@ -74,6 +74,37 @@ Across vendors and frameworks, several principles have converged:
 - The repo itself is the best place to store agent instructions. External configuration drifts.
 - Enforcement must work without the agent framework installed. Project-level mechanisms (CI, hooks, branch protection) outlive any specific tool.
 
+## Operational Patterns from OpenAI's Deployment
+
+OpenAI's five-month internal deployment (~1,500 PRs, ~1M LOC, team scaled 3 to 7 engineers) surfaced operational patterns that go beyond the four system functions. These describe how to *run* a harnessed repo day-to-day, not how to structure it.
+
+### Merge Philosophy: Minimal Blocking Gates
+
+Conventional code-review norms (two approvals, comprehensive manual QA, "every PR gets a comment") become bottlenecks once agents open dozens of PRs per day. OpenAI's stance:
+
+- Minimal blocking merge gates -- only mechanical checks block (tests, linting, harness verification). Subjective gates do not.
+- Short-lived pull requests -- merge fast, iterate via follow-up PRs.
+- Higher tolerance for quick post-merge corrections -- "the cost of a quick correction is low when the agent can implement it in minutes. The cost of blocking every merge on comprehensive upfront validation compounds across hundreds of concurrent tasks."
+
+This is consistent with the Level 3 stance that branch protection requires `harness-verify` to pass -- because that check is fast and mechanical. It is *not* consistent with stacking subjective approval gates, manual QA sign-off, or "minimum reviewer count" policies on top of an agent-driven workflow.
+
+### Continuous Entropy Management
+
+Treat pattern drift as a continuous background process, not a periodic sprint:
+
+- Define canonical patterns (logging format, naming conventions, component shape) as mechanical linter rules.
+- Run recurring background agents that scan for deviations and open auto-mergeable refactor PRs.
+- Treat technical debt as compound interest -- small continuous cleanup payments are far cheaper than waiting for a large refactor sprint.
+
+The opposite pattern -- batching cleanup into periodic "fix the AI slop" sessions -- is explicitly called out as inefficient. Continuous correction beats episodic correction.
+
+### Additional Anti-Patterns
+
+In addition to the anti-patterns covered earlier (monolithic instruction files, stale documentation), the article identifies two more:
+
+- **Unpredictable third-party dependencies.** Libraries with opaque internals or unstable APIs make agents unreliable because they cannot reason about behaviour. See `agent-first-architecture.md` for the agent-first technology trade-off.
+- **Periodic cleanup sprints.** Batching technical debt is more disruptive and more expensive than continuous background cleanup. See "Continuous entropy management" above.
+
 ## The Key Principle
 
 > "The model is commodity; the harness is moat."
