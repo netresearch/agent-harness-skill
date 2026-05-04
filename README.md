@@ -1,5 +1,9 @@
 # Agent Harness Skill
 
+[![Lint](https://github.com/netresearch/agent-harness-skill/actions/workflows/lint.yml/badge.svg)](https://github.com/netresearch/agent-harness-skill/actions/workflows/lint.yml)
+[![Harness Verification](https://github.com/netresearch/agent-harness-skill/actions/workflows/harness-verify.yml/badge.svg)](https://github.com/netresearch/agent-harness-skill/actions/workflows/harness-verify.yml)
+[![Security](https://github.com/netresearch/agent-harness-skill/actions/workflows/security.yml/badge.svg)](https://github.com/netresearch/agent-harness-skill/actions/workflows/security.yml)
+
 Agent Skill for bootstrapping, verifying, and enforcing agent-harness infrastructure in repositories. Makes repos agent-ready with self-sustaining enforcement mechanisms that work for all contributors -- human or AI, with or without skills installed.
 
 ## What is Agent Harness?
