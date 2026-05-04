@@ -128,5 +128,6 @@ Runtime concerns (agent tracing, evaluation frameworks, durable execution, LLM o
 ## Sources
 
 - OpenAI Harness Engineering: <https://openai.com/index/harness-engineering/>
+- SWE Quiz commentary on the OpenAI writeup (source of the deployment metrics and operational-pattern framing in this doc): <https://www.swequiz.com/articles/openai-harness-engineering>
 - Anthropic Agent Development: <https://docs.anthropic.com/en/docs/build-with-claude/agentic-systems>
 - Claude Code SDK: <https://docs.claude.com/en/api/agent-sdk>
