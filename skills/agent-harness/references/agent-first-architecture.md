@@ -26,12 +26,14 @@ Types -> Config -> Repo -> Service -> Runtime -> UI
 
 The specific layer names are not the point; the point is that the dependency graph is explicit, declared in code, and enforced by tooling. Agents do not absorb architecture from culture -- they follow rules that produce errors.
 
-Custom linters check imports against the layer rule -- a UI module cannot import directly from Runtime, a Service module cannot import from UI, and so on. When a violation occurs, the linter must produce an actionable error message aimed at the agent: name the file, name the rule, name the fix.
+Read the diagram left-to-right as "depends only on the next layer to the left": UI depends on Runtime; Runtime depends on Service; Service depends on Repo; and so on. A UI module reaching past Runtime to import Service or Repo directly is a violation.
+
+Custom linters check imports against this rule. When a violation occurs, the linter must produce an actionable error message aimed at the agent: name the file, name the rule, name the fix.
 
 Compare:
 
 - ❌ "Architectural violation in `component.tsx`"
-- ✅ "`component.tsx` (UI layer) imports from `src/runtime/cache.ts` (Runtime layer); UI must call Runtime through a Service. See `docs/ARCHITECTURE.md#layer-rules`."
+- ✅ "`component.tsx` (UI layer) imports from `src/service/payments.ts` (Service layer); UI must access Service through the Runtime layer. See `docs/ARCHITECTURE.md#layer-rules`."
 
 Recommended starting points for repos using this skill:
 
