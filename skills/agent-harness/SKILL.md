@@ -75,3 +75,5 @@ See `references/maturity-levels.md` for the full breakdown.
 - `references/agents-md-rules.md` -- AGENTS.md authoring rules and anti-patterns
 - `references/artefact-inventory.md` -- Complete list of harness artefacts with purposes
 - `references/delegation-map.md` -- Which skill handles which concern
+- `references/harness-engineering-overview.md` -- Theory: four system functions, operational patterns, anti-patterns
+- `references/agent-first-architecture.md` -- Application legibility, layered dependency model, agent-first technology choices
