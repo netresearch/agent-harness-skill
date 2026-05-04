@@ -43,7 +43,7 @@ When artefacts are missing, create them from templates:
 | Makefile harness targets | `templates/Makefile.harness.tmpl` | All |
 | `scripts/verify-harness.sh` | `scripts/verify-harness.sh` (copy directly) | All |
 
-Populate templates with repo-specific values (project name, tech stack, existing conventions). Do not overwrite files that already exist without user confirmation.
+Populate with repo-specific values. Do not overwrite existing files without user confirmation.
 
 ### 3. Audit
 
@@ -54,10 +54,7 @@ Report the repo's maturity level (1, 2, or 3) and show what is needed to reach t
 - **AGENTS.md is an index, not an encyclopedia.** Keep it under 150 lines. Put detail in `docs/`.
 - **Enforcement is project-level.** CI workflows, git hooks, and branch protection enforce the harness -- not this skill at runtime.
 - **Verify first, bootstrap second.** Always run verification before creating artefacts. The skill checks artefacts, not tools.
-- **Delegate specialist work.** Route concerns to the appropriate skill:
-  - AGENTS.md content rules: `@agent-rules`
-  - Branch protection / merge checks setup: `@github-project` (GitHub) or manual GitLab settings
-  - Quality gates and CI pipelines: `@enterprise-readiness`
+- **Delegate specialist work.** See `references/delegation-map.md` for skill routing (`@agent-rules`, `@github-project`, `@enterprise-readiness`).
 
 ## Maturity Levels
 
