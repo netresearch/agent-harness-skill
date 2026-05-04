@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 jobs:
   release:
@@ -12,3 +13,4 @@ jobs:
       contents: write          # release upload
       id-token: write          # OIDC for sigstore (required by the attest job)
       attestations: write      # GitHub native attestation API (required by the attest job)
+      pull-requests: write     # required by checkpoint SR-31; see upstream issue for staleness
