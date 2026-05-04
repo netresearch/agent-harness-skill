@@ -3,7 +3,7 @@ skill_id: agent-harness
 
 preconditions:
   - type: command
-    target: "git rev-parse --git-dir 2>/dev/null"
+    pattern: "git rev-parse --git-dir"
     desc: "Must be a git repository"
 
 mechanical:
@@ -16,7 +16,7 @@ mechanical:
 
   - id: AH-02
     type: command
-    target: "test $(wc -l < AGENTS.md) -lt 150"
+    pattern: "wc -l < AGENTS.md | awk '$1<150 {exit 0} {exit 1}'"
     severity: warning
     desc: "AGENTS.md is compact index (<150 lines)"
 
@@ -28,18 +28,22 @@ mechanical:
     desc: "AGENTS.md documents available commands"
 
   - id: AH-04
-    type: command
-    target: "test -d docs"
+    type: file_exists
+    target: docs
     severity: warning
     desc: "docs/ directory exists"
 
   # Level 2 — Verified
+  # Note: Comprehensive AGENTS.md reference resolution is performed by
+  # scripts/verify-harness.sh (run via the harness-verify CI workflow).
+  # The mechanical checkpoint here cannot loop with shell `for/while` under
+  # the assessment runner's command allowlist; it relies on `xargs test`
+  # over extracted markdown link targets, which catches local file refs
+  # but not anchor targets or templated URLs (those are validated upstream
+  # in verify-harness.sh).
   - id: AH-10
     type: command
-    target: >-
-      ! grep -oP '\\[.*?\\]\\(\\K[^)]+' AGENTS.md 2>/dev/null
-      | grep -v '^http' | grep -v '^#' | sed 's/[?#].*//'
-      | while read -r ref; do test -e "$ref" || { echo "Dead ref: $ref"; exit 1; }; done
+    pattern: "grep -oP '\\[.*?\\]\\(\\K[^)]+' AGENTS.md | grep -v '^http' | grep -v '^#' | sed 's/[?#].*//' | xargs -r -I {} test -e {}"
     severity: error
     desc: "All AGENTS.md references resolve to existing files"
 
@@ -51,22 +55,22 @@ mechanical:
 
   - id: AH-12
     type: command
-    target: "test -f .github/workflows/harness-verify.yml || (test -f .gitlab-ci.yml && grep -q 'harness-verify\\|verify-harness' .gitlab-ci.yml)"
+    pattern: "cat .github/workflows/harness-verify.yml .gitlab-ci.yml 2>/dev/null | grep -qE 'harness-verify|verify-harness'"
     severity: warning
     desc: "CI harness verification workflow exists (GitHub Actions or GitLab CI)"
 
   # Level 3 — Enforced
   - id: AH-20
-    type: command
-    target: "test -f .github/pull_request_template.md || test -d .github/PULL_REQUEST_TEMPLATE || test -n \"$(find .gitlab/merge_request_templates -maxdepth 1 -name '*.md' -print -quit 2>/dev/null)\""
+    type: file_exists
+    target: "{.github/pull_request_template.md,.github/PULL_REQUEST_TEMPLATE,.gitlab/merge_request_templates}"
     severity: warning
     desc: "PR/MR template with harness checklist exists"
 
   - id: AH-21
     type: command
-    target: "grep -qlr 'hooksPath\\|core.hookspath' .envrc .husky/husky.sh 2>/dev/null || grep -q 'post-install-cmd' composer.json 2>/dev/null"
+    pattern: "cat .envrc .husky/install.sh composer.json package.json 2>/dev/null | grep -qE 'hooksPath|core\\.hookspath|post-install-cmd|\"prepare\"'"
     severity: warning
-    desc: "Git hooks auto-activate on clone"
+    desc: "Git hooks auto-activate on clone (.envrc, .husky, or composer/npm install hook)"
 
   # === QUALITY DELEGATION ENFORCEMENT ===
   # The harness delegates quality to specialist skills but MUST verify
@@ -74,28 +78,26 @@ mechanical:
   # infrastructure exists and is properly configured.
 
   - id: AH-30
-    type: command
-    command: "test -f Build/Scripts/runTests.sh -o -f Makefile"
+    type: file_exists
+    target: "{Build/Scripts/runTests.sh,runTests.sh,Makefile}"
     severity: warning
     desc: "Test runner infrastructure must exist (runTests.sh or Makefile with test targets)"
 
   - id: AH-31
     type: command
-    command: "grep -hP '^\\s*level:\\s*(10|max|[89])' phpstan.neon Build/phpstan.neon 2>/dev/null | wc -l"
-    expected: "^[1-9]"
+    pattern: "grep -hP '^\\s*level:\\s*(10|max|[89])' phpstan.neon Build/phpstan.neon 2>/dev/null | wc -l | grep -qE '^[[:space:]]*[1-9]'"
     severity: warning
     desc: "PHPStan must be configured at level 8+ (PHP projects only; level 10 recommended)"
 
   - id: AH-32
-    type: command
-    command: "test -f captainhook.json || test -f .githooks/pre-commit || test -f .husky/pre-commit"
+    type: file_exists
+    target: "{captainhook.json,.githooks/pre-commit,.husky/pre-commit}"
     severity: warning
     desc: "Git hooks must be configured for pre-commit quality checks"
 
   - id: AH-33
     type: command
-    command: "find . -name '*_test.go' -o -name '*Test.php' -o -name '*.test.js' -o -name '*.test.ts' -o -name 'test_*.py' | head -1 | wc -l"
-    expected: "^[1-9]"
+    pattern: "find . -name '*_test.go' -o -name '*Test.php' -o -name '*.test.js' -o -name '*.test.ts' -o -name 'test_*.py' | head -1 | grep -q ."
     severity: error
     desc: "Project must have at least one test file (supports Go, PHP, JS, TS, Python)"
 
