@@ -16,7 +16,7 @@ mechanical:
 
   - id: AH-02
     type: command
-    pattern: "wc -l < AGENTS.md | awk '$1<150 {exit 0} {exit 1}'"
+    pattern: "awk 'END {exit !(NR<150)}' AGENTS.md"
     severity: warning
     desc: "AGENTS.md is compact index (<150 lines)"
 
@@ -68,7 +68,7 @@ mechanical:
 
   - id: AH-21
     type: command
-    pattern: "cat .envrc .husky/install.sh composer.json package.json 2>/dev/null | grep -qE 'hooksPath|core\\.hookspath|post-install-cmd|\"prepare\"'"
+    pattern: "cat .envrc .husky/install.sh .husky/husky.sh .husky/_/husky.sh composer.json package.json 2>/dev/null | grep -qE 'hooksPath|core\\.hookspath|post-install-cmd|\"prepare\"'"
     severity: warning
     desc: "Git hooks auto-activate on clone (.envrc, .husky, or composer/npm install hook)"
 
@@ -85,7 +85,7 @@ mechanical:
 
   - id: AH-31
     type: command
-    pattern: "grep -hP '^\\s*level:\\s*(10|max|[89])' phpstan.neon Build/phpstan.neon 2>/dev/null | wc -l | grep -qE '^[[:space:]]*[1-9]'"
+    pattern: "grep -hP '^\\s*level:\\s*(10|max|[89])' phpstan.neon Build/phpstan.neon 2>/dev/null | grep -q ."
     severity: warning
     desc: "PHPStan must be configured at level 8+ (PHP projects only; level 10 recommended)"
 
