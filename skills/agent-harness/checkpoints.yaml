@@ -68,7 +68,7 @@ mechanical:
 
   - id: AH-21
     type: command
-    pattern: "cat .envrc .husky/install.sh composer.json package.json 2>/dev/null | grep -qE 'hooksPath|core\\.hookspath|post-install-cmd|\"prepare\"'"
+    pattern: "cat .envrc .husky/install.sh .husky/husky.sh .husky/_/husky.sh composer.json package.json 2>/dev/null | grep -qE 'hooksPath|core\\.hookspath|post-install-cmd|\"prepare\"'"
     severity: warning
     desc: "Git hooks auto-activate on clone (.envrc, .husky, or composer/npm install hook)"
 
