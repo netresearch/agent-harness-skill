@@ -16,7 +16,7 @@ mechanical:
 
   - id: AH-02
     type: command
-    pattern: "wc -l < AGENTS.md | awk '$1<150 {exit 0} {exit 1}'"
+    pattern: "awk 'END {exit !(NR<150)}' AGENTS.md"
     severity: warning
     desc: "AGENTS.md is compact index (<150 lines)"
 
