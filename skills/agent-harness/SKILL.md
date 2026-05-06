@@ -68,11 +68,11 @@ See `references/maturity-levels.md` for the full breakdown.
 
 ## References
 
-- `references/maturity-levels.md` -- Detailed maturity level criteria and progression guidance
-- `references/agents-md-rules.md` -- AGENTS.md authoring rules and anti-patterns
-- `references/artefact-inventory.md` -- Complete list of harness artefacts with purposes
-- `references/delegation-map.md` -- Which skill handles which concern
-- `references/harness-engineering-overview.md` -- Theory: four system functions, operational patterns, anti-patterns
-- `references/agent-first-architecture.md` -- Application legibility, layered dependency model, agent-first technology choices
-- `references/enforcement-mechanisms.md` -- 10-mechanism reference table (CI, hooks, branch protection, drift detection)
-- `references/skill-integration-map.md` -- Integration contracts between agent-harness and companion skills
+- `references/maturity-levels.md` -- Maturity criteria and progression
+- `references/agents-md-rules.md` -- AGENTS.md authoring rules
+- `references/artefact-inventory.md` -- Harness artefacts list
+- `references/delegation-map.md` -- Skill routing map
+- `references/harness-engineering-overview.md` -- Theory: four functions, patterns
+- `references/agent-first-architecture.md` -- Legibility, layered deps, agent-first tech
+- `references/enforcement-mechanisms.md` -- 10-mechanism table (CI, hooks, protection, drift)
+- `references/skill-integration-map.md` -- Integration contracts with companion skills
