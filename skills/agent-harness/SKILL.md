@@ -74,3 +74,5 @@ See `references/maturity-levels.md` for the full breakdown.
 - `references/delegation-map.md` -- Which skill handles which concern
 - `references/harness-engineering-overview.md` -- Theory: four system functions, operational patterns, anti-patterns
 - `references/agent-first-architecture.md` -- Application legibility, layered dependency model, agent-first technology choices
+- `references/enforcement-mechanisms.md` -- 10-mechanism reference table (CI, hooks, branch protection, drift detection)
+- `references/skill-integration-map.md` -- Integration contracts between agent-harness and companion skills
