@@ -72,8 +72,7 @@ See `references/maturity-levels.md` for the full breakdown.
 - `references/maturity-levels.md` -- Maturity criteria and progression
 - `references/agents-md-rules.md` -- AGENTS.md authoring rules
 - `references/artefact-inventory.md` -- Harness artefacts list
-- `references/delegation-map.md` -- Skill routing map
 - `references/harness-engineering-overview.md` -- Theory: four functions, patterns
 - `references/agent-first-architecture.md` -- Legibility, layered deps, agent-first tech
 - `references/enforcement-mechanisms.md` -- 10-mechanism table (CI, hooks, protection, drift)
-- `references/skill-integration-map.md` -- Integration contracts with companion skills
+- `references/skill-integration-map.md` -- Skill routing map + integration contracts with companion skills
