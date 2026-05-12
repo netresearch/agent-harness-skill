@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | Draft (Phase 1 — for review) |
+| **Status** | Phase 1 implemented (v0.1.1); spec is the canonical contract |
 | **Owner Repo** | `agent-harness-skill` (this spec) |
-| **Implementation Repo** | `netresearch/retro-skill` (new, to be created) |
+| **Implementation Repo** | [netresearch/retro-skill](https://github.com/netresearch/retro-skill) — exists at v0.1.0+; v0.1.1 adds Schicht D + audit mode |
 | **Companion Changes** | 4 existing skill repos (small edits) |
 | **Author** | Sebastian Mendel |
-| **Date** | 2026-05-11 |
+| **Date** | 2026-05-11 (v0.1 spec); 2026-05-12 (v0.1.1 amendments) |
 
 ## Objective
 
@@ -26,52 +26,60 @@ Field investigation of the user's own workflow (subagent report, session 2026-05
 
 | | |
 |---|---|
-| **NEW** | `netresearch/retro-skill` — own repo, own marketplace entry |
+| **IMPLEMENTED** | `netresearch/retro-skill` v0.1.1 — own repo, own marketplace entry, on GitHub |
 | **EDIT (small)** | 4 repos for materialization conventions: `agent-harness-skill`, `agent-rules-skill`, `skill-repo-skill`, `automated-assessment-skill` |
 | **NO CHANGE** | `claude-coach-plugin` — Coach stays as-is, optionally read by retro-skill as a data source |
-| **OUT** | Versioning/release coordination, auto-merge, marketplace listing automation, migration of existing Coach candidates |
+| **OUT** | Versioning/release coordination, auto-merge, marketplace listing automation, migration of existing Coach candidates, external-feedback integrations (Sentry/Jira/Slack — future direction) |
 
-## Repo Layout — `retro-skill`
+## Repo Layout — `retro-skill` (as-built, v0.1.1)
 
 ```
 retro-skill/
-├── plugin.json
-├── composer.json
+├── .claude-plugin/
+│   └── plugin.json               (Claude marketplace manifest)
+├── composer.json                 (skill-repo-skill convention)
 ├── README.md
 ├── LICENSE-MIT
 ├── LICENSE-CC-BY-SA-4.0
+├── AGENTS.md
 ├── skills/retro/
 │   ├── SKILL.md
 │   └── checkpoints.yaml          (own quality gates)
 ├── commands/
-│   └── retro.md                  (slash command definition)
+│   └── retro.md                  (slash command definition; 4 modes)
 ├── hooks/
-│   └── session-end.json          (off by default)
+│   └── session-end.json          (off by default; reads stdin JSON)
 ├── references/
-│   ├── friction-catalog.md       (Schichten A/B/C)
+│   ├── friction-catalog.md       (Schichten A/B/C/D/E)
 │   ├── destination-taxonomy.md   (6 categories)
 │   ├── classification-heuristic.md (friction → destination)
 │   ├── skill-discovery.md        (where + how to find skills)
 │   ├── patch-workflow.md         (source-repo, not cache)
 │   ├── eval-integration.md       (how evals inform retro)
-│   └── workflow.md               (sweep + spotlight + auto modes)
+│   └── workflow.md               (sweep + spotlight + outcome + audit + auto modes)
 ├── scripts/
-│   ├── detect-mechanical.py      (Schicht A pre-pass)
+│   ├── detect-mechanical.py      (Schicht A pre-pass; 13 of 18 signals implemented)
 │   ├── find-installed-skills.sh  (mechanical discovery helper)
 │   ├── extract-coach-events.py   (optional — reads ~/.claude-coach/ if present)
 │   └── scan-cross-session.py     (fallback for Schicht C if Coach absent)
+├── tests/
+│   └── test_detect_mechanical.py (unit tests for Schicht A)
+├── .github/workflows/
+│   └── lint.yml                  (py_compile, bash -n, jq/yaml validate, tests, DCO)
 └── docs/specs/
-    └── retro-skill.md            (mirror of this spec post-bootstrap)
+    └── retro-skill.md            (mirror of this spec)
 ```
 
-## Commands
+## Commands (v0.1.1)
 
 ```
-/retro                              Sweep: analyze entire current session
-/retro "<problem description>"      Spotlight: focus on specific issue
+/retro                                Sweep — full current session
+/retro "<problem description>"        Spotlight — focus on one issue
+/retro outcome [session-id|--since N] Outcome — post-hoc review of past session(s)
+/retro audit [--scope X]              Audit — cross-session architectural review
 ```
 
-Plus optional auto-trigger via SessionEnd hook (off by default; user opts in).
+Plus optional auto-trigger via SessionEnd hook (off by default; user opts in). All four explicit modes share the same pipeline (discovery, classification, materialization) but differ in which detection Schicht they activate.
 
 ## Core Workflow
 
@@ -184,8 +192,40 @@ Not detectable from a single session. Optional Coach-events read; otherwise sess
 | **Cross-project pattern** | Same friction class in N≥2 projects | Multi-session JSONL scan grouped by project |
 | **Memory drift** | feedback_*.md exists but assistant violated it anyway → skill needs it more prominently | Session JSONL diff against memory files |
 | **Skill update ineffective** | Previous PR to skill X, same bug returned afterward | Git log of skill repo + session JSONL |
+| **Follow-up-fix session** | Later session exists primarily to fix what earlier session broke | Cross-session JSONL + git log |
 
 **Persistence strategy:** if `~/.claude-coach/events.sqlite` exists, query it (fast, indexed). Else scan `~/.claude/projects/<slug>/*.jsonl` (always present, slower). No new state introduced by retro-skill.
+
+### Schicht D — Outcome (Post-Session; v0.1.x extension)
+
+What happened to session output **after** it left the session. Requires latency (days–weeks); best run monthly via `/retro outcome --since 30d`, not at session end.
+
+| Signal | Detection | Hint at |
+|---|---|---|
+| **Session commit reverted** | `git log --grep="revert" + ($commit_sha)` | Output was wrong |
+| **Session commit superseded** | Same file touched again within 7 days, diff substantively reverts | Output unfinished/wrong direction |
+| **Session PR closed without merge** | `gh pr view --json closedAt,merged,state` | Output rejected |
+| **Session PR required major changes** | `gh pr view --json reviews` filter CHANGES_REQUESTED | Output below standard |
+| **CI failed on session commit** | `gh run list --commit $sha --json conclusion` | Output broken |
+| **Issue filed referencing session files** | `gh issue list --search "filename after:$date"` | Output caused a bug |
+| **Follow-up session detected** | Schicht C5 cross-referenced from outcome perspective | Session output didn't last |
+
+Full list (10 signals) in `references/friction-catalog.md`. Catalogued in v0.1.1; detector implementation deferred to v0.1.x.
+
+### Schicht E — Constitutional (Audit mode only; v0.1.x extension)
+
+Cross-session architectural patterns. Output class is "architectural finding", not "friction finding". Quarterly cadence; tech-lead actor.
+
+| Signal | Detection | Hint at |
+|---|---|---|
+| **ADR violation pattern** | Active ADRs declare X; recent N sessions violated X | Design erosion |
+| **AGENTS.md rule compliance trend** | feedback files exist but sessions repeatedly violate them | Rules not reaching agent |
+| **Test coverage trend** | Coverage trending down over recent commits | Quality discipline regression |
+| **Skill-inventory drift** | Skill count growing without scope; redundant skills | Bloat / fragmentation |
+| **Dependency staleness trend** | A16 (outdated tool) recurring | Library maintenance gap |
+| **Convention divergence** | Style/naming diverging | Onboarding or review gap |
+
+Full list (6 signals) in `references/friction-catalog.md`. Catalogued in v0.1.1.
 
 ## Destination Taxonomy
 
@@ -348,23 +388,8 @@ Documented in `references/patch-workflow.md`.
   ## Retro
   - [ ] Was a reusable pattern detected? If yes, was it routed via /retro?
   ```
-- **NEW Checkpoint AH-22** (warning, Level 3):
-  ```yaml
-  - id: AH-22
-    type: regex
-    target: "{.github/pull_request_template.md,.github/PULL_REQUEST_TEMPLATE/*,.gitlab/merge_request_templates/*}"
-    value: "(?i)retro|reusable.*pattern"
-    severity: warning
-    desc: "PR/MR template includes retro question for agent-authored work"
-  ```
-- **NEW Checkpoint AH-23** (info, Level 3):
-  ```yaml
-  - id: AH-23
-    type: file_exists
-    target: ".claude/hooks/session-end.json"
-    severity: info
-    desc: "SessionEnd hook configured if auto-retro is desired (optional)"
-  ```
+- **NEW Checkpoint AH-22** (warning, Level 3): see `skills/agent-harness/checkpoints.yaml` for the authoritative YAML. Verifies PR/MR template includes a retro question via `grep -liE '(retro|reusable.*pattern)' ...`. Uses `type: command` because brace-expansion glob with regex matching across multiple optional files isn't expressible as `type: regex`.
+- **NEW Checkpoint AH-23** (info, Level 3): see `skills/agent-harness/checkpoints.yaml`. `type: file_exists` against `{.claude/hooks/session-end.json,hooks/session-end.json}`. Optional convenience; doesn't fail audits, just hints at auto-retro availability.
 
 ### `agent-rules-skill`
 
@@ -446,10 +471,11 @@ Documented in `references/patch-workflow.md`.
 9. **Coach integration:** when present, Coach events accelerate Schicht C
 10. **Patches land in source repo**, never cache
 11. **Evals consulted** when target skill has them
-12. **AH-22 + AH-23** checkpoints green in test repo
-13. **All 14 Schicht-A signals** detected by `detect-mechanical.py`
-14. **All 14 Schicht-B signals** in `friction-catalog.md` with prose example each
-15. **All 4 Schicht-C signals** documented with persistence strategy
+12. **AH-22** emits warning when retro question absent from PR/MR template; **AH-23** emits info when SessionEnd hook present. Neither becomes error.
+13. **13 of 18 Schicht-A signals** detected by `detect-mechanical.py` in v0.1.1 (A4, A5, A11, A13, A18 catalogued but deferred). All 18 documented with synthetic-transcript pattern in `references/friction-catalog.md`.
+14. **All 14 Schicht-B signals** in `friction-catalog.md` with prose example each (LLM-driven; no separate code)
+15. **All 5 Schicht-C signals** documented (C5 follow-up-fix added v0.1.1)
+16. **All 10 Schicht-D signals (Outcome) and 6 Schicht-E signals (Constitutional/audit) catalogued in v0.1.1**; detectors deferred to v0.1.x follow-up
 
 ## Verification Plan
 
