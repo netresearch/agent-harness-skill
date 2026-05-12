@@ -54,7 +54,8 @@ Report the repo's maturity level (1, 2, or 3) and show what is needed to reach t
 - **AGENTS.md is an index, not an encyclopedia.** Keep it under 150 lines. Put detail in `docs/`.
 - **Enforcement is project-level.** CI workflows, git hooks, and branch protection enforce the harness -- not this skill at runtime.
 - **Verify first, bootstrap second.** Always run verification before creating artefacts. The skill checks artefacts, not tools.
-- **Delegate specialist work.** See `references/delegation-map.md` for skill routing (`@agent-rules`, `@github-project`, `@enterprise-readiness`).
+- **Delegate specialist work.** See `references/delegation-map.md` for skill routing (`@agent-rules`, `@github-project`, `@enterprise-readiness`, `@retro`).
+- **Does not own learning.** Session learning, retrospection, and rule materialization are delegated to `@retro` (retro-skill). The harness verifies that integration points exist (PR/MR template includes retro question, optional SessionEnd hook configured) but does not store learnings itself.
 
 ## Maturity Levels
 

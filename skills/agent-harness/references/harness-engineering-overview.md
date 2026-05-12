@@ -44,6 +44,8 @@ Correction depends on clear, actionable error messages. A CI check that reports 
 
 Correction lives in CI annotations, hook output, and structured error reporting from verification scripts.
 
+**The harness does not store learning itself.** It provides the rails: memory files, rule files, CI checks, hooks, review templates. Learning — capturing reusable patterns from sessions and routing them to the correct destination — is performed by `retro-skill` (see `skill-integration-map.md` #12) and materialized through specialist skills (`agent-rules`, `skill-repo`, `automated-assessment`). The harness verifies the integration points exist (`AH-22`, `AH-23`) but does not own the learning loop.
+
 ## Complementary Perspectives
 
 ### Anthropic / Claude Code
