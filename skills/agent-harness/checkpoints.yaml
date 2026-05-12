@@ -72,6 +72,25 @@ mechanical:
     severity: warning
     desc: "Git hooks auto-activate on clone (.envrc, .husky, or composer/npm install hook)"
 
+  # === RETRO-SKILL INTEGRATION ===
+  # The harness does not own learning, but verifies that integration points
+  # exist for retro-skill to route session learnings into the correct
+  # destination. See references/skill-integration-map.md (retro-skill section).
+
+  - id: AH-22
+    type: command
+    pattern: "grep -liE '(retro|reusable.*pattern)' .github/pull_request_template.md .github/PULL_REQUEST_TEMPLATE/*.md .gitlab/merge_request_templates/*.md 2>/dev/null | head -1 | grep -q ."
+    severity: warning
+    desc: "PR/MR template includes retro question for agent-authored work"
+    fix_skill: "retro"
+
+  - id: AH-23
+    type: file_exists
+    target: "{.claude/hooks/session-end.json,hooks/session-end.json}"
+    severity: info
+    desc: "SessionEnd hook configured (optional; enable for auto-trigger of /retro)"
+    fix_skill: "retro"
+
   # === QUALITY DELEGATION ENFORCEMENT ===
   # The harness delegates quality to specialist skills but MUST verify
   # the delegation produces results. These checks verify that quality

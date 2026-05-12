@@ -167,6 +167,8 @@ All of Level 2, plus:
 | ---------- | ----- | -------- |
 | AH-20 | PR/MR template includes harness checklist | Warning |
 | AH-21 | Git hooks auto-activate on clone (via .envrc, composer, or npm) | Warning |
+| AH-22 | PR/MR template includes retro question for agent-authored work | Warning |
+| AH-23 | SessionEnd hook configured (optional convenience for retro auto-trigger) | Info |
 | AH-34 | Mutation testing configuration exists | Info |
 | AH-35 | Code coverage configuration exists | Info |
 | -- | Assessment checkpoints pass for all applicable skills | Warning |
@@ -323,6 +325,8 @@ automated-assessment:audit --skill=agent-harness --org=netresearch
 | AH-12 | 2 | CI harness verification workflow exists (GitHub Actions or GitLab CI) | Warning | command |
 | AH-20 | 3 | PR/MR template with harness checklist | Warning | command |
 | AH-21 | 3 | Git hooks auto-activate | Warning | command |
+| AH-22 | 3 | PR/MR template includes retro question | Warning | command |
+| AH-23 | 3 | SessionEnd hook configured (optional) | Info | file_exists |
 | AH-30 | 2 | Test runner infrastructure exists | Warning | command |
 | AH-31 | 2 | PHPStan level 8+ configured (PHP only) | Warning | command |
 | AH-32 | 2 | Git hooks for pre-commit quality checks | Warning | command |

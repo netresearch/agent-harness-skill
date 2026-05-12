@@ -228,7 +228,7 @@ The assessment generates a structured gap report from checkpoints. This report b
 
 ### 11. skill-repo-skill
 
-**What it provides:** Defines the structure of a *skill* repository: `.claude-plugin/plugin.json`, `skills/<name>/SKILL.md`, split licensing (MIT + CC-BY-SA-4.0), release workflows, composer integration.
+**What it provides:** Defines the structure of a *skill* repository: `.claude-plugin/plugin.json`, `skills/<name>/SKILL.md`, split licensing (MIT + CC-BY-SA-4.0), release workflows, composer integration. Also defines the `materialization-contract.md` followed by tools that submit PRs to skill repos (notably retro-skill).
 
 **When harness applies alongside it:** Skill repos benefit from both layers: `skill-repo-skill` verifies skill-specific structure (`.claude-plugin/plugin.json`, `skills/<name>/SKILL.md`, `composer.json` conventions) via its own `validate-skill.sh`; harness layers generic agent-readiness on top (`AGENTS.md` as index, `docs/` structure, `.github/workflows/harness-verify.yml`). The two verifiers don't overlap — they target different artefacts.
 
@@ -240,6 +240,29 @@ The assessment generates a structured gap report from checkpoints. This report b
 **What harness verifies in skill repos:**
 
 - The same generic harness checkpoints apply as for any other repo (`AH-01` `AGENTS.md` exists, `AH-02` line count, `AH-12` `harness-verify.yml` exists). Skill-specific structural validation is left to `skill-repo-skill`'s own `validate-skill.sh`.
+
+---
+
+### 12. retro-skill
+
+**What it provides:** LLM-driven session retrospection. Detects friction in agent sessions (~32 signals across 3 layers: mechanical pre-pass, LLM inference, cross-session) and materializes approved learnings into one of six destinations: `user-memory`, `project-rule`, `skill-update`, `new-skill`, `checkpoint`, `harness-artefact`.
+
+**When harness delegates to it:** At end of any non-trivial session, or on-demand for specific issues. The harness does **not** invoke retro-skill at runtime; it verifies that the artefacts retro-skill needs to materialize learnings exist in the repo.
+
+**What harness expects back from a retro-active repo:**
+
+- PR/MR template contains a retro question (so contributors can flag reusable patterns to route).
+- Optional `SessionEnd` hook (`.claude/hooks/session-end.json`) is present if the team wants auto-trigger of `/retro`.
+- `docs/feedback/` directory exists when project-rule learnings have been approved.
+- Approved learnings in `docs/feedback/` follow the `feedback-memory-schema` defined by `agent-rules-skill`.
+
+**What harness verifies:**
+
+- `AH-22` (warning, Level 3): PR/MR template includes a retro question.
+- `AH-23` (info, Level 3): SessionEnd hook present (optional convenience).
+- Indirect: `AH-10` ensures any `docs/feedback/<slug>.md` referenced from AGENTS.md actually exists.
+
+**Why this delegation matters:** The harness used to risk becoming the meta-owner for "anything agent-readiness-shaped", including learning. retro-skill carves out the learning ownership cleanly, leaving the harness as a thin verifier of integration points. See `references/harness-engineering-overview.md` for the principle.
 
 ## Integration Flow Diagram
 

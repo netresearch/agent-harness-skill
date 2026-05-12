@@ -54,15 +54,16 @@ Report the repo's maturity level (1, 2, or 3) and show what is needed to reach t
 - **AGENTS.md is an index, not an encyclopedia.** Keep it under 150 lines. Put detail in `docs/`.
 - **Enforcement is project-level.** CI workflows, git hooks, and branch protection enforce the harness -- not this skill at runtime.
 - **Verify first, bootstrap second.** Always run verification before creating artefacts. The skill checks artefacts, not tools.
-- **Delegate specialist work.** See `references/delegation-map.md` for skill routing (`@agent-rules`, `@github-project`, `@enterprise-readiness`).
+- **Delegate specialist work.** See `references/skill-integration-map.md` for skill routing (`@agent-rules`, `@github-project`, `@enterprise-readiness`, `@retro`).
+- **Does not own learning.** Session retrospection, outcome review, and constitutional audits are delegated to `retro-skill`. The harness verifies integration points exist (AH-22, AH-23) but does not invoke retro at runtime.
 
 ## Maturity Levels
 
-**Level 1 -- Basic:** AGENTS.md exists, serves as an index (not a wall of text), and documents available commands.
+**Level 1 -- Basic:** AGENTS.md exists, is an index, documents commands.
 
-**Level 2 -- Verified:** CI checks enforce harness integrity, all AGENTS.md references resolve, documented commands match actual Makefile/script targets, and ARCHITECTURE.md exists.
+**Level 2 -- Verified:** CI enforces harness integrity, AGENTS.md references resolve, commands match Makefile/scripts, ARCHITECTURE.md exists.
 
-**Level 3 -- Enforced:** Branch protection requires harness CI to pass, git hooks auto-activate on clone, PR template includes harness checklist, and drift detection runs on every push.
+**Level 3 -- Enforced:** Branch protection requires harness CI, git hooks auto-activate, PR template includes checklist, drift detection on push.
 
 See `references/maturity-levels.md` for the full breakdown.
 
@@ -71,8 +72,7 @@ See `references/maturity-levels.md` for the full breakdown.
 - `references/maturity-levels.md` -- Maturity criteria and progression
 - `references/agents-md-rules.md` -- AGENTS.md authoring rules
 - `references/artefact-inventory.md` -- Harness artefacts list
-- `references/delegation-map.md` -- Skill routing map
 - `references/harness-engineering-overview.md` -- Theory: four functions, patterns
 - `references/agent-first-architecture.md` -- Legibility, layered deps, agent-first tech
 - `references/enforcement-mechanisms.md` -- 10-mechanism table (CI, hooks, protection, drift)
-- `references/skill-integration-map.md` -- Integration contracts with companion skills
+- `references/skill-integration-map.md` -- Skill routing map + integration contracts with companion skills
