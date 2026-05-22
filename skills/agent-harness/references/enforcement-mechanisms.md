@@ -28,10 +28,12 @@ Pick the hook framework the ecosystem already expects, not the one you personall
 | Stack | Default framework | Why |
 |-------|-------------------|-----|
 | PHP | `captainhook/captainhook` | Composer-installable, integrates with `composer install` |
-| Go / mixed / skill repos | `lefthook` | Single static binary, language-agnostic, fast |
+| Go (binary-shipping projects) | `lefthook` | Single static binary, no runtime dependency, fast |
 | Node-heavy frontends | `husky` + `lint-staged` | Ecosystem-native, integrates with `npm prepare` |
-| Python | `pre-commit` | Canonical for the language, large ecosystem |
+| Python / skill repos / mixed | `pre-commit` | Canonical Python-world tool; huge ecosystem of pre-built hooks with `repo:`+`rev:` pinning that Renovate/Dependabot bumps automatically; runs each hook in an isolated language env so contributor PATH doesn't matter |
 | Shell-only / minimal | direct `.githooks/` + `.envrc` | Zero dependencies, see mechanism #3 |
+
+For **skill repos specifically**, prefer `pre-commit` over `lefthook` even though both work: skill repos contain Python helper scripts, contributors usually already have Python tooling (uv, ruff, validation scripts), and the upstream tools the validation pipeline depends on (`markdownlint-cli2`, `yamllint`, `actionlint`, `ruff`, `shellcheck`) all ship `.pre-commit-hooks.yaml` definitions that can be pinned by `rev:` and updated by dependency bots. See this repo's `.pre-commit-config.yaml` as the reference shape.
 
 The framework choice is secondary to the principle. What matters is that **the local set is a subset of the CI set** — never a separate pipeline that drifts.
 
