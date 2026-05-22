@@ -1,12 +1,21 @@
-# Pre-commit hooks — embodies the CI / Hook Parity Principle.
+# Pre-commit hooks — embodies the CI / Hook Parity Principle for this repo.
 #
-# Every command here is a fast check that also runs in CI. The local set is a
-# subset of the CI set; CI remains the authoritative backstop. See
-# skills/agent-harness/references/enforcement-mechanisms.md.
+# This file is intentionally a SUBSET of CI:
+#   - Local: yamllint, markdownlint-cli2, actionlint (fast, deterministic, no
+#     network, no infrastructure beyond the tool itself).
+#   - CI-only (not mirrored here): skill-validation via the reusable workflow
+#     `netresearch/skill-repo-skill/.github/workflows/validate.yml@main`. The
+#     validate-skill.sh script lives in another repo; vendoring it here is
+#     scope-creep, and downloading it on every commit violates the
+#     "no external deps" rule. Tracked as a follow-up: distribute the script
+#     via the netresearch/composer-agent-skill-plugin so it lands in vendor/.
 #
-# Install: `lefthook install` (or run once after clone).
-# Bypass for an emergency commit: `git commit --no-verify` — but if you find
-# yourself doing this regularly, the hook is wrong, not your commit. Fix the hook.
+# See skills/agent-harness/references/enforcement-mechanisms.md for the
+# parity principle in full.
+#
+# Install once after clone: `lefthook install` (one binary, no runtime).
+# Bypass (use sparingly): `git commit --no-verify`. If you need this often,
+# the hook is wrong — fix it; don't tolerate the bypass.
 
 skip_output:
   - meta
@@ -18,24 +27,14 @@ pre-commit:
   parallel: true
   commands:
 
-    skill-validation:
-      glob: "skills/**/{SKILL.md,checkpoints.yaml,plugin.json}"
-      run: |
-        if [ -x /home/cybot/projects/skill-repo-skill/main/skills/skill-repo/scripts/validate-skill.sh ]; then
-          bash /home/cybot/projects/skill-repo-skill/main/skills/skill-repo/scripts/validate-skill.sh
-        else
-          echo "⚠️  validate-skill.sh not found locally — skipping (CI will run it)."
-        fi
-
     markdown-lint:
       glob: "*.md"
       run: |
         if command -v markdownlint-cli2 >/dev/null 2>&1; then
           markdownlint-cli2 {staged_files}
-        elif command -v npx >/dev/null 2>&1; then
-          npx -y markdownlint-cli2 {staged_files}
         else
-          echo "⚠️  markdownlint-cli2 not found — skipping (CI will run it)."
+          echo "⚠️  markdownlint-cli2 not installed locally — CI will run it."
+          echo "    Install: npm i -g markdownlint-cli2"
         fi
 
     yaml-lint:
@@ -44,11 +43,8 @@ pre-commit:
         if command -v yamllint >/dev/null 2>&1; then
           yamllint {staged_files}
         else
-          # Fallback: well-formedness only
-          python3 -c "import yaml, sys
-        for f in sys.argv[1:]:
-            try: list(yaml.safe_load_all(open(f)))
-            except yaml.YAMLError as e: print(f'❌ {f}: {e}'); sys.exit(1)" {staged_files}
+          echo "⚠️  yamllint not installed locally — CI will run it."
+          echo "    Install: pipx install yamllint  (or: pip install --user yamllint)"
         fi
 
     actionlint:
@@ -57,25 +53,6 @@ pre-commit:
         if command -v actionlint >/dev/null 2>&1; then
           actionlint {staged_files}
         else
-          echo "⚠️  actionlint not found — skipping (CI will run it)."
-        fi
-
-commit-msg:
-  commands:
-
-    conventional-commits:
-      run: |
-        msg=$(cat {1})
-        echo "$msg" | grep -q "^Merge" && exit 0
-        if ! echo "$msg" | grep -qE "^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .+"; then
-          echo "⚠️  Commit message doesn't follow Conventional Commits — consider <type>(<scope>): <subject>"
-        fi
-
-    dco-signoff:
-      run: |
-        msg=$(cat {1})
-        echo "$msg" | grep -q "^Merge" && exit 0
-        if ! echo "$msg" | grep -qE "^Signed-off-by: .+ <.+>"; then
-          echo "❌ Missing DCO sign-off. Use: git commit --signoff"
-          exit 1
+          echo "⚠️  actionlint not installed locally — CI will run it."
+          echo "    Install: go install github.com/rhysd/actionlint/cmd/actionlint@latest"
         fi
