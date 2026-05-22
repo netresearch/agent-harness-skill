@@ -90,7 +90,7 @@ All of Level 1, plus:
 | AH-12 | CI workflow runs harness verification on every PR/MR | Warning |
 | AH-30 | Test runner infrastructure exists (runTests.sh or Makefile) | Warning |
 | AH-31 | PHPStan configured at level 8+ (PHP projects only) | Warning |
-| AH-32 | Git hooks configured for pre-commit quality checks (must mirror CI's fast checks — see CI/Hook Parity Principle in `references/enforcement-mechanisms.md`) | Warning |
+| AH-32 | Git hooks configured for pre-commit quality checks — must mirror CI's fast checks (see CI/Hook Parity Principle in `references/enforcement-mechanisms.md`; skill/Python projects: prefer `.pre-commit-config.yaml`) | Warning |
 | AH-33 | At least one test file exists (multi-language) | Error |
 | AH-36 | Hook config references at least one of CI's fast-check commands (best-effort parity check) | Info |
 

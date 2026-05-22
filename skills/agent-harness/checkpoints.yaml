@@ -110,9 +110,12 @@ mechanical:
 
   - id: AH-32
     type: file_exists
-    target: "{captainhook.json,.githooks/pre-commit,.husky/pre-commit,lefthook.yml,lefthook.yaml,.lefthook.yml,.pre-commit-config.yaml}"
+    target: "{.pre-commit-config.yaml,captainhook.json,lefthook.yml,lefthook.yaml,.lefthook.yml,.husky/pre-commit,.githooks/pre-commit}"
     severity: warning
-    desc: "Git hooks must be configured for pre-commit quality checks (must mirror CI's fast checks — see references/enforcement-mechanisms.md CI/Hook Parity Principle)"
+    desc: >-
+      Git hooks must be configured for pre-commit quality checks (must mirror
+      CI's fast checks — see references/enforcement-mechanisms.md CI/Hook
+      Parity Principle; skill/Python projects: prefer .pre-commit-config.yaml)
 
   - id: AH-33
     type: command

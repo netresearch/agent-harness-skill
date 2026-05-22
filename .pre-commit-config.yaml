@@ -1,0 +1,77 @@
+# Pre-commit hooks — embodies the CI/Hook Parity Principle for this repo.
+#
+# These hooks are a SUBSET of what CI runs (via the reusable workflow
+# netresearch/skill-repo-skill/.github/workflows/validate.yml@main):
+#
+#   Local (here)             CI
+#   ---------------------    -----------------------------------
+#   markdownlint-cli2        Markdown lint
+#   yamllint                 YAML lint
+#   actionlint               (not in CI yet — see follow-up)
+#   ruff check + format      Python lint
+#   shellcheck               ShellCheck scripts
+#   check-yaml etc.          (covered transitively by yamllint)
+#   plugin-version-sync      Validate plugin.json ↔ SKILL.md version sync
+#
+# CI-only (not mirrored here — script lives in skill-repo-skill):
+#   - validate-skill.sh (frontmatter, word count, plugin paths, license, …)
+#   - checkpoint YAML schema validation
+#
+# See skills/agent-harness/references/enforcement-mechanisms.md for the
+# CI/Hook Parity Principle in full.
+#
+# Install once after clone: `pre-commit install`.
+# Bypass (use sparingly): `git commit --no-verify`. If you need this often,
+# the hook is wrong — fix it; don't tolerate the bypass.
+
+default_install_hook_types: [pre-commit]
+default_stages: [pre-commit]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: check-json
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.22.1
+    hooks:
+      - id: markdownlint-cli2
+        files: '\.md$'
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        args: [-c, .yamllint.yml]
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.14
+    hooks:
+      - id: ruff
+      - id: ruff-format
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+
+  - repo: local
+    hooks:
+      - id: plugin-version-sync
+        name: plugin.json version matches SKILL.md metadata.version
+        entry: scripts/check-version-sync.sh
+        language: script
+        files: '(\.claude-plugin/plugin\.json|SKILL\.md)$'
+        pass_filenames: false
