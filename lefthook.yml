@@ -1,0 +1,58 @@
+# Pre-commit hooks — embodies the CI / Hook Parity Principle for this repo.
+#
+# This file is intentionally a SUBSET of CI:
+#   - Local: yamllint, markdownlint-cli2, actionlint (fast, deterministic, no
+#     network, no infrastructure beyond the tool itself).
+#   - CI-only (not mirrored here): skill-validation via the reusable workflow
+#     `netresearch/skill-repo-skill/.github/workflows/validate.yml@main`. The
+#     validate-skill.sh script lives in another repo; vendoring it here is
+#     scope-creep, and downloading it on every commit violates the
+#     "no external deps" rule. Tracked as a follow-up: distribute the script
+#     via the netresearch/composer-agent-skill-plugin so it lands in vendor/.
+#
+# See skills/agent-harness/references/enforcement-mechanisms.md for the
+# parity principle in full.
+#
+# Install once after clone: `lefthook install` (one binary, no runtime).
+# Bypass (use sparingly): `git commit --no-verify`. If you need this often,
+# the hook is wrong — fix it; don't tolerate the bypass.
+
+skip_output:
+  - meta
+  - success
+
+colors: true
+
+pre-commit:
+  parallel: true
+  commands:
+
+    markdown-lint:
+      glob: "*.md"
+      run: |
+        if command -v markdownlint-cli2 >/dev/null 2>&1; then
+          markdownlint-cli2 {staged_files}
+        else
+          echo "⚠️  markdownlint-cli2 not installed locally — CI will run it."
+          echo "    Install: npm i -g markdownlint-cli2"
+        fi
+
+    yaml-lint:
+      glob: "*.{yml,yaml}"
+      run: |
+        if command -v yamllint >/dev/null 2>&1; then
+          yamllint {staged_files}
+        else
+          echo "⚠️  yamllint not installed locally — CI will run it."
+          echo "    Install: pipx install yamllint  (or: pip install --user yamllint)"
+        fi
+
+    actionlint:
+      glob: ".github/workflows/*.{yml,yaml}"
+      run: |
+        if command -v actionlint >/dev/null 2>&1; then
+          actionlint {staged_files}
+        else
+          echo "⚠️  actionlint not installed locally — CI will run it."
+          echo "    Install: go install github.com/rhysd/actionlint/cmd/actionlint@latest"
+        fi

@@ -110,9 +110,9 @@ mechanical:
 
   - id: AH-32
     type: file_exists
-    target: "{captainhook.json,.githooks/pre-commit,.husky/pre-commit}"
+    target: "{captainhook.json,.githooks/pre-commit,.husky/pre-commit,lefthook.yml,lefthook.yaml,.lefthook.yml,.pre-commit-config.yaml}"
     severity: warning
-    desc: "Git hooks must be configured for pre-commit quality checks"
+    desc: "Git hooks must be configured for pre-commit quality checks (must mirror CI's fast checks — see references/enforcement-mechanisms.md CI/Hook Parity Principle)"
 
   - id: AH-33
     type: command
@@ -131,3 +131,18 @@ mechanical:
     target: codecov.yml
     severity: info
     desc: "Code coverage configuration should exist"
+
+  - id: AH-36
+    type: command
+    pattern: >-
+      K1='composer ci:|golangci-lint|go vet|gofmt|validate-skill|validate\.yml';
+      K2='markdownlint|yamllint|biome|eslint|tsc|ruff|black|mypy|pyright';
+      K3='prettier|stylelint|cargo clippy|cargo fmt|phpstan|psalm|rector';
+      K4='php-cs-fixer|phpcs|make lint|make site-lint|make cgl|make phpstan';
+      K="($K1|$K2|$K3|$K4)";
+      H='captainhook.json .githooks/ .husky/ lefthook.yml lefthook.yaml';
+      H="$H .lefthook.yml .pre-commit-config.yaml";
+      ! grep -rlE "$K" .github/workflows .gitlab-ci.yml 2>/dev/null | head -1 | grep -q .
+      || grep -rlE "$K" $H 2>/dev/null | head -1 | grep -q .
+    severity: info
+    desc: "If CI runs a fast-check command, a hook config should reference at least one fast-check command too (best-effort CI/hook parity)"

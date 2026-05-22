@@ -2,6 +2,49 @@
 
 This document covers all 10 enforcement instruments available for making repositories agent-ready. Mechanisms are ordered by enforcement strength, from hardest (server-side, nobody bypasses) to softest (convention-based, reminder only).
 
+## CI / Hook Parity Principle
+
+The single most load-bearing rule across all 10 mechanisms: **every fast, deterministic check that runs in CI must also run as a pre-commit hook.** CI is the slow, parallel, authoritative backstop. It is not the first feedback loop. When a contributor (human or agent) commits broken code and learns about it 90 seconds later from a CI failure rather than 2 seconds earlier from a pre-commit hook, the harness has a gap — even if every CI gate is correctly configured.
+
+The corollary: when CI catches a mechanical issue that a hook could have caught, the absence of the hook is the bug. Strengthen the harness rather than asking the operator to be more careful.
+
+### What counts as a fast check
+
+A check qualifies for the hook layer if it:
+
+- Completes in under ~5 seconds on a typical commit on the contributor's machine
+- Is deterministic (same input → same result, no flakes)
+- Has no external dependencies that the commit machine cannot satisfy (no remote API calls, no Docker pulls)
+- Operates on the working tree or staged changes, not on a matrix of environments
+
+Examples: linters, formatters, type-checkers, schema validators, AST-based static analysis, file-shape validators (e.g. SKILL.md word count, YAML well-formedness).
+
+Examples that do NOT qualify and should stay CI-only: full test suites, mutation testing, security scanners with remote feeds, multi-version matrices, container builds, integration tests against live services.
+
+### Stack-native framework choice
+
+Pick the hook framework the ecosystem already expects, not the one you personally prefer:
+
+| Stack | Default framework | Why |
+|-------|-------------------|-----|
+| PHP | `captainhook/captainhook` | Composer-installable, integrates with `composer install` |
+| Go / mixed / skill repos | `lefthook` | Single static binary, language-agnostic, fast |
+| Node-heavy frontends | `husky` + `lint-staged` | Ecosystem-native, integrates with `npm prepare` |
+| Python | `pre-commit` | Canonical for the language, large ecosystem |
+| Shell-only / minimal | direct `.githooks/` + `.envrc` | Zero dependencies, see mechanism #3 |
+
+The framework choice is secondary to the principle. What matters is that **the local set is a subset of the CI set** — never a separate pipeline that drifts.
+
+### How parity fails in practice
+
+Most parity gaps follow one of three patterns:
+
+1. **CI added a check, hook never updated.** New linter, new validator, new format rule — wired into CI, forgotten locally.
+2. **Hook framework exists but is hollow.** `lefthook.yml` is present and runs `echo "lint"`, but the actual `composer lint` / `go vet` / `validate-skill.sh` invocation lives only in CI.
+3. **Hook bypassed by default.** Contributors run `git commit --no-verify` because some hook step is slow or flaky. The fix is to make that step fast (or move it to `pre-push` / CI), not to tolerate the bypass.
+
+Audit periodically: for each command line in CI workflows that meets the "fast check" definition above, grep the hook config files. If the command is not represented, that is the harness gap.
+
 ## Mechanism Summary
 
 | # | Mechanism | Triggers | Affects | Strength |
