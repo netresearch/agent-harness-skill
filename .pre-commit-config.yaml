@@ -5,7 +5,7 @@
 #
 #   Local (here)             CI
 #   ---------------------    -----------------------------------
-#   validate-skill           Skill validation (skill-repo-skill, v1.21.1+)
+#   validate-skill           Skill validation (via skill-repo-skill)
 #   check-version-parity     Plugin/SKILL/composer version parity
 #   markdownlint-cli2        Markdown lint
 #   yamllint                 YAML lint
