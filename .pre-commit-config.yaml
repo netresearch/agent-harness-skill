@@ -5,17 +5,14 @@
 #
 #   Local (here)             CI
 #   ---------------------    -----------------------------------
+#   validate-skill           Skill validation (skill-repo-skill, v1.21.1+)
+#   check-version-parity     Plugin/SKILL/composer version parity
 #   markdownlint-cli2        Markdown lint
 #   yamllint                 YAML lint
-#   actionlint               (not in CI yet — see follow-up)
+#   actionlint               (in CI via lint.yml's actionlint step)
 #   ruff check + format      Python lint
 #   shellcheck               ShellCheck scripts
 #   check-yaml etc.          (covered transitively by yamllint)
-#   plugin-version-sync      Validate plugin.json ↔ SKILL.md version sync
-#
-# CI-only (not mirrored here — script lives in skill-repo-skill):
-#   - validate-skill.sh (frontmatter, word count, plugin paths, license, …)
-#   - checkpoint YAML schema validation
 #
 # See skills/agent-harness/references/enforcement-mechanisms.md for the
 # CI/Hook Parity Principle in full.
@@ -38,6 +35,12 @@ repos:
       - id: check-json
       - id: check-yaml
         args: [--allow-multiple-documents]
+
+  - repo: https://github.com/netresearch/skill-repo-skill
+    rev: v1.21.1
+    hooks:
+      - id: validate-skill
+      - id: check-version-parity
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.22.1
@@ -66,12 +69,3 @@ repos:
     rev: v0.11.0.1
     hooks:
       - id: shellcheck
-
-  - repo: local
-    hooks:
-      - id: plugin-version-sync
-        name: plugin.json version matches SKILL.md metadata.version
-        entry: scripts/check-version-sync.sh
-        language: script
-        files: '(\.claude-plugin/plugin\.json|SKILL\.md)$'
-        pass_filenames: false
