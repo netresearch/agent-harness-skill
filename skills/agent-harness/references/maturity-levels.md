@@ -92,7 +92,7 @@ All of Level 1, plus:
 | AH-31 | PHPStan configured at level 8+ (PHP projects only) | Warning |
 | AH-32 | Git hooks configured for pre-commit quality checks — must mirror CI's fast checks (see CI/Hook Parity Principle in `references/enforcement-mechanisms.md`; skill/Python projects: prefer `.pre-commit-config.yaml`) | Warning |
 | AH-33 | At least one test file exists (multi-language) | Error |
-| AH-36 | Hook config references at least one of CI's fast-check commands (best-effort parity check) | Info |
+| AH-36 | Hook config references at least one of CI's fast-check commands (best-effort parity check) | Warning |
 
 > **Note:** AH-30..AH-33 are assessed via the automated-assessment checkpoint runner (`/assess agent-harness`), not by `verify-harness.sh`. The verification script covers structural harness checks; quality delegation checkpoints are evaluated by the assessment skill.
 
@@ -334,4 +334,4 @@ automated-assessment:audit --skill=agent-harness --org=netresearch
 | AH-33 | 2 | At least one test file exists (multi-language) | Error | command |
 | AH-34 | 3 | Mutation testing configuration exists | Info | file_exists |
 | AH-35 | 3 | Code coverage configuration exists | Info | file_exists |
-| AH-36 | 2 | Hook config references at least one of CI's fast-check commands (parity) | Info | command |
+| AH-36 | 2 | Hook config references at least one of CI's fast-check commands (parity) | Warning | command |

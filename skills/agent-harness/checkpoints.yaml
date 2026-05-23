@@ -147,5 +147,5 @@ mechanical:
       H="$H .lefthook.yml .pre-commit-config.yaml";
       ! grep -rlE "$K" .github/workflows .gitlab-ci.yml 2>/dev/null | head -1 | grep -q .
       || grep -rlE "$K" $H 2>/dev/null | head -1 | grep -q .
-    severity: info
+    severity: warning
     desc: "If CI runs a fast-check command, a hook config should reference at least one fast-check command too (best-effort CI/hook parity)"
