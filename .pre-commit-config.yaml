@@ -1,18 +1,23 @@
 # Pre-commit hooks — embodies the CI/Hook Parity Principle for this repo.
 #
-# These hooks are a SUBSET of what CI runs (via the reusable workflow
-# netresearch/skill-repo-skill/.github/workflows/validate.yml@main):
+# Every hook below ALSO runs in CI; CI is the authoritative backstop. Local
+# hooks are pinned by `rev:` and Renovate bumps them automatically. There is a
+# small drift window between a Renovate bump in CI and the local config catching
+# up; this is the standard pre-commit pattern.
 #
-#   Local (here)             CI
-#   ---------------------    -----------------------------------
-#   validate-skill           Skill validation (via skill-repo-skill)
-#   check-version-parity     Plugin/SKILL/composer version parity
-#   markdownlint-cli2        Markdown lint
-#   yamllint                 YAML lint
-#   actionlint               (in CI via lint.yml's actionlint step)
-#   ruff check + format      Python lint
-#   shellcheck               ShellCheck scripts
-#   check-yaml etc.          (covered transitively by yamllint)
+# Local hooks:
+#   - validate-skill            (via skill-repo-skill)
+#   - check-version-parity      (via skill-repo-skill)
+#   - markdownlint-cli2
+#   - yamllint
+#   - ruff check + format
+#   - shellcheck
+#   - pre-commit-hooks: trailing-whitespace, end-of-file-fixer,
+#       check-merge-conflict, check-added-large-files, check-json, check-yaml
+#
+# CI-only (not mirrored here):
+#   - checkpoint YAML schema validation (uses `uv run --with pyyaml` patterns
+#     that are heavier than a pre-commit hook should be)
 #
 # See skills/agent-harness/references/enforcement-mechanisms.md for the
 # CI/Hook Parity Principle in full.
@@ -53,11 +58,6 @@ repos:
     hooks:
       - id: yamllint
         args: [-c, .yamllint.yml]
-
-  - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.12
-    hooks:
-      - id: actionlint
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.14
