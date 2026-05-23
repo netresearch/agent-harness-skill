@@ -194,12 +194,17 @@ All of Level 2, plus:
 
 1. Complete all Level 2 requirements.
 2. Configure branch protection: on GitHub, add `harness-verify` as a required status check on the default branch. On GitLab, enable 'Pipelines must succeed' under Settings > Merge requests.
-3. Set up hook auto-activation using one or more of:
-   - `.envrc` with `git config core.hooksPath .githooks` (for direnv users).
-   - `composer.json` `post-install-cmd` (for PHP projects).
-   - `package.json` `prepare` script (for Node projects).
-4. Create the PR/MR template. For GitHub: copy to `.github/pull_request_template.md`. For GitLab: copy to `.gitlab/merge_request_templates/Default.md`.
-5. Ensure `.githooks/pre-commit` and `.githooks/pre-push` exist and are executable.
+3. Choose a hook framework appropriate for the stack:
+   - **`pre-commit` (recommended for skill/Python projects)** — add a `.pre-commit-config.yaml` referencing the hook providers and `pre-commit install --install-hooks` to activate. See `references/enforcement-mechanisms.md` § "Stack-native framework choice" and § "CI / Hook Parity Principle" for full rationale; skill repos consume `validate-skill` + `check-version-parity` from `netresearch/skill-repo-skill@vX.Y.Z`.
+   - `captainhook/captainhook` (PHP) — install via composer, configure `captainhook.json`.
+   - `lefthook` (Go binary-shipping projects, e.g. ofelia) — install the static binary, configure `lefthook.yml`.
+   - `husky` + `lint-staged` (Node-heavy frontends) — install via npm, wire into `package.json`.
+   - Direct `.githooks/` + `.envrc` with `git config core.hooksPath .githooks` (zero-dependency fallback).
+4. Wire hook auto-activation so contributors don't run `<framework> install` manually:
+   - `pre-commit`: add `scripts.prepare` (npm) or `post-install-cmd` (composer) that runs `pre-commit install --install-hooks` if pre-commit is on PATH.
+   - direct `.githooks/`: an `.envrc` with `git config core.hooksPath .githooks` works for direnv users.
+5. Create the PR/MR template. For GitHub: copy to `.github/pull_request_template.md`. For GitLab: copy to `.gitlab/merge_request_templates/Default.md`.
+6. Ensure the chosen hook framework's pre-commit checks are subsets of CI — see `references/enforcement-mechanisms.md` § "CI / Hook Parity Principle". For the direct `.githooks/` route, ensure `.githooks/pre-commit` and `.githooks/pre-push` exist and are executable.
 
 **With skill bootstrap:**
 
@@ -255,12 +260,12 @@ Summary: Level 3 COMPLETE | 0 error(s), 0 warning(s)
 ### Level 2 to Level 3
 
 1. **Configure branch protection.** Add `harness-verify` as a required status check. This is the single most impactful change -- it turns advisory CI into blocking enforcement.
-2. **Add hook auto-setup.** Choose the mechanism appropriate for your project:
-   - PHP: add `post-install-cmd` to `composer.json`.
-   - Node: add `prepare` script to `package.json`.
-   - Any: create `.envrc` with hook configuration.
-3. **Create the PR template.** Copy `templates/pull_request_template.md.tmpl` to `.github/pull_request_template.md`.
-4. **Create git hooks.** Add `.githooks/pre-commit` and `.githooks/pre-push` that call `verify-harness.sh`.
+2. **Choose a hook framework.** Skill/Python projects: `pre-commit` with `.pre-commit-config.yaml` (recommended). PHP: `captainhook`. Go binary-shipping: `lefthook`. Node-heavy frontends: `husky` + `lint-staged`. Zero-dependency fallback: direct `.githooks/` + `.envrc`. See `references/enforcement-mechanisms.md` § "Stack-native framework choice" for the full table.
+3. **Add hook auto-setup** so contributors don't run install manually:
+   - `pre-commit`: `scripts.prepare` (npm) or `post-install-cmd` (composer) running `pre-commit install --install-hooks`.
+   - Direct `.githooks/`: `.envrc` with `git config core.hooksPath .githooks`.
+4. **Create the PR template.** Copy `templates/pull_request_template.md.tmpl` to `.github/pull_request_template.md`.
+5. **Ensure CI/Hook parity.** Whatever framework runs locally, its checks must be a subset of what CI runs (see `references/enforcement-mechanisms.md` § "CI / Hook Parity Principle"). For the direct route, add `.githooks/pre-commit` and `.githooks/pre-push` calling `verify-harness.sh`.
 
 ## Measuring Maturity
 
