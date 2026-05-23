@@ -94,7 +94,7 @@ All of Level 1, plus:
 | AH-33 | At least one test file exists (multi-language) | Error |
 | AH-36 | Hook config references at least one of CI's fast-check commands (best-effort parity check) | Warning |
 
-> **Note:** AH-30..AH-33 are assessed via the automated-assessment checkpoint runner (`/assess agent-harness`), not by `verify-harness.sh`. The verification script covers structural harness checks; quality delegation checkpoints are evaluated by the assessment skill.
+> **Note:** AH-30..AH-33 and AH-36 are assessed via the automated-assessment checkpoint runner (`/assess agent-harness`), not by `verify-harness.sh`. The verification script covers structural harness checks; quality delegation checkpoints are evaluated by the assessment skill.
 
 ### What it gives you
 
