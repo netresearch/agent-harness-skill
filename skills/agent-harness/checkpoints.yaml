@@ -149,3 +149,29 @@ mechanical:
       || grep -rlE "$K" $H 2>/dev/null | head -1 | grep -q .
     severity: warning
     desc: "If CI runs a fast-check command, a hook config should reference at least one fast-check command too (best-effort CI/hook parity)"
+
+llm_reviews:
+  - id: AH-40
+    name: AGENTS.md Architecture and Key Decisions reflect current implementation
+    type: llm_review
+    severity: warning
+    domain: documentation
+    prompt: |
+      Read AGENTS.md — specifically the File Map, Architecture, and Key Decisions
+      sections (or equivalent). Then read the primary implementation files it references.
+
+      Check for concrete contradictions between what AGENTS.md describes and what the
+      code actually does. Common failure modes after a significant implementation change:
+        - A tool, binary, or technique mentioned in Key Decisions that has been removed
+          from the code (e.g. "uses splitsh-lite" but the script no longer downloads it)
+        - An algorithm or step in the Architecture description that no longer matches
+          the actual code flow
+        - A file listed in the File Map that no longer exists or has a different purpose
+
+      Do NOT flag style issues, naming conventions, or missing documentation for new
+      features (that is a separate concern). Only flag cases where AGENTS.md makes a
+      factually false claim about the current code.
+
+      Report: either a list of specific contradictions (AGENTS.md claim vs. actual code),
+      or "No contradictions found."
+    tags: [documentation, agents-md, accuracy, staleness]
