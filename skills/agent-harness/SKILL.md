@@ -18,13 +18,13 @@ The agent harness is repo-level infrastructure that makes repositories agent-rea
 
 ### 1. Verify (primary)
 
-Always start here. Run the verification script:
+Always start here. From the target repo root, run:
 
 ```bash
-scripts/verify-harness.sh /path/to/target-repo
+scripts/verify-harness.sh
 ```
 
-Analyse the output. Fix issues directly or suggest fixes to the user. Verification checks for dead references, line count limits, missing artefacts, and command/target alignment.
+Analyse the output. Fix issues directly or suggest fixes. Verification checks for dead references, line count limits, missing artefacts, and command/target alignment.
 
 ### 2. Bootstrap
 
