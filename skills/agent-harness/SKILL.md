@@ -5,7 +5,7 @@ license: "(MIT AND CC-BY-SA-4.0). See LICENSE-MIT and LICENSE-CC-BY-SA-4.0"
 compatibility: "Requires Bash, Read, Write, Edit, Glob, Grep tools"
 metadata:
   author: Netresearch DTT GmbH
-  version: "1.4.0"
+  version: "1.5.0"
   repository: https://github.com/netresearch/agent-harness-skill
 allowed-tools: Bash(git:*,make:*,bash:*,wc:*,test:*,chmod:*) Read Write Edit Glob Grep Agent
 ---
@@ -18,20 +18,20 @@ The agent harness is repo-level infrastructure that makes repositories agent-rea
 
 ### 1. Verify (primary)
 
-Always start here. Run the verification script against the target repo:
+Always start here. From the target repo root, run:
 
 ```bash
-scripts/verify-harness.sh /path/to/target-repo
+scripts/verify-harness.sh
 ```
 
-Analyse the output. Fix issues directly or suggest fixes to the user. Verification checks for dead references, line count limits, missing artefacts, and command/target alignment.
+Analyse the output. Fix issues directly or suggest fixes. Verification checks for dead references, line count limits, missing artefacts, and command/target alignment.
 
 ### 2. Bootstrap
 
 When artefacts are missing, create them from templates:
 
 | Artefact | Template | Platform |
-|---|---|---|
+| --- | --- | --- |
 | `AGENTS.md` | `templates/AGENTS.md.tmpl` | All |
 | `docs/ARCHITECTURE.md` | `templates/ARCHITECTURE.md.tmpl` | All |
 | `docs/exec-plans/{active,completed}/` | Create directories | All |
