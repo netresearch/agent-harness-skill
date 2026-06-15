@@ -12,7 +12,7 @@ allowed-tools: Bash(git:*,make:*,bash:*,wc:*,test:*,chmod:*) Read Write Edit Glo
 
 # Agent Harness
 
-The agent harness is repo-level infrastructure that makes repositories agent-ready with self-sustaining enforcement. This skill is the **installer**; the harness enforces itself via CI, hooks, and conventions once installed.
+The agent harness makes a repo agent-ready with self-sustaining enforcement. This skill **installs** it; CI, hooks, and conventions then enforce it.
 
 ## Modes
 
@@ -24,7 +24,7 @@ Always start here. From the target repo root, run:
 scripts/verify-harness.sh
 ```
 
-Analyse the output. Fix issues directly or suggest fixes. Verification checks for dead references, line count limits, missing artefacts, and command/target alignment.
+Analyse the output and fix or suggest fixes. Verification checks dead references, line counts, missing artefacts, and command/target alignment.
 
 ### 2. Bootstrap
 
@@ -37,13 +37,15 @@ When artefacts are missing, create them from templates:
 | `docs/exec-plans/{active,completed}/` | Create directories | All |
 | `.github/workflows/harness-verify.yml` | `templates/harness-verify.yml.tmpl` | GitHub |
 | `.gitlab-ci.yml` (harness-verify job) | `templates/gitlab-ci-harness-verify.yml.tmpl` | GitLab |
+| `.forgejo/workflows/harness-verify.yml` | `templates/forgejo-harness-verify.yml.tmpl` | Forgejo/Gitea |
 | `.github/pull_request_template.md` | `templates/pull_request_template.md.tmpl` | GitHub |
 | `.gitlab/merge_request_templates/Default.md` | `templates/merge_request_template.md.tmpl` | GitLab |
+| `.forgejo/pull_request_template.md` | `templates/pull_request_template.md.tmpl` | Forgejo/Gitea |
 | `.envrc` | `templates/envrc.tmpl` | All |
 | Makefile harness targets | `templates/Makefile.harness.tmpl` | All |
 | `scripts/verify-harness.sh` | `scripts/verify-harness.sh` (copy directly) | All |
 
-Populate with repo-specific values. Do not overwrite existing files without user confirmation.
+Populate with repo-specific values; never overwrite existing files without confirmation.
 
 ### 3. Audit
 
