@@ -1,0 +1,28 @@
+# .forgejo/workflows/harness-verify.yml
+name: Harness Verification
+
+on:
+    pull_request:
+        branches: [ {{DEFAULT_BRANCH}} ]
+
+jobs:
+    verify-harness:
+        name: Verify Harness Consistency
+        runs-on: ubuntu-latest
+
+        env:
+            # Forgejo/Gitea Actions export GITHUB_ACTIONS=true for compatibility;
+            # pin the platform so the script checks .forgejo/ artefacts, not .github/.
+            PLATFORM: forgejo
+
+        steps:
+            -   name: Checkout repository
+                uses: actions/checkout@v4
+                with:
+                    fetch-depth: 2  # parent commit needed for drift detection
+
+            -   name: Verify agent-harness integrity
+                # Exit 1 = errors (fail the build); exit 2 = advisory warnings
+                # only (e.g. drift heuristic) — informative, must not block CI.
+                run: |
+                    bash scripts/verify-harness.sh || { code=$?; [ "$code" -eq 2 ] && exit 0; exit "$code"; }

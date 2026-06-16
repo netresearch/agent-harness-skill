@@ -41,8 +41,8 @@ Options:
   --format=text     Plain text output (default for terminals)
   --format=github   GitHub Actions annotations (auto-detected in CI)
   --format=gitlab   GitLab CI section annotations (auto-detected in CI)
-  --platform=P      Target platform: github or gitlab (auto-detected from
-                    CI environment or git remote URL if not specified)
+  --platform=P      Target platform: github, gitlab or forgejo (auto-detected
+                    from CI environment or git remote URL if not specified)
   --level=N         Only check up to level N (1, 2, or 3; default: all)
   --check=NAME      Run single check category: refs, commands, drift, structure
   --status          Show current maturity level summary only
@@ -73,14 +73,21 @@ detect_format() {
 # Detect hosting platform from CI env, git remote, or flag
 detect_platform() {
     if [[ -n "$PLATFORM" ]]; then
-        if [[ "$PLATFORM" != "github" && "$PLATFORM" != "gitlab" ]]; then
-            echo "Error: Unsupported PLATFORM '${PLATFORM}'. Expected 'github' or 'gitlab'." >&2
+        if [[ "$PLATFORM" != "github" && "$PLATFORM" != "gitlab" && "$PLATFORM" != "forgejo" ]]; then
+            echo "Error: Unsupported PLATFORM '${PLATFORM}'. Expected 'github', 'gitlab' or 'forgejo'." >&2
             exit 1
         fi
         return
     fi
     if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
-        PLATFORM="github"
+        # Forgejo/Gitea Actions also export GITHUB_ACTIONS=true; tell them apart
+        # by the server URL — github.com (or a *.github.* Enterprise host) is real
+        # GitHub, anything else is a self-hosted Forgejo/Gitea instance.
+        if [[ -n "${GITHUB_SERVER_URL:-}" && "${GITHUB_SERVER_URL}" != *"github."* ]]; then
+            PLATFORM="forgejo"
+        else
+            PLATFORM="github"
+        fi
         return
     fi
     if [[ "${GITLAB_CI:-}" == "true" ]]; then
@@ -89,13 +96,18 @@ detect_platform() {
     fi
     local remote_url=""
     remote_url=$(git remote get-url origin 2>/dev/null || true)
-    if [[ "$remote_url" == *"github"* ]]; then
+    if [[ "$remote_url" == *"forgejo"* || "$remote_url" == *"gitea"* ]]; then
+        PLATFORM="forgejo"
+    elif [[ "$remote_url" == *"github"* ]]; then
         PLATFORM="github"
     elif [[ "$remote_url" == *"gitlab"* ]]; then
         PLATFORM="gitlab"
     elif [[ -f ".gitlab-ci.yml" ]]; then
         # Infer GitLab from CI config presence (e.g. self-hosted GitLab)
         PLATFORM="gitlab"
+    elif [[ -d ".forgejo" || -d ".gitea" ]]; then
+        # Infer Forgejo/Gitea from config presence (self-hosted)
+        PLATFORM="forgejo"
     elif [[ -d ".github" ]]; then
         PLATFORM="github"
     else
@@ -364,6 +376,12 @@ check_ci_workflow() {
         else
             fail 2 "CI harness workflow missing -- create .gitlab-ci.yml with a harness-verify job" ""
         fi
+    elif [[ "$PLATFORM" == "forgejo" ]]; then
+        if [[ -f ".forgejo/workflows/harness-verify.yml" || -f ".gitea/workflows/harness-verify.yml" ]]; then
+            pass 2 "CI harness workflow exists"
+        else
+            fail 2 "CI harness workflow missing -- create .forgejo/workflows/harness-verify.yml" ""
+        fi
     else
         if [[ -f ".github/workflows/harness-verify.yml" ]]; then
             pass 2 "CI harness workflow exists"
@@ -416,6 +434,20 @@ check_hooks_autosetup() {
 }
 
 check_pr_template() {
+    if [[ "$PLATFORM" == "forgejo" ]]; then
+        # Forgejo/Gitea honour PR templates under .forgejo/, .gitea/ or .github/
+        local f
+        for f in .forgejo/pull_request_template.md .gitea/pull_request_template.md \
+                 .forgejo/PULL_REQUEST_TEMPLATE.md .gitea/PULL_REQUEST_TEMPLATE.md \
+                 .github/pull_request_template.md; do
+            if [[ -f "$f" ]]; then
+                pass 3 "PR template exists ($f)"
+                return
+            fi
+        done
+        warn 3 "PR template missing (create .forgejo/pull_request_template.md)"
+        return
+    fi
     if [[ "$PLATFORM" == "gitlab" ]]; then
         if [[ -d ".gitlab/merge_request_templates" ]]; then
             local tmpl_count
@@ -474,7 +506,7 @@ check_drift() {
 
     while IFS= read -r changed_file; do
         case "$changed_file" in
-            Makefile|composer.json|package.json|.github/workflows/*|.gitlab-ci.yml)
+            Makefile|composer.json|package.json|.github/workflows/*|.gitlab-ci.yml|.forgejo/workflows/*|.gitea/workflows/*)
                 build_files_changed=true
                 ;;
             AGENTS.md)
@@ -635,8 +667,8 @@ main() {
                 ;;
             --platform=*)
                 PLATFORM="${1#--platform=}"
-                if [[ ! "$PLATFORM" =~ ^(github|gitlab)$ ]]; then
-                    echo "Error: --platform must be 'github' or 'gitlab'" >&2
+                if [[ ! "$PLATFORM" =~ ^(github|gitlab|forgejo)$ ]]; then
+                    echo "Error: --platform must be 'github', 'gitlab' or 'forgejo'" >&2
                     exit 1
                 fi
                 ;;
