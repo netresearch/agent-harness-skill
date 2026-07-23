@@ -3,9 +3,16 @@
 # so that required_approving_review_count >= 1 is satisfied without
 # manual review for trusted authors.
 #
-# SECURITY: This workflow uses pull_request_target which runs with base branch
-# permissions. NEVER add an actions/checkout step here -- that would allow code
-# from the PR to execute with write access to the repository.
+# SECURITY: This caller runs on `pull_request_target`, so the job receives
+# base-branch permissions (including `pull-requests: write`). Do NOT add an
+# `actions/checkout` of the PR head or otherwise execute PR-controlled code
+# here -- that would escalate untrusted code to write scope. All logic lives
+# in the reusable workflow; this file must stay a thin caller.
+#
+# Authorization is unchanged from the previous inline implementation: the
+# reusable resolves the author's repository permission via
+# `GET /repos/{repo}/collaborators/{author}/permission` and approves only for
+# write-or-higher. It does not consult `author_association`.
 
 name: PR Quality Gates
 
@@ -13,32 +20,10 @@ on:
     pull_request_target:
         types: [opened, synchronize, reopened]
 
+permissions: {}
+
 jobs:
-    auto-approve:
-        name: Auto-approve (collaborators)
-        runs-on: ubuntu-latest
+    pr-quality:
+        uses: netresearch/skill-repo-skill/.github/workflows/pr-quality.yml@main
         permissions:
             pull-requests: write
-
-        steps:
-            - name: Harden Runner
-              uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2
-              with:
-                  egress-policy: audit
-
-            - name: Check author permission
-              id: check-permission
-              env:
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-                  REPO: ${{ github.repository }}
-              run: |
-                  PERMISSION=$(gh api "repos/$REPO/collaborators/$PR_AUTHOR/permission" --jq '.permission' 2>/dev/null || echo "none")
-                  echo "permission=$PERMISSION" >> "$GITHUB_OUTPUT"
-
-            - name: Auto-approve PR
-              if: steps.check-permission.outputs.permission == 'admin' || steps.check-permission.outputs.permission == 'write'
-              env:
-                  PR_URL: ${{ github.event.pull_request.html_url }}
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: gh pr review --approve "$PR_URL"
