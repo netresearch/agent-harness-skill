@@ -4,7 +4,7 @@ This document covers all 10 enforcement instruments available for making reposit
 
 ## CI / Hook Parity Principle
 
-The single most load-bearing rule across all 10 mechanisms: **every fast, deterministic check that runs in CI must also run as a pre-commit hook.** CI is the slow, parallel, authoritative backstop. It is not the first feedback loop. When a contributor (human or agent) commits broken code and learns about it 90 seconds later from a CI failure rather than 2 seconds earlier from a pre-commit hook, the harness has a gap — even if every CI gate is correctly configured.
+The single most load-bearing rule across the repo-level mechanisms (1-10): **every fast, deterministic check that runs in CI must also run as a pre-commit hook.** CI is the slow, parallel, authoritative backstop. It is not the first feedback loop. When a contributor (human or agent) commits broken code and learns about it 90 seconds later from a CI failure rather than 2 seconds earlier from a pre-commit hook, the harness has a gap — even if every CI gate is correctly configured.
 
 The corollary: when CI catches a mechanical issue that a hook could have caught, the absence of the hook is the bug. Strengthen the harness rather than asking the operator to be more careful.
 
@@ -61,6 +61,7 @@ Audit periodically: for each command line in CI workflows that meets the "fast c
 | 8 | AGENTS.md | Agent session start | AI agents | Soft |
 | 9 | PR Templates | PR creation | PR authors | Soft |
 | 10 | pre-commit framework | Commit (after install) | Local devs | Automatic |
+| 11 | Claude Code agent hook | Every tool call | AI agents on one machine | Automatic |
 
 ## Detailed Mechanisms
 
@@ -428,6 +429,62 @@ Then: `pre-commit install`
 **Advantages:** Standardised hook management. Easy to add additional hooks (linting, formatting). Supports auto-update of hook versions.
 
 **Limitations:** Requires `pre-commit` installed (`pip install pre-commit`). Requires `pre-commit install` to be run once. Bypassable with `--no-verify`.
+
+### 11. Claude Code Agent Hook
+
+**What it is:** A `PreToolUse` / `Stop` hook wired into `~/.claude/settings.json`, run by the Claude Code harness before every matching tool call. It reads the tool payload on stdin and answers on stdout.
+
+**When it triggers:** On every tool call the `matcher` selects — before the tool runs, so it can block.
+
+**Who it affects:** AI agents on the machine where it is installed. Not teammates, and not CI.
+
+**Strength:** Automatic and unbypassable *by the agent* — unlike every other mechanism here, there is no `--no-verify` equivalent the agent can reach for.
+
+**When to reach for it:** Mechanisms 1-10 gate a *repo*. This one gates the *agent*, so it is the right instrument for a rule the agent keeps violating across every repo — where a per-repo hook would have to be installed everywhere and would still miss commands run outside any repo.
+
+**Setup:**
+
+```jsonc
+// ~/.claude/settings.json
+{
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "python3 $HOME/.claude/hooks/my-gate.py" }] }
+    ]
+  }
+}
+```
+
+The script exits 0 always; the *verdict* is the JSON it prints. Silence means allow:
+
+```python
+# block, with a reason the agent reads
+print(json.dumps({"hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "<what to do instead>"}}))
+
+# advisory only — surfaces in the transcript, does not block
+print(json.dumps({"systemMessage": "...", "suppressOutput": True}))
+```
+
+**Escalate advisory to deny when the nudge is ignored.** Ship a rule as `systemMessage` first and let it run for a few sessions. If the transcript shows the nudge firing correctly and the behaviour continuing anyway, that is the evidence for promoting it to `deny` — the rule is not unclear, it is unenforced. Two rules in this author's own hook took that path after a retro counted the violations.
+
+**Write the deny reason for the reader, and name what it does *not* block.** A gate that blocks a legitimate variant with no stated escape sends the agent hunting for a workaround. State the allowed forms explicitly.
+
+**Test it directly — the hook is a pure function of its payload:**
+
+```bash
+echo '{"tool_name":"Bash","tool_input":{"command":"<cmd>"},"cwd":"/tmp"}' \
+  | python3 ~/.claude/hooks/my-gate.py
+```
+
+Keep a table of `(command, expected verdict)` cases and run them after every edit. Beware the self-match trap: a test *command* containing the pattern trips the agent's own gate, so keep cases in a file rather than inline in the shell.
+
+**Advantages:** Reaches every repo and every session on the machine. Catches commands no repo hook sees. Deny reasons are read by the agent, so the fix propagates immediately.
+
+**Limitations:** Reach is one machine, one user — it is not shared with teammates and cannot replace a CI check or branch protection for anything humans also do. Pair it with a repo-level mechanism whenever humans can trip the same rule. Pattern-matching on shell strings has false positives; prefer a narrow regex plus an explicit allowlist of legitimate shapes.
 
 ## The Activation Chain
 
