@@ -228,9 +228,9 @@ The assessment generates a structured gap report from checkpoints. This report b
 
 ### 11. skill-repo-skill
 
-**What it provides:** Defines the structure of a *skill* repository: `.claude-plugin/plugin.json`, `skills/<name>/SKILL.md`, split licensing (MIT + CC-BY-SA-4.0), release workflows, composer integration. Also defines the `materialization-contract.md` followed by tools that submit PRs to skill repos (notably retro-skill).
+**What it provides:** Defines the structure of a *skill* repository: the [Agent Plugins 1.0.0](https://agent-plugins.org) manifest `plugin.json` at the repo root plus the Claude Code manifest `.claude-plugin/plugin.json` generated from it, `skills/<name>/SKILL.md`, split licensing (MIT + CC-BY-SA-4.0), release workflows, composer integration. Also defines the `materialization-contract.md` followed by tools that submit PRs to skill repos (notably retro-skill).
 
-**When harness applies alongside it:** Skill repos benefit from both layers: `skill-repo-skill` verifies skill-specific structure (`.claude-plugin/plugin.json`, `skills/<name>/SKILL.md`, `composer.json` conventions) via its own `validate-skill.sh`; harness layers generic agent-readiness on top (`AGENTS.md` as index, `docs/` structure, `.github/workflows/harness-verify.yml`). The two verifiers don't overlap — they target different artefacts.
+**When harness applies alongside it:** Skill repos benefit from both layers: `skill-repo-skill` verifies skill-specific structure (both manifests and their parity, `skills/<name>/SKILL.md`, `composer.json` conventions) via its own `validate-skill.sh`; harness layers generic agent-readiness on top (`AGENTS.md` as index, `docs/` structure, `.github/workflows/harness-verify.yml`). The two verifiers don't overlap — they target different artefacts.
 
 **What harness expects back:**
 
