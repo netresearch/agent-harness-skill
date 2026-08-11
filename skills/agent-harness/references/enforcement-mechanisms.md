@@ -26,7 +26,7 @@ Examples that do NOT qualify and should stay CI-only: full test suites, mutation
 Pick the hook framework the ecosystem already expects, not the one you personally prefer:
 
 | Stack | Default framework | Why |
-|-------|-------------------|-----|
+| ------- | ------------------- | ----- |
 | PHP | `captainhook/captainhook` | Composer-installable, integrates with `composer install` |
 | Go (binary-shipping projects) | `lefthook` | Single static binary, no runtime dependency, fast |
 | Node-heavy frontends | `husky` + `lint-staged` | Ecosystem-native, integrates with `npm prepare` |
@@ -50,7 +50,7 @@ Audit periodically: for each command line in CI workflows that meets the "fast c
 ## Mechanism Summary
 
 | # | Mechanism | Triggers | Affects | Strength |
-|---|-----------|----------|---------|----------|
+| --- | ----------- | ---------- | --------- | ---------- |
 | 1 | Branch Protection / Rulesets | Merge attempt | Everyone | Hard |
 | 2 | CI Workflows | PR push | Everyone | Hard |
 | 3 | Git Hooks | Commit / push | Local devs | Automatic |
@@ -201,7 +201,7 @@ PATH_add bin
 
 After creating `.envrc`, a developer entering the directory for the first time sees:
 
-```
+```text
 direnv: error .envrc is blocked. Run `direnv allow` to approve its content
 ```
 
@@ -295,15 +295,15 @@ Then configure Husky hooks to call `verify-harness.sh`.
 ```makefile
 .PHONY: verify-harness
 verify-harness:
-	bash scripts/verify-harness.sh --format=text
+ bash scripts/verify-harness.sh --format=text
 
 .PHONY: bootstrap-harness
 bootstrap-harness:
-	@echo "Run agent-harness:bootstrap via your agent framework"
+ @echo "Run agent-harness:bootstrap via your agent framework"
 
 .PHONY: harness-status
 harness-status:
-	bash scripts/verify-harness.sh --format=text --level=3 || true
+ bash scripts/verify-harness.sh --format=text --level=3 || true
 ```
 
 **Advantages:** Works in any project regardless of language or package manager. Discoverable via `make help` or reading the Makefile. Can be called by CI workflows.
@@ -482,6 +482,26 @@ echo '{"tool_name":"Bash","tool_input":{"command":"<cmd>"},"cwd":"/tmp"}' \
 
 Keep a table of `(command, expected verdict)` cases and run them after every edit. Beware the self-match trap: a test *command* containing the pattern trips the agent's own gate, so keep cases in a file rather than inline in the shell.
 
+**Derive the negative cases from the guarded resource's stated purpose, not from
+your own sense of what looks legitimate.** A table you invent covers the shapes
+you thought of; the one shape you forget is the one that fires on a colleague
+the same afternoon. Whatever document defines the thing you are gating — the
+AGENTS.md paragraph, the reference section, the ADR — usually states what it is
+*for*, in a sentence adjacent to the rule you are enforcing. Read that sentence
+and turn every clause of it into a negative case.
+
+Worked example: a gate that refuses git writes inside a bare-layout `main/`
+worktree shipped with six negative cases and blocked its own author's
+`git merge --ff-only origin/main` within the hour. The rule and the purpose sat
+in the same reference file — *"exists for reading code, running `git fetch`, and
+serving as the base for new worktrees"* — and *serving as a base* entails being
+current, which entails the refresh. Three clauses, three negative cases; two had
+been guessed, the third had not.
+
+The discriminator is worth stating in the gate itself: `merge --ff-only` was
+exempted while `reset --hard` stayed refused, because the first cannot create a
+commit or discard work and the second reaches the same state by discarding.
+
 **Advantages:** Reaches every repo and every session on the machine. Catches commands no repo hook sees. Deny reasons are read by the agent, so the fix propagates immediately.
 
 **Limitations:** Reach is one machine, one user — it is not shared with teammates and cannot replace a CI check or branch protection for anything humans also do. Pair it with a repo-level mechanism whenever humans can trip the same rule. Pattern-matching on shell strings has false positives; prefer a narrow regex plus an explicit allowlist of legitimate shapes.
@@ -490,7 +510,7 @@ Keep a table of `(command, expected verdict)` cases and run them after every edi
 
 This diagram shows how enforcement mechanisms activate in sequence during a typical development workflow:
 
-```
+```text
 Developer clones repo
   |
   +---> .envrc detected by direnv
