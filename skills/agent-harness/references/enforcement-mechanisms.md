@@ -26,7 +26,7 @@ Examples that do NOT qualify and should stay CI-only: full test suites, mutation
 Pick the hook framework the ecosystem already expects, not the one you personally prefer:
 
 | Stack | Default framework | Why |
-|-------|-------------------|-----|
+| ------- | ------------------- | ----- |
 | PHP | `captainhook/captainhook` | Composer-installable, integrates with `composer install` |
 | Go (binary-shipping projects) | `lefthook` | Single static binary, no runtime dependency, fast |
 | Node-heavy frontends | `husky` + `lint-staged` | Ecosystem-native, integrates with `npm prepare` |
@@ -50,7 +50,7 @@ Audit periodically: for each command line in CI workflows that meets the "fast c
 ## Mechanism Summary
 
 | # | Mechanism | Triggers | Affects | Strength |
-|---|-----------|----------|---------|----------|
+| --- | ----------- | ---------- | --------- | ---------- |
 | 1 | Branch Protection / Rulesets | Merge attempt | Everyone | Hard |
 | 2 | CI Workflows | PR push | Everyone | Hard |
 | 3 | Git Hooks | Commit / push | Local devs | Automatic |
@@ -201,7 +201,7 @@ PATH_add bin
 
 After creating `.envrc`, a developer entering the directory for the first time sees:
 
-```
+```text
 direnv: error .envrc is blocked. Run `direnv allow` to approve its content
 ```
 
@@ -295,15 +295,15 @@ Then configure Husky hooks to call `verify-harness.sh`.
 ```makefile
 .PHONY: verify-harness
 verify-harness:
-	bash scripts/verify-harness.sh --format=text
+ bash scripts/verify-harness.sh --format=text
 
 .PHONY: bootstrap-harness
 bootstrap-harness:
-	@echo "Run agent-harness:bootstrap via your agent framework"
+ @echo "Run agent-harness:bootstrap via your agent framework"
 
 .PHONY: harness-status
 harness-status:
-	bash scripts/verify-harness.sh --format=text --level=3 || true
+ bash scripts/verify-harness.sh --format=text --level=3 || true
 ```
 
 **Advantages:** Works in any project regardless of language or package manager. Discoverable via `make help` or reading the Makefile. Can be called by CI workflows.
@@ -490,7 +490,7 @@ Keep a table of `(command, expected verdict)` cases and run them after every edi
 
 This diagram shows how enforcement mechanisms activate in sequence during a typical development workflow:
 
-```
+```text
 Developer clones repo
   |
   +---> .envrc detected by direnv
