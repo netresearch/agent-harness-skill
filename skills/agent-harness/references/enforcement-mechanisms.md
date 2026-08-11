@@ -482,6 +482,26 @@ echo '{"tool_name":"Bash","tool_input":{"command":"<cmd>"},"cwd":"/tmp"}' \
 
 Keep a table of `(command, expected verdict)` cases and run them after every edit. Beware the self-match trap: a test *command* containing the pattern trips the agent's own gate, so keep cases in a file rather than inline in the shell.
 
+**Derive the negative cases from the guarded resource's stated purpose, not from
+your own sense of what looks legitimate.** A table you invent covers the shapes
+you thought of; the one shape you forget is the one that fires on a colleague
+the same afternoon. Whatever document defines the thing you are gating — the
+AGENTS.md paragraph, the reference section, the ADR — usually states what it is
+*for*, in a sentence adjacent to the rule you are enforcing. Read that sentence
+and turn every clause of it into a negative case.
+
+Worked example: a gate that refuses git writes inside a bare-layout `main/`
+worktree shipped with six negative cases and blocked its own author's
+`git merge --ff-only origin/main` within the hour. The rule and the purpose sat
+in the same reference file — *"exists for reading code, running `git fetch`, and
+serving as the base for new worktrees"* — and *serving as a base* entails being
+current, which entails the refresh. Three clauses, three negative cases; two had
+been guessed, the third had not.
+
+The discriminator is worth stating in the gate itself: `merge --ff-only` was
+exempted while `reset --hard` stayed refused, because the first cannot create a
+commit or discard work and the second reaches the same state by discarding.
+
 **Advantages:** Reaches every repo and every session on the machine. Catches commands no repo hook sees. Deny reasons are read by the agent, so the fix propagates immediately.
 
 **Limitations:** Reach is one machine, one user — it is not shared with teammates and cannot replace a CI check or branch protection for anything humans also do. Pair it with a repo-level mechanism whenever humans can trip the same rule. Pattern-matching on shell strings has false positives; prefer a narrow regex plus an explicit allowlist of legitimate shapes.
