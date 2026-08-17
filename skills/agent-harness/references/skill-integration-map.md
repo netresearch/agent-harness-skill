@@ -245,7 +245,7 @@ The assessment generates a structured gap report from checkpoints. This report b
 
 ### 12. retro-skill
 
-**What it provides:** LLM-driven session retrospection. Detects friction in agent sessions (~32 signals across 3 layers: mechanical pre-pass, LLM inference, cross-session) and materializes approved learnings into one of six destinations: `user-memory`, `project-rule`, `skill-update`, `new-skill`, `checkpoint`, `harness-artefact`.
+**What it provides:** LLM-driven session retrospection. Detects friction in agent sessions (~32 signals across 3 layers: mechanical pre-pass, LLM inference, cross-session) and materializes approved learnings into one of seven destinations, chosen authority-first: `canonical-source`, `personal-rule`, `project-rule`, `skill-update`, `new-skill`, `checkpoint`, `harness-artefact`. (`personal-rule` was called `user-memory` in earlier versions; the old name is a deprecated alias retro still accepts as input.)
 
 **When harness delegates to it:** At end of any non-trivial session, or on-demand for specific issues. The harness does **not** invoke retro-skill at runtime; it verifies that the artefacts retro-skill needs to materialize learnings exist in the repo.
 
@@ -253,8 +253,8 @@ The assessment generates a structured gap report from checkpoints. This report b
 
 - PR/MR template contains a retro question (so contributors can flag reusable patterns to route).
 - Optional `SessionEnd` hook (`.claude/hooks/session-end.json`) is present if the team wants auto-trigger of `/retro`.
-- `docs/feedback/` directory exists when project-rule learnings have been approved.
-- Approved learnings in `docs/feedback/` follow the `feedback-memory-schema` defined by `agent-rules-skill`.
+- Approved `project-rule` learnings are appended to `AGENTS.md`, which retro treats as the single project rule store — it does not create `<project>/CLAUDE.md` or a `docs/feedback/` tree. A repo that still has `docs/feedback/` from the earlier model keeps working, because the entries are reached from `AGENTS.md`.
+- `personal-rule` learnings never land in the repo at all: they go to `~/.claude/CLAUDE.md`, outside every project.
 
 **What harness verifies:**
 
@@ -266,7 +266,7 @@ The assessment generates a structured gap report from checkpoints. This report b
 
 ## Integration Flow Diagram
 
-```
+```text
                     agent-harness (verify / bootstrap / audit)
                     |
         +-----------+-----------+------------------+
