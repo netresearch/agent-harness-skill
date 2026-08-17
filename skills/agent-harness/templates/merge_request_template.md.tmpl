@@ -12,7 +12,7 @@
 ## Retro
 
 <!-- Did this change reveal a reusable pattern, missing rule, or skill instruction gap? -->
-<!-- If yes, route via `/retro` to the correct destination (user-memory, project-rule, skill PR, checkpoint, harness-artefact). -->
+<!-- If yes, route via `/retro` to the correct destination (canonical-source, personal-rule, project-rule, skill PR, checkpoint, harness-artefact). -->
 
 - [ ] Reusable pattern detected? (N/A if purely local fix)
 
