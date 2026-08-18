@@ -47,6 +47,55 @@ Most parity gaps follow one of three patterns:
 
 Audit periodically: for each command line in CI workflows that meets the "fast check" definition above, grep the hook config files. If the command is not represented, that is the harness gap.
 
+## Calibrating a check before you ship it
+
+The parity principle above pushes toward more gates. This section is its
+counterweight: a gate that is *wrong* is worse than the gap it was meant to
+close, because a gap is visible and a wrong gate is not.
+
+**A false reject silently disables a real check.** In a warning-only gate a
+missed case costs a warning nobody read. In a denying gate a false positive
+blocks legitimate work, and what happens next is either that someone disables
+the gate or that the blocked check simply reports failure forever and stops
+being read. One hardening pass on a shell-command allowlist rejected four
+legitimate checks this way — including one that searched a project for the very
+attack the allowlist existed to stop. Every one of them had reported `fail` on
+every run since.
+
+So state **both** error directions before shipping, not just the one that
+motivated the work:
+
+- what the incident that prompted the check scores, and
+- what the loudest *legitimate* input scores.
+
+A denying gate's threshold belongs where the negative corpus is silent, not at
+the edge of the positive one.
+
+**Say how the corpus was assembled.** A "no regressions across N inputs" number
+is evidence only if someone else can reproduce it, and a corpus built by a
+convenient extraction usually is not the population the gate will meet. One such
+claim — "0 verdict changes across 274 patterns" — turned out to count lines
+produced by splitting multi-line YAML block scalars, text the runtime never
+executes as a command. The real corpus was 230 unique single-line patterns, and
+the correction had to be published after the fact. Write down the extraction
+command next to the number.
+
+**A predicate shared by two tools must not read ambient state.** An
+authoring-time validator and a runtime gate that apply "the same rule" only
+agree while that rule is a pure function of its input. Tokenizing a string with
+shell globbing left enabled made one predicate consult the working directory —
+so the same input was accepted in the author's checkout and rejected in the
+project under test, which is precisely the divergence a shared implementation
+exists to prevent. Audit a shared predicate for reads of cwd, environment,
+clock, network and filesystem; a check that answers differently in two places is
+not one rule, it is two.
+
+**A documented gap beats a wrong guard.** When closing a case would cost more
+false rejects than the case is worth, record it — in the checker itself, next to
+the rule it qualifies — rather than shipping an approximation that reads as
+coverage. Note what was tried and what it broke, so the next reader re-opens the
+question with the measurement rather than the intuition.
+
 ## Mechanism Summary
 
 | # | Mechanism | Triggers | Affects | Strength |
