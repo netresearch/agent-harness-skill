@@ -2,6 +2,47 @@
 
 This document covers all 10 enforcement instruments available for making repositories agent-ready. Mechanisms are ordered by enforcement strength, from hardest (server-side, nobody bypasses) to softest (convention-based, reminder only).
 
+## Why prose is not a mechanism
+
+The mechanisms below are ordered by strength, and the reason the list starts
+where it does is measurable: **text an agent reads does not enforce anything,
+including the text inside a skill.** Four levers were measured in
+[netresearch/agent-system-evals](https://github.com/netresearch/agent-system-evals)
+on `claude-haiku-4-5-20251001`, each on the case that motivated it, each against
+an unchanged control arm.
+
+| lever | what it changes | measured |
+| --- | --- | --- |
+| a reference file the skill ships | the right content is reachable | no change — 3 of 3 trials loaded the skill, none opened the file |
+| a step in the skill's workflow | the skill instructs the agent | no change — the sentence was in context in every trial |
+| a checkpoint in the skill's own validator | the skill checks the work | no change — the check was never run |
+| the skill's `description` | whether the skill is loaded at all | no change — 0 of 6 against 1 of 6, Fisher p 1.000 |
+
+The fourth is the one that surprises people, because a `description` is not
+advice to an agent, it is routing metadata. Rewriting it to name the exact
+artefacts a request is about did not get the skill reached for.
+
+**What did work was composition.** The same benchmark added one skill to a fleet
+— `github-release-skill`, whose description names the noun in the request — and
+invocation went from **0 of 6 to 6 of 6, Fisher exact p 0.002**. An agent
+offered a skill that matches the request reaches for it reliably. An agent not
+offered one cannot be talked into it by any wording elsewhere.
+
+**And being reached is not being obeyed.** In those same six trials the skill
+loaded every time and the mechanical outcome stayed at 0 of 6, exactly as it was
+without the skill. The release was not prepared correctly in a single run.
+
+Two rules follow, and they are why this document exists:
+
+1. **A rule that must hold gets a mechanism from the table below, not a
+   sentence in a skill.** If it can be checked by a script, it belongs in a
+   hook and in CI. Prose is how an agent is *offered* a way to do the job; it
+   is not how the job is *required* to come out.
+2. **A capability that is not installed cannot be routed to.** Before
+   concluding that an agent ignored a skill, check that the skill was in the
+   fleet at all — three published results in that benchmark had to be corrected
+   after that check was finally made.
+
 ## CI / Hook Parity Principle
 
 The single most load-bearing rule across the repo-level mechanisms (1-10): **every fast, deterministic check that runs in CI must also run as a pre-commit hook.** CI is the slow, parallel, authoritative backstop. It is not the first feedback loop. When a contributor (human or agent) commits broken code and learns about it 90 seconds later from a CI failure rather than 2 seconds earlier from a pre-commit hook, the harness has a gap — even if every CI gate is correctly configured.
