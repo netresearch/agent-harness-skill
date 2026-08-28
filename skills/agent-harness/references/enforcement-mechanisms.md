@@ -16,11 +16,26 @@ an unchanged control arm.
 | a reference file the skill ships | the right content is reachable | no change — 3 of 3 trials loaded the skill, none opened the file |
 | a step in the skill's workflow | the skill instructs the agent | no change — the sentence was in context in every trial |
 | a checkpoint in the skill's own validator | the skill checks the work | no change — the check was never run |
-| the skill's `description` | whether the skill is loaded at all | no change — 0 of 6 against 1 of 6, Fisher p 1.000 |
+| the skill's `description`, words appended to its trigger list | whether the skill is loaded at all | no change — 0 of 6 against 1 of 6, Fisher p 1.000 |
 
 The fourth is the one that surprises people, because a `description` is not
-advice to an agent, it is routing metadata. Rewriting it to name the exact
-artefacts a request is about did not get the skill reached for.
+advice to an agent, it is routing metadata. Appending the exact artefacts a
+request is about to its trigger list did not get the skill reached for.
+
+**Then the same words were moved, and that did.** A second run changed nothing
+but where the artefacts are named — out of the `Also triggers on:` tail and into
+the opening `Use when` clause, thirty-five words earlier, with nothing removed:
+
+| where the description names them | skill loaded | Fisher p |
+| --- | --- | --- |
+| appended to the trigger list | 1 of 6 | 1.000 |
+| in the opening clause | **6 of 6** | **0.002** |
+
+So a `description` routes, and position inside it is load-bearing. That belongs
+in this document rather than in the benchmark's, because it is the one lever in
+the table an agent-readiness review can actually inspect: a skill whose opening
+clause does not name what its users will ask for is not reachable, however
+complete its trigger list.
 
 **What did work was composition.** The same benchmark added one skill to a fleet
 — `github-release-skill`, whose description names the noun in the request — and
@@ -32,13 +47,17 @@ offered one cannot be talked into it by any wording elsewhere.
 loaded every time and the mechanical outcome stayed at 0 of 6, exactly as it was
 without the skill. The release was not prepared correctly in a single run.
 
-Two rules follow, and they are why this document exists:
+Three rules follow, and they are why this document exists:
 
 1. **A rule that must hold gets a mechanism from the table below, not a
    sentence in a skill.** If it can be checked by a script, it belongs in a
    hook and in CI. Prose is how an agent is *offered* a way to do the job; it
    is not how the job is *required* to come out.
-2. **A capability that is not installed cannot be routed to.** Before
+2. **A skill's opening clause is its routing surface.** Everything after it
+   was measured to carry far less. Review the first sentence of a
+   `description` against the words the requests actually use, and treat a
+   trigger list as documentation rather than as reach.
+3. **A capability that is not installed cannot be routed to.** Before
    concluding that an agent ignored a skill, check that the skill was in the
    fleet at all — three published results in that benchmark had to be corrected
    after that check was finally made.
