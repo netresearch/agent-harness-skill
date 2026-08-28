@@ -31,6 +31,28 @@ the opening `Use when` clause, thirty-five words earlier, with nothing removed:
 | appended to the trigger list | 1 of 6 | 1.000 |
 | in the opening clause | **6 of 6** | **0.002** |
 
+Five routing measurements on the same day, across three cases, fill in the rest
+of the picture. A skill is reached when **the words the request itself uses
+appear in the opening clause of its description** — and each row below fails or
+passes on a different half of that:
+
+| the skill in the fleet… | loaded |
+| --- | --- |
+| opens by naming the request's words | 6 of 6 |
+| opens by naming the request's words | 6 of 6 |
+| names them 35 words in, in a trigger list | 1 of 6 |
+| covers the work under other words | 0 of 3 |
+| covers the work under other words | 0 of 5 |
+| is not in the fleet at all | 0 of 6 |
+
+The two 0-of-N rows with the skill *present* are the ones worth dwelling on. In
+one, a skill describing "CI fails, authoring or consuming reusable workflows"
+was added to a fleet for a request reading *"the star-notifications job went red
+again last night"* — the phrase sits ninth in its opening list, and the request
+says job, red, log, rate limit. In the other, a skill naming "LDAP/AD clients"
+sat in the fleet for a request that only ever says *library*. Installing the
+capability changed nothing in either.
+
 So a `description` routes, and position inside it is load-bearing. That belongs
 in this document rather than in the benchmark's, because it is the one lever in
 the table an agent-readiness review can actually inspect: a skill whose opening
