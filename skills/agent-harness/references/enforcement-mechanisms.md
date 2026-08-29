@@ -31,7 +31,9 @@ the opening `Use when` clause, thirty-five words earlier, with nothing removed:
 | appended to the trigger list | 1 of 6 | 1.000 |
 | in the opening clause | **6 of 6** | **0.002** |
 
-So a `description` routes, and position inside it is load-bearing.
+So in this benchmark a `description` routed, and position inside it was
+load-bearing — six trials per arm, one fleet, one model. That is enough to act
+on when writing a description, and not enough to call a law.
 
 **What does not follow — and was published here for a few hours — is a rule for
 predicting it.** The first version of this section said a skill is reached when
