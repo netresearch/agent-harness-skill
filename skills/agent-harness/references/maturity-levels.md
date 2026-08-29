@@ -54,7 +54,7 @@ The skill analyses the repo, detects available commands from Makefile/composer.j
 ### Verification
 
 ```bash
-bash scripts/verify-harness.sh --level=1 --format=text
+${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=1 --format=text
 ```
 
 Example output:
@@ -130,7 +130,7 @@ The skill creates ARCHITECTURE.md from the template, generates the CI workflow, 
 ### Verification
 
 ```bash
-bash scripts/verify-harness.sh --level=2 --format=text
+${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=2 --format=text
 ```
 
 Example output:
@@ -219,7 +219,7 @@ The skill creates all missing artefacts and delegates branch protection setup to
 ### Verification
 
 ```bash
-bash scripts/verify-harness.sh --level=3 --format=text
+${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=3 --format=text
 ```
 
 Example output:
@@ -277,16 +277,16 @@ Summary: Level 3 COMPLETE | 0 error(s), 0 warning(s)
 
 ```bash
 # Check current maturity level (runs all checks, reports highest passing level)
-bash scripts/verify-harness.sh --format=text
+${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --format=text
 
 # Check a specific level
-bash scripts/verify-harness.sh --level=2 --format=text
+${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=2 --format=text
 
 # Use in CI (exits non-zero on failure)
-bash scripts/verify-harness.sh --level=2
+${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=2
 
 # Run a single check category
-bash scripts/verify-harness.sh --check=refs --format=text
+${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --check=refs --format=text
 ```
 
 ### CI usage
@@ -294,7 +294,7 @@ bash scripts/verify-harness.sh --check=refs --format=text
 ```yaml
 # .github/workflows/harness-verify.yml
 - name: Verify harness (Level 2)
-  run: bash scripts/verify-harness.sh --level=2
+  run: ${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=2
 ```
 
 The default output format uses GitHub Actions annotation syntax (`::error::`, `::warning::`), which makes results visible directly on the PR Files Changed tab.
@@ -303,7 +303,7 @@ The default output format uses GitHub Actions annotation syntax (`::error::`, `:
 # .gitlab-ci.yml
 harness-verify:
   stage: test
-  script: bash scripts/verify-harness.sh --level=2 --format=gitlab
+  script: ${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=2 --format=gitlab
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 ```

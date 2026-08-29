@@ -7,7 +7,7 @@ metadata:
   author: Netresearch DTT GmbH
   version: "1.8.0"
   repository: https://github.com/netresearch/agent-harness-skill
-allowed-tools: Bash(git:*,make:*,bash:*,wc:*,test:*,chmod:*) Read Write Edit Glob Grep Agent
+allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/*) Bash(git:*) Bash(make:*) Read Write Edit Glob Grep Agent
 ---
 
 # Agent Harness
@@ -21,7 +21,7 @@ The agent harness makes a repo agent-ready with self-sustaining enforcement. Thi
 Always start here. From the target repo root, run:
 
 ```bash
-scripts/verify-harness.sh
+${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh
 ```
 
 Analyse the output and fix or suggest fixes. Verification checks dead references, line counts, missing artefacts, and command/target alignment.
@@ -43,7 +43,7 @@ When artefacts are missing, create them from templates:
 | `.forgejo/pull_request_template.md` | `templates/pull_request_template.md.tmpl` | Forgejo/Gitea |
 | `.envrc` | `templates/envrc.tmpl` | All |
 | Makefile harness targets | `templates/Makefile.harness.tmpl` | All |
-| `scripts/verify-harness.sh` | `scripts/verify-harness.sh` (copy directly) | All |
+| `${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh` | `${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh` (copy directly) | All |
 
 Populate with repo-specific values; never overwrite existing files without confirmation.
 

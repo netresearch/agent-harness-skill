@@ -261,7 +261,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Verify harness
-        run: bash scripts/verify-harness.sh --level=2
+        run: ${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=2
 ```
 
 The workflow uses only `actions/checkout` and bash -- no external action dependencies.
@@ -278,7 +278,7 @@ A GitLab CI job in `.gitlab-ci.yml` that runs `verify-harness.sh` on every merge
 harness-verify:
   stage: test
   script:
-    - bash scripts/verify-harness.sh --level=2 --format=gitlab
+    - ${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=2 --format=gitlab
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 ```
@@ -312,7 +312,7 @@ Hooks should call `verify-harness.sh`:
 ```bash
 #!/usr/bin/env bash
 # .githooks/pre-commit
-bash scripts/verify-harness.sh --level=1 --format=text
+${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=1 --format=text
 ```
 
 **Limitations:** Requires activation. Bypassable with `--no-verify`. This is why the hard layer (CI + branch protection) exists as a backstop.
@@ -437,7 +437,7 @@ Then configure Husky hooks to call `verify-harness.sh`.
 ```makefile
 .PHONY: verify-harness
 verify-harness:
- bash scripts/verify-harness.sh --format=text
+ ${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --format=text
 
 .PHONY: bootstrap-harness
 bootstrap-harness:
@@ -445,7 +445,7 @@ bootstrap-harness:
 
 .PHONY: harness-status
 harness-status:
- bash scripts/verify-harness.sh --format=text --level=3 || true
+ ${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --format=text --level=3 || true
 ```
 
 **Advantages:** Works in any project regardless of language or package manager. Discoverable via `make help` or reading the Makefile. Can be called by CI workflows.
@@ -560,7 +560,7 @@ repos:
     hooks:
       - id: verify-harness
         name: Verify harness consistency
-        entry: bash scripts/verify-harness.sh --level=1 --format=text
+        entry: ${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=1 --format=text
         language: system
         pass_filenames: false
         always_run: true
