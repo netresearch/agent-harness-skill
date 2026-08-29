@@ -31,33 +31,42 @@ the opening `Use when` clause, thirty-five words earlier, with nothing removed:
 | appended to the trigger list | 1 of 6 | 1.000 |
 | in the opening clause | **6 of 6** | **0.002** |
 
-Five routing measurements on the same day, across three cases, fill in the rest
-of the picture. A skill is reached when **the words the request itself uses
-appear in the opening clause of its description** — and each row below fails or
-passes on a different half of that:
+So in this benchmark a `description` routed, and position inside it was
+load-bearing — six trials per arm, one fleet, one model. That is enough to act
+on when writing a description, and not enough to call a law.
 
-| the skill in the fleet… | loaded |
-| --- | --- |
-| opens by naming the request's words | 6 of 6 |
-| opens by naming the request's words | 6 of 6 |
-| names them 35 words in, in a trigger list | 1 of 6 |
-| covers the work under other words | 0 of 3 |
-| covers the work under other words | 0 of 5 |
-| is not in the fleet at all | 0 of 6 |
+**What does not follow — and was published here for a few hours — is a rule for
+predicting it.** The first version of this section said a skill is reached when
+the words the request itself uses appear in the opening clause. Checked against
+every silent case in that benchmark rather than the two it was read from, five
+of six have exactly that overlap and none of them route: a skill describing
+TYPO3 *upgrades* shares "extensions, typo3, versions" with a request about
+version declarations; a request opening *"Someone from the security side says…"*
+sat beside a security skill in its own fleet for five trials; a modernization
+skill shares "property" with a request about properties that cannot be
+persisted. All zero.
 
-The two 0-of-N rows with the skill *present* are the ones worth dwelling on. In
-one, a skill describing "CI fails, authoring or consuming reusable workflows"
-was added to a fleet for a request reading *"the star-notifications job went red
-again last night"* — the phrase sits ninth in its opening list, and the request
-says job, red, log, rate limit. In the other, a skill naming "LDAP/AD clients"
-sat in the fleet for a request that only ever says *library*. Installing the
-capability changed nothing in either.
+What the two positive runs have in common is narrower than shared vocabulary:
+the opening clause named **the action the request asks to perform**, in the
+request's own terms. "Prepare the 2.4.2 release" against *"Use when creating
+releases, version bumps, tagging"*; "which TYPO3 versions does it say it
+supports, and the statements disagree" against an opening clause naming exactly
+that. Neither `typo3-extension-upgrade` nor `security-audit` describes the action
+that was asked for, however many of its nouns they share.
 
-So a `description` routes, and position inside it is load-bearing. That belongs
-in this document rather than in the benchmark's, because it is the one lever in
-the table an agent-readiness review can actually inspect: a skill whose opening
-clause does not name what its users will ask for is not reachable, however
-complete its trigger list.
+And one of those two positives is close to circular — that clause was written
+from the request by the person running the experiment, so its matching is not a
+discovery. The release case is the clean one: a published skill, written without
+the benchmark in view, whose first clause names the request's verb.
+
+**For a harness review, that means one usable instruction and no test.** Read a
+skill's first sentence against the actions its users actually ask for, in their
+words rather than yours, and rewrite it if it names a category instead of an
+action. The 1-of-6-to-6-of-6 move above is the demonstration that rewriting
+one can change reach at all; it is not evidence that this particular reading
+predicts it, because that clause was written from the request. Do not treat any
+of this as a predictor: nothing measured here lets you look at a fleet and a
+request and say in advance whether a skill will be reached.
 
 **What did work was composition.** The same benchmark added one skill to a fleet
 — `github-release-skill`, whose description names the noun in the request — and
@@ -77,8 +86,10 @@ Three rules follow, and they are why this document exists:
    is not how the job is *required* to come out.
 2. **A skill's opening clause is its routing surface.** Everything after it
    was measured to carry far less. Review the first sentence of a
-   `description` against the words the requests actually use, and treat a
-   trigger list as documentation rather than as reach.
+   `description` against the *actions* its users ask for, phrased their way,
+   and treat a trigger list as documentation rather than as reach. This is an
+   instruction for writing one, not a test for predicting reach — sharing the
+   request's nouns is measurably not enough.
 3. **A capability that is not installed cannot be routed to.** Before
    concluding that an agent ignored a skill, check that the skill was in the
    fleet at all — three published results in that benchmark had to be corrected
