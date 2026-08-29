@@ -5,7 +5,7 @@ The harness maturity model defines three levels of agent-readiness for a reposit
 ## Level Overview
 
 | Level | Name | Target | Effort (manual) | Effort (with skill) |
-|-------|------|--------|-----------------|---------------------|
+| ------- | ------ | -------- | ----------------- | --------------------- |
 | 1 | Basic | Any repo, solo dev, minimal effort | ~15 minutes | ~2 minutes |
 | 2 | Verified | Team repos, CI-backed, actively maintained | ~30 minutes | ~5 minutes |
 | 3 | Enforced | Production repos, full enforcement, drift-resistant | ~1 hour | ~10 minutes |
@@ -17,7 +17,7 @@ The harness maturity model defines three levels of agent-readiness for a reposit
 ### Requirements
 
 | Checkpoint | Check | Severity |
-|------------|-------|----------|
+| ------------ | ------- | ---------- |
 | AH-01 | `AGENTS.md` exists at repo root | Error |
 | AH-02 | `AGENTS.md` is index-format (under 150 lines) | Warning |
 | AH-03 | `AGENTS.md` documents available commands (build, test, lint) | Warning |
@@ -45,7 +45,7 @@ The harness maturity model defines three levels of agent-readiness for a reposit
 
 **With skill bootstrap:**
 
-```
+```text
 agent-harness:bootstrap --level=1
 ```
 
@@ -54,12 +54,12 @@ The skill analyses the repo, detects available commands from Makefile/composer.j
 ### Verification
 
 ```bash
-bash scripts/verify-harness.sh --level=1 --format=text
+${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=1 --format=text
 ```
 
 Example output:
 
-```
+```text
 Agent Harness Verification
 ==========================
 
@@ -121,7 +121,7 @@ All of Level 1, plus:
 
 **With skill bootstrap:**
 
-```
+```text
 agent-harness:bootstrap --level=2
 ```
 
@@ -130,12 +130,12 @@ The skill creates ARCHITECTURE.md from the template, generates the CI workflow, 
 ### Verification
 
 ```bash
-bash scripts/verify-harness.sh --level=2 --format=text
+${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=2 --format=text
 ```
 
 Example output:
 
-```
+```text
 Agent Harness Verification
 ==========================
 
@@ -210,7 +210,7 @@ All of Level 2, plus:
 
 **With skill bootstrap:**
 
-```
+```text
 agent-harness:bootstrap --level=3
 ```
 
@@ -219,12 +219,12 @@ The skill creates all missing artefacts and delegates branch protection setup to
 ### Verification
 
 ```bash
-bash scripts/verify-harness.sh --level=3 --format=text
+${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=3 --format=text
 ```
 
 Example output:
 
-```
+```text
 Agent Harness Verification
 ==========================
 
@@ -277,16 +277,16 @@ Summary: Level 3 COMPLETE | 0 error(s), 0 warning(s)
 
 ```bash
 # Check current maturity level (runs all checks, reports highest passing level)
-bash scripts/verify-harness.sh --format=text
+${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --format=text
 
 # Check a specific level
-bash scripts/verify-harness.sh --level=2 --format=text
+${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=2 --format=text
 
-# Use in CI (exits non-zero on failure)
-bash scripts/verify-harness.sh --level=2
+# Exits non-zero on failure — what the CI job below relies on
+${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=2
 
 # Run a single check category
-bash scripts/verify-harness.sh --check=refs --format=text
+${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --check=refs --format=text
 ```
 
 ### CI usage
