@@ -60,7 +60,9 @@ the benchmark in view, whose first clause names the request's verb.
 **For a harness review, that means one usable instruction and no test.** Read a
 skill's first sentence against the actions its users actually ask for, in their
 words rather than yours, and rewrite it if it names a category instead of an
-action — one such rewrite moved a case from 1 of 6 to 6 of 6. Do not treat any
+action. The 1-of-6-to-6-of-6 move above is the demonstration that rewriting
+one can change reach at all; it is not evidence that this particular reading
+predicts it, because that clause was written from the request. Do not treat any
 of this as a predictor: nothing measured here lets you look at a fleet and a
 request and say in advance whether a skill will be reached.
 
