@@ -282,7 +282,7 @@ ${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --format=text
 # Check a specific level
 ${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=2 --format=text
 
-# Use in CI (exits non-zero on failure)
+# Exits non-zero on failure — what the CI job below relies on
 ${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=2
 
 # Run a single check category
@@ -294,7 +294,7 @@ ${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --check=refs --format=text
 ```yaml
 # .github/workflows/harness-verify.yml
 - name: Verify harness (Level 2)
-  run: ${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=2
+  run: bash scripts/verify-harness.sh --level=2
 ```
 
 The default output format uses GitHub Actions annotation syntax (`::error::`, `::warning::`), which makes results visible directly on the PR Files Changed tab.
@@ -303,7 +303,7 @@ The default output format uses GitHub Actions annotation syntax (`::error::`, `:
 # .gitlab-ci.yml
 harness-verify:
   stage: test
-  script: ${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh --level=2 --format=gitlab
+  script: bash scripts/verify-harness.sh --level=2 --format=gitlab
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 ```
