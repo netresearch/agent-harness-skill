@@ -5,7 +5,7 @@ The harness maturity model defines three levels of agent-readiness for a reposit
 ## Level Overview
 
 | Level | Name | Target | Effort (manual) | Effort (with skill) |
-|-------|------|--------|-----------------|---------------------|
+| ------- | ------ | -------- | ----------------- | --------------------- |
 | 1 | Basic | Any repo, solo dev, minimal effort | ~15 minutes | ~2 minutes |
 | 2 | Verified | Team repos, CI-backed, actively maintained | ~30 minutes | ~5 minutes |
 | 3 | Enforced | Production repos, full enforcement, drift-resistant | ~1 hour | ~10 minutes |
@@ -17,7 +17,7 @@ The harness maturity model defines three levels of agent-readiness for a reposit
 ### Requirements
 
 | Checkpoint | Check | Severity |
-|------------|-------|----------|
+| ------------ | ------- | ---------- |
 | AH-01 | `AGENTS.md` exists at repo root | Error |
 | AH-02 | `AGENTS.md` is index-format (under 150 lines) | Warning |
 | AH-03 | `AGENTS.md` documents available commands (build, test, lint) | Warning |
@@ -45,7 +45,7 @@ The harness maturity model defines three levels of agent-readiness for a reposit
 
 **With skill bootstrap:**
 
-```
+```text
 agent-harness:bootstrap --level=1
 ```
 
@@ -59,7 +59,7 @@ bash scripts/verify-harness.sh --level=1 --format=text
 
 Example output:
 
-```
+```text
 Agent Harness Verification
 ==========================
 
@@ -121,7 +121,7 @@ All of Level 1, plus:
 
 **With skill bootstrap:**
 
-```
+```text
 agent-harness:bootstrap --level=2
 ```
 
@@ -135,7 +135,7 @@ bash scripts/verify-harness.sh --level=2 --format=text
 
 Example output:
 
-```
+```text
 Agent Harness Verification
 ==========================
 
@@ -210,7 +210,7 @@ All of Level 2, plus:
 
 **With skill bootstrap:**
 
-```
+```text
 agent-harness:bootstrap --level=3
 ```
 
@@ -224,7 +224,7 @@ bash scripts/verify-harness.sh --level=3 --format=text
 
 Example output:
 
-```
+```text
 Agent Harness Verification
 ==========================
 
