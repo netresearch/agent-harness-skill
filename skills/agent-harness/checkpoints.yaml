@@ -63,7 +63,7 @@ mechanical:
   # repo with a working harness-verify workflow was reported as having none.
   - id: AH-12
     type: command
-    pattern: "cat .github/workflows/harness-verify.yml .forgejo/workflows/harness-verify.yml .gitlab-ci.yml 2>/dev/null | grep -qE 'harness-verify|verify-harness'"
+    pattern: "cat .github/workflows/harness-verify.yml .forgejo/workflows/harness-verify.yml .gitea/workflows/harness-verify.yml .gitlab-ci.yml 2>/dev/null | grep -qE 'harness-verify|verify-harness'"
     severity: warning
     desc: "CI harness verification workflow exists (GitHub Actions, Forgejo Actions, or GitLab CI)"
 
@@ -111,7 +111,13 @@ mechanical:
   # template whose org template carries the retro question fails this check.
   - id: AH-22
     type: command
-    pattern: "grep -qsiE '(retro|reusable.*pattern)' .github/{pull_request_template.md,PULL_REQUEST_TEMPLATE/*.md} .{forgejo,gitea}/pull_request_template.md .gitlab/merge_request_templates/*.md"
+    pattern: |
+      cat .github/pull_request_template.md \
+          .github/PULL_REQUEST_TEMPLATE/*.md \
+          .forgejo/pull_request_template.md \
+          .gitea/pull_request_template.md \
+          .gitlab/merge_request_templates/*.md 2>/dev/null \
+        | grep -qiE '(retro|reusable.*pattern)'
     severity: warning
     desc: "PR/MR template includes retro question for agent-authored work"
     fix_skill: "retro"
