@@ -20,10 +20,15 @@ mechanical:
     severity: warning
     desc: "AGENTS.md is compact index (<150 lines)"
 
+  # `value:` is not a field the runner reads: `type: regex` takes `pattern:`.
+  # The regex reached grep empty, and an empty pattern matches every line, so
+  # this checkpoint passed on any AGENTS.md — including one with no Commands
+  # section. It is also the one entry validate-checkpoints.sh rejects outright
+  # ("type regex requires 'pattern'").
   - id: AH-03
     type: regex
     target: AGENTS.md
-    value: "(?i)## commands"
+    pattern: "(?i)## commands"
     severity: warning
     desc: "AGENTS.md documents available commands"
 
@@ -53,33 +58,66 @@ mechanical:
     severity: warning
     desc: "Architecture documentation exists"
 
+  # Forgejo/Gitea is a first-class platform for this skill (SKILL.md bootstrap
+  # table), so its workflow path belongs in the file list; without it a Forgejo
+  # repo with a working harness-verify workflow was reported as having none.
   - id: AH-12
     type: command
-    pattern: "cat .github/workflows/harness-verify.yml .gitlab-ci.yml 2>/dev/null | grep -qE 'harness-verify|verify-harness'"
+    pattern: "cat .github/workflows/harness-verify.yml .forgejo/workflows/harness-verify.yml .gitea/workflows/harness-verify.yml .gitlab-ci.yml 2>/dev/null | grep -qE 'harness-verify|verify-harness'"
     severity: warning
-    desc: "CI harness verification workflow exists (GitHub Actions or GitLab CI)"
+    desc: "CI harness verification workflow exists (GitHub Actions, Forgejo Actions, or GitLab CI)"
 
   # Level 3 — Enforced
+  # `org_provides:` adds the org-level fallback that scripts/verify-harness.sh
+  # already applies: GitHub serves `<org>/.github/pull_request_template.md` to
+  # every repo in the org, so a repo with no local template still has a working
+  # one. Without it, repos on an org template were reported as having none.
+  # Limits, deliberately matching verify-harness.sh: one path only (GitHub also
+  # honours `.github/` and `docs/` inside the org repo, and the contents API is
+  # case-sensitive — `PULL_REQUEST_TEMPLATE.md` is a distinct path), and the
+  # runner's check_org_provides returns "not found" when gh is missing or
+  # unauthenticated, so an unauthenticated run still reports this as failing.
   - id: AH-20
     type: file_exists
-    target: "{.github/pull_request_template.md,.github/PULL_REQUEST_TEMPLATE,.gitlab/merge_request_templates}"
+    target: "{.github/pull_request_template.md,.github/PULL_REQUEST_TEMPLATE,.gitlab/merge_request_templates,.forgejo/pull_request_template.md,.gitea/pull_request_template.md}"
+    org_provides: "pull_request_template.md"
     severity: warning
-    desc: "PR/MR template with harness checklist exists"
+    desc: "PR/MR template with harness checklist exists (repo-level, or org-level via <org>/.github)"
 
+  # `captainhook/hook-installer` is a composer PLUGIN: enabling it under
+  # config.allow-plugins is what activates the git hooks on `composer install`,
+  # and it leaves no post-install-cmd behind. Repos using it were reported as
+  # having no auto-activation at all. `[^,}]*` keeps the match inside one JSON
+  # member, so an explicit `: false` does not satisfy the check. The three
+  # literal .husky shims collapse into globs — the same files plus any other
+  # shim, and it buys the line budget the new alternative needs.
   - id: AH-21
     type: command
-    pattern: "cat .envrc .husky/install.sh .husky/husky.sh .husky/_/husky.sh composer.json package.json 2>/dev/null | grep -qE 'hooksPath|core\\.hookspath|post-install-cmd|\"prepare\"'"
+    pattern: "cat .envrc .husky/*.sh .husky/_/*.sh composer.json package.json 2>/dev/null | grep -qE 'hooksPath|core\\.hookspath|post-install-cmd|\"prepare\"|hook-installer[^:]*:[^,}]*true'"
     severity: warning
-    desc: "Git hooks auto-activate on clone (.envrc, .husky, or composer/npm install hook)"
+    desc: "Git hooks auto-activate on clone (.envrc, .husky, composer/npm install hook, or captainhook hook-installer)"
 
   # === RETRO-SKILL INTEGRATION ===
   # The harness does not own learning, but verifies that integration points
   # exist for retro-skill to route session learnings into the correct
   # destination. See references/skill-integration-map.md (retro-skill section).
 
+  # `| head -1` dropped: head exits 0 on empty input, so it can only mask the
+  # status it forwards; `grep -q` alone carries the verdict. Forgejo/Gitea paths
+  # added to match AH-20. KNOWN LIMIT: this reads repo-local templates only. An
+  # org-level template's CONTENT cannot be reached from a checkpoint — resolving
+  # the owner needs `$(...)`, which the runner rejects, and `org_provides:` is an
+  # existence fallback for file_exists, not a content grep. A repo on an org
+  # template whose org template carries the retro question fails this check.
   - id: AH-22
     type: command
-    pattern: "grep -liE '(retro|reusable.*pattern)' .github/pull_request_template.md .github/PULL_REQUEST_TEMPLATE/*.md .gitlab/merge_request_templates/*.md 2>/dev/null | head -1 | grep -q ."
+    pattern: |
+      cat .github/pull_request_template.md \
+          .github/PULL_REQUEST_TEMPLATE/*.md \
+          .forgejo/pull_request_template.md \
+          .gitea/pull_request_template.md \
+          .gitlab/merge_request_templates/*.md 2>/dev/null \
+        | grep -qiE '(retro|reusable.*pattern)'
     severity: warning
     desc: "PR/MR template includes retro question for agent-authored work"
     fix_skill: "retro"
@@ -102,26 +140,37 @@ mechanical:
     severity: warning
     desc: "Test runner infrastructure must exist (runTests.sh or Makefile with test targets)"
 
+  # PHPStan's own config discovery order is phpstan.neon, phpstan.neon.dist,
+  # phpstan.dist.neon; only the first two spellings were listed, so a project
+  # configured at level 9 in a .dist file was reported as below level 8.
   - id: AH-31
     type: command
-    pattern: "grep -hP '^\\s*level:\\s*(10|max|[89])' phpstan.neon Build/phpstan.neon 2>/dev/null | grep -q ."
+    pattern: "grep -hP '^\\s*level:\\s*(10|max|[89])' phpstan.neon phpstan.neon.dist phpstan.dist.neon Build/phpstan.neon Build/phpstan.neon.dist 2>/dev/null | grep -q ."
     severity: warning
     desc: "PHPStan must be configured at level 8+ (PHP projects only; level 10 recommended)"
 
+  # `desc: >-` reached the runner as the literal string ">-": its YAML reader is
+  # line-oriented and folded scalars are not among the shapes it collects, so
+  # every report line for this checkpoint read "[AH-32] >-" instead of the rule.
+  # Keep desc a single-line scalar. Skill/Python projects: prefer
+  # .pre-commit-config.yaml.
   - id: AH-32
     type: file_exists
     target: "{.pre-commit-config.yaml,captainhook.json,lefthook.yml,lefthook.yaml,.lefthook.yml,.husky/pre-commit,.githooks/pre-commit}"
     severity: warning
-    desc: >-
-      Git hooks must be configured for pre-commit quality checks (must mirror
-      CI's fast checks — see references/enforcement-mechanisms.md CI/Hook
-      Parity Principle; skill/Python projects: prefer .pre-commit-config.yaml)
+    desc: "Git hooks configured for pre-commit quality checks (must mirror CI's fast checks — see references/enforcement-mechanisms.md, CI/Hook Parity Principle)"
 
+  # The unpruned find matched dependency trees: of 150 `*Test.php` hits in one
+  # TYPO3 extension, 112 were under .Build/vendor/. A project with no tests of
+  # its own passed on its dependencies' test suites. Prune those trees first,
+  # and keep BOTH groups parenthesised — without the parens `-prune -o` binds
+  # to the first -name only, and the trailing `-print` to the last. Pruning by
+  # -name rather than -path also catches a nested vendor/ or node_modules/.
   - id: AH-33
     type: command
-    pattern: "find . -name '*_test.go' -o -name '*Test.php' -o -name '*.test.js' -o -name '*.test.ts' -o -name 'test_*.py' | head -1 | grep -q ."
+    pattern: 'find . \( -name .Build -o -name vendor -o -name node_modules \) -prune -o \( -name "*_test.go" -o -name "*Test.php" -o -name "*.test.[jt]s" -o -name "test_*.py" \) -print | grep -q .'
     severity: error
-    desc: "Project must have at least one test file (supports Go, PHP, JS, TS, Python)"
+    desc: "Project must have at least one test file of its own (supports Go, PHP, JS, TS, Python)"
 
   - id: AH-34
     type: file_exists
@@ -135,18 +184,26 @@ mechanical:
     severity: info
     desc: "Code coverage configuration should exist"
 
+  # `pattern: >-` reached the runner as the literal string ">-" and was rejected
+  # ("'>-' not in allowed command whitelist"): the runner's block-scalar
+  # collector matches `|` only, so under the current runner it never ran. A
+  # multi-line body is a `type: script`, screened by is_safe_script_text, which
+  # permits the `;` and `||` a script needs. Folding has to go with it: a
+  # literal-block line that STARTS with `||` is a bash syntax error, so the `||`
+  # moves to the end of its left operand. `| head -1` dropped — head exits 0 on
+  # empty input and only masks the status `grep -q` already carries.
   - id: AH-36
-    type: command
-    pattern: >-
-      K1='composer ci:|golangci-lint|go vet|gofmt|validate-skill|validate\.yml';
-      K2='markdownlint|yamllint|biome|eslint|tsc|ruff|black|mypy|pyright';
-      K3='prettier|stylelint|cargo clippy|cargo fmt|phpstan|psalm|rector';
-      K4='php-cs-fixer|phpcs|make lint|make site-lint|make cgl|make phpstan';
-      K="($K1|$K2|$K3|$K4)";
-      H='captainhook.json .githooks/ .husky/ lefthook.yml lefthook.yaml';
-      H="$H .lefthook.yml .pre-commit-config.yaml";
-      ! grep -rlE "$K" .github/workflows .gitlab-ci.yml 2>/dev/null | head -1 | grep -q .
-      || grep -rlE "$K" $H 2>/dev/null | head -1 | grep -q .
+    type: script
+    pattern: |
+      K1='composer ci:|golangci-lint|go vet|gofmt|validate-skill|validate\.yml'
+      K2='markdownlint|yamllint|biome|eslint|tsc|ruff|black|mypy|pyright'
+      K3='prettier|stylelint|cargo clippy|cargo fmt|phpstan|psalm|rector'
+      K4='php-cs-fixer|phpcs|make lint|make site-lint|make cgl|make phpstan'
+      K="($K1|$K2|$K3|$K4)"
+      H='captainhook.json .githooks/ .husky/ lefthook.yml lefthook.yaml'
+      H="$H .lefthook.yml .pre-commit-config.yaml"
+      ! grep -rlE "$K" .github/workflows .gitlab-ci.yml 2>/dev/null | grep -q . ||
+        grep -rlE "$K" $H 2>/dev/null | grep -q .
     severity: warning
     desc: "If CI runs a fast-check command, a hook config should reference at least one fast-check command too (best-effort CI/hook parity)"
 
