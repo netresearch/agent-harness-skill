@@ -5,7 +5,7 @@ license: "(MIT AND CC-BY-SA-4.0). See LICENSE-MIT and LICENSE-CC-BY-SA-4.0"
 compatibility: "Requires Bash, Read, Write, Edit, Glob, Grep tools"
 metadata:
   author: Netresearch DTT GmbH
-  version: "1.8.0"
+  version: "1.8.1"
   repository: https://github.com/netresearch/agent-harness-skill
 allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/*) Bash(git:*) Bash(make:*) Read Write Edit Glob Grep Agent
 ---
