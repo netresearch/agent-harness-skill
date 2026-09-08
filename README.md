@@ -30,14 +30,15 @@ The skill follows the "verify-first" principle: it primarily checks consistency,
 
 ### Without a marketplace
 
-Since Claude Code 2.1.157 a plugin directory under your personal skills directory loads on its own, hooks and commands included:
+Since Claude Code 2.1.157 a plugin directory under your personal skills directory loads on its own:
 
 ```bash
+mkdir -p ~/.claude/skills
 git clone https://github.com/netresearch/agent-harness-skill.git \
   ~/.claude/skills/agent-harness
 ```
 
-It loads as `agent-harness@skills-dir` on the next session. Update with `git pull`; remove it by deleting the directory. This route has no `claude plugin update`.
+It loads as `agent-harness@skills-dir` on the next session. Update with `git -C ~/.claude/skills/agent-harness pull` and start a new session; remove it by deleting the directory. This route has no `claude plugin update`.
 
 ### Composer
 
