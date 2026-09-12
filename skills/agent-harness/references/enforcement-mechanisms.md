@@ -605,11 +605,12 @@ The script exits 0 always; the *verdict* is the JSON it prints. Silence means al
 print(
     json.dumps(
         {
+            "systemMessage": "<optional: what the operator should see>",
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
                 "permissionDecision": "deny",
                 "permissionDecisionReason": "<what to do instead>",
-            }
+            },
         }
     )
 )
@@ -630,37 +631,61 @@ without a round trip:
 
 ```python
 # hand the corrected command back; the normal permission flow still runs on it
+note = "<what was changed, and why>"
 print(
     json.dumps(
         {
+            "systemMessage": note,  # top level: the operator
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
-                "updatedInput": {"command": "set -o pipefail; " + cmd},
-                "systemMessage": "<what was changed, and why>",
-            }
+                # updatedInput REPLACES the tool input — carry every field the
+                # call arrived with and override only the one you are fixing.
+                "updatedInput": {**tool_input, "command": "set -o pipefail; " + cmd},
+                "additionalContext": note,  # inside: the agent
+            },
         }
     )
 )
 ```
 
-Two properties are worth copying. **Omit `permissionDecision`** unless you mean
-to decide permission: without it the call still goes through whatever approval
-it would normally need, on the fixed command, so the rewrite does not smuggle in
-an allow. And **always emit a `systemMessage`** — a gate that silently edits
-commands moves who is driving, and an agent that cannot see the edit will
-re-derive the wrong form next time.
+Three properties are worth copying.
+
+**`updatedInput` replaces the tool input; it is not a patch.** Returning
+`{"command": …}` alone drops every other field the call arrived with — `timeout`
+and `run_in_background` among them, so a long build silently reverts to the
+default timeout. Spread the original and override the one key you are fixing.
+
+**Omit `permissionDecision`** unless you mean to decide permission: without it
+the call still goes through whatever approval it would normally need, on the
+fixed command, so the rewrite does not smuggle in an allow.
+
+**Tell both readers.** `systemMessage` is a top-level field, beside
+`hookSpecificOutput` rather than inside it, and it is what the operator sees; a
+gate that silently edits commands moves who is driving. `additionalContext`
+sits inside `hookSpecificOutput` and is what the agent sees — without it the
+agent watches its command change for no stated reason and re-derives the wrong
+form on the next call.
 
 The rung is narrow, and the test is whether the hook can *construct* the right
 command from what it was given:
 
 | Defect | Rewritable? |
 | --- | --- |
-| `$?` after a pipe measures the filter | yes — prefix `set -o pipefail;` |
+| `$?` after a pipe measures the filter | yes — prefix `set -o pipefail;`, with the caveat below |
 | state-changing `git` piped into `tail`/`head` | yes — drop the filter |
 | `cat file` that should be the Read tool | **no** — that is a different tool, and `updatedInput` only edits the input it was handed |
 | `grep` on a `.json` that should be `jq` | **no** — nobody can derive the filter |
 | a `git` command missing its `-C <dir>` | **no** — the hook cannot know which directory was meant |
 | a checker whose output is truncated by a trailing `tail -3` | **no** — dropping it can dump an entire report |
+
+The `pipefail` row carries a caveat worth stating where somebody copies it:
+`set -o pipefail` makes the pipeline report the **rightmost non-zero** status,
+not the producer's. For the shape this rewrite targets — a producer whose status
+was being masked by a filter that always succeeds — that is exactly the
+producer's status. Where a downstream command can legitimately exit non-zero
+(`grep` finding nothing, `head` closing the pipe early), the rewritten status is
+that command's, and the honest fix is to capture the producer explicitly
+(`${PIPESTATUS[0]}`) rather than to rewrite.
 
 Two failure modes to guard against. A rewrite that leaves the defect in place is
 worse than a refusal, because it reads as fixed: stripping the trailing filter
