@@ -144,6 +144,7 @@ mechanical:
   # phpstan.dist.neon; only the first two spellings were listed, so a project
   # configured at level 9 in a .dist file was reported as below level 8.
   - id: AH-31
+    requires: composer.json
     type: command
     pattern: "grep -hP '^\\s*level:\\s*(10|max|[89])' phpstan.neon phpstan.neon.dist phpstan.dist.neon Build/phpstan.neon Build/phpstan.neon.dist 2>/dev/null | grep -q ."
     severity: warning
