@@ -204,6 +204,7 @@ question with the measurement rather than the intuition.
 | 9 | PR Templates | PR creation | PR authors | Soft |
 | 10 | pre-commit framework | Commit (after install) | Local devs | Automatic |
 | 11 | Claude Code agent hook | Every tool call | AI agents on one machine | Automatic |
+| 12 | Shipped checkpoints in CI | PR push | Everyone | Hard |
 
 ## Detailed Mechanisms
 
@@ -728,6 +729,32 @@ commit or discard work and the second reaches the same state by discarding.
 **Advantages:** Reaches every repo and every session on the machine. Catches commands no repo hook sees. Deny reasons are read by the agent, so the fix propagates immediately.
 
 **Limitations:** Reach is one machine, one user — it is not shared with teammates and cannot replace a CI check or branch protection for anything humans also do. Pair it with a repo-level mechanism whenever humans can trip the same rule. Pattern-matching on shell strings has false positives; prefer a narrow regex plus an explicit allowlist of legitimate shapes.
+
+### 12. Shipped checkpoints in CI
+
+This is the mechanism the measurements at the top of this document argue for. Three levers inside a loaded skill changed nothing, and the sharpest of them was a *correct* check the skill shipped: it was run in one trial of six on the case where it was most obviously relevant. A check whose execution depends on an agent deciding to run it is not a control, however good the check is.
+
+So the execution moves out of the agent's reach. The repository declares which skills' checkpoints apply to it, and CI runs them:
+
+```yaml
+# .harness/checkpoints.yml
+skills:
+  - repo: netresearch/typo3-docs-skill
+    ref: v2.19.0
+    path: skills/typo3-docs/checkpoints.yaml
+```
+
+`scripts/run-shipped-checkpoints.sh` reads that file, fetches each skill at its pinned ref, runs the assessment runner against this repository and fails the job when a checkpoint of severity `error` failed. Warnings are reported and do not gate; `blocked` never gates, because it reports a broken checkpoint rather than a broken project. Templates for the job: `templates/harness-checkpoints.yml.tmpl`, `templates/gitlab-ci-harness-checkpoints.yml.tmpl`, `templates/forgejo-harness-checkpoints.yml.tmpl`.
+
+Three properties worth keeping when this is adapted:
+
+**Every ref is pinned.** An unpinned skill ref changes what the gate means without a commit in the repository being gated — the check would tighten or loosen itself behind the maintainer's back.
+
+**A broken declaration is loud.** An entry naming a repository that cannot be fetched, or a path that does not exist in it, exits 2 and fails the job. The tempting alternative — skip it and carry on — reproduces the exact defect this mechanism exists against: a check that silently does not run, while the job stays green.
+
+**The declaration and the job imply each other.** `verify-harness.sh` errors when `.harness/checkpoints.yml` exists and no CI job runs it, and equally when a job runs but the declaration is missing. A declaration nothing executes reads as enforcement and buys false trust; checkpoint `AH-37` carries the same rule for repositories assessed rather than verified.
+
+What this does not claim: nothing here was measured to improve the work an agent produces. The two levers that were measured to work — carrying a skill whose description matches the request, and naming the request's words in the description's opening clause — decide whether a skill is *reached*, and neither moved the outcome. This mechanism does not try to change what an agent does; it removes the agent from the path between a check and its execution.
 
 ## The Activation Chain
 

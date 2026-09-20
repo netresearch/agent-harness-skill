@@ -1,0 +1,22 @@
+# Shipped-checkpoints job for GitLab CI
+# Add this to your .gitlab-ci.yml or include it via !reference
+#
+# Runs the checkpoints that skills ship, against this repository, whether or
+# not an agent asks — see agent-harness-skill#61 for the measurement. Which
+# checkpoints run is declared in .harness/checkpoints.yml, with a pinned ref
+# per skill.
+
+harness-checkpoints:
+  stage: test
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache bash git coreutils grep yq jq
+    - git clone --depth 1 --branch {{HARNESS_SKILL_REF}} https://github.com/netresearch/agent-harness-skill.git /tmp/agent-harness
+  script:
+    # Pin the assessment runner as well — it decides what a checkpoint means,
+    # so an unpinned one moves the gate under the repository.
+    - HARNESS_RUNNER_REF={{ASSESSMENT_SKILL_REF}} bash /tmp/agent-harness/skills/agent-harness/scripts/run-shipped-checkpoints.sh
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  allow_failure: false

@@ -1,0 +1,19 @@
+name: Skill Tests
+
+# Runs this repo's tests/ via the skill-repo-skill reusable. Until this file
+# existed no workflow here ran anything under tests/, so a test added to this
+# repository was not a gate — the same "a check nobody runs is not a control"
+# this skill's own issue #61 measured.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions: {}
+
+jobs:
+  tests:
+    uses: netresearch/skill-repo-skill/.github/workflows/tests.yml@main
+    permissions:
+      contents: read

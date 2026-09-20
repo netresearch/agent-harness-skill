@@ -208,6 +208,21 @@ mechanical:
     severity: warning
     desc: "If CI runs a fast-check command, a hook config should reference at least one fast-check command too (best-effort CI/hook parity)"
 
+  # A declaration that nothing executes reads as enforcement and buys false
+  # trust — the failure #61 measured one level down, where a correct check
+  # shipped by a skill was run in one trial of six. Both directions, so that a
+  # job without a declaration is caught as well as a declaration without a job.
+  - id: AH-37
+    type: script
+    requires: .harness/checkpoints.yml
+    command: |
+      D=".github/workflows .forgejo/workflows .gitlab-ci.yml"
+      grep -rq 'run-shipped-checkpoints' $D 2>/dev/null
+    severity: error
+    desc: ".harness/checkpoints.yml must be run by a CI job — a declaration nothing executes enforces nothing"
+    provenance: regression
+    source: https://github.com/netresearch/agent-harness-skill/issues/61
+
 llm_reviews:
   - id: AH-40
     desc: AGENTS.md Architecture and Key Decisions reflect current implementation

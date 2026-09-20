@@ -1,0 +1,37 @@
+# .forgejo/workflows/harness-checkpoints.yml
+name: Shipped Checkpoints
+
+# Runs the checkpoints that skills ship, against this repository, whether or
+# not an agent asks — see agent-harness-skill#61. Which checkpoints run is
+# declared in .harness/checkpoints.yml, with a pinned ref per skill.
+
+on:
+    pull_request:
+        branches: [ {{DEFAULT_BRANCH}} ]
+    push:
+        branches: [ {{DEFAULT_BRANCH}} ]
+
+jobs:
+    shipped-checkpoints:
+        name: Run checkpoints shipped by skills
+        runs-on: ubuntu-latest
+
+        steps:
+            -   name: Checkout repository
+                uses: actions/checkout@v4
+
+            -   name: Install yq and jq
+                run: |
+                    sudo apt-get update -qq
+                    sudo apt-get install -y -qq jq
+                    sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+                    sudo chmod +x /usr/local/bin/yq
+
+            -   name: Fetch the harness skill
+                run: git clone --depth 1 --branch {{HARNESS_SKILL_REF}} https://github.com/netresearch/agent-harness-skill.git /tmp/agent-harness
+
+            -   name: Run shipped checkpoints
+                # Pin the assessment runner as well — it decides what a
+                # checkpoint means, so an unpinned one moves the gate under the
+                # repository.
+                run: HARNESS_RUNNER_REF={{ASSESSMENT_SKILL_REF}} bash /tmp/agent-harness/skills/agent-harness/scripts/run-shipped-checkpoints.sh
