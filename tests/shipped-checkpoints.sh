@@ -189,8 +189,12 @@ verify_annotation() { # verify_annotation <repo-dir> -> the ::kind for our file,
     out=$( cd "$1" && bash "$VERIFY" --format=github 2>&1 )
     grep -oE '::(error|warning) file=\.harness/checkpoints\.yml' <<<"$out" | head -1 | grep -oE 'error|warning' || echo none
 }
+# `--format=text` explicitly: the verifier picks its format from
+# GITHUB_ACTIONS, which is set in CI and unset on a developer machine, so a
+# bare call reads the annotation stream in one place and the text report in the
+# other. This case passed locally and failed in CI for exactly that reason.
 verify_passline() { # verify_passline <repo-dir>
-    ( cd "$1" && PLATFORM=github bash "$VERIFY" 2>&1 ) | grep -c 'shipped checkpoints are declared and run in CI'
+    ( cd "$1" && PLATFORM=github bash "$VERIFY" --format=text 2>&1 ) | grep -c 'shipped checkpoints are declared and run in CI'
 }
 
 r=$(mk_repo both y y)
