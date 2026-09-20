@@ -328,6 +328,39 @@ check_architecture_doc() {
     fi
 }
 
+# A repository may declare, in .harness/checkpoints.yml, the checkpoints that
+# skills ship and that must run against it. The declaration is only worth
+# anything if something executes it: an unread declaration reads as enforcement
+# and buys false trust, which is the failure #61 measured one level down. So
+# the two are checked against each other in both directions.
+check_shipped_checkpoints() {
+    local decl=".harness/checkpoints.yml"
+    local runner="run-shipped-checkpoints"
+    local wired=false
+
+    if [[ "$PLATFORM" == "gitlab" ]]; then
+        [[ -f ".gitlab-ci.yml" ]] && grep -q "$runner" ".gitlab-ci.yml" && wired=true
+    else
+        local dir=".github/workflows"
+        [[ "$PLATFORM" == "forgejo" ]] && dir=".forgejo/workflows"
+        if [[ -d "$dir" ]] && grep -rq "$runner" "$dir" 2>/dev/null; then
+            wired=true
+        fi
+    fi
+
+    if [[ -f "$decl" ]]; then
+        if $wired; then
+            pass 3 "shipped checkpoints are declared and run in CI"
+        else
+            fail 3 "${decl} declares checkpoints that no CI job runs — add the harness-checkpoints job, or the declaration enforces nothing" "$decl"
+        fi
+    elif $wired; then
+        fail 3 "a CI job runs shipped checkpoints but ${decl} is missing — the job has nothing to run" "$decl"
+    else
+        warn 3 "no ${decl} — checks that skills ship run only if an agent chooses to (see agent-harness-skill#61)" "$decl"
+    fi
+}
+
 check_ci_workflow() {
     if [[ "$PLATFORM" == "gitlab" ]]; then
         if [[ -f ".gitlab-ci.yml" ]]; then
@@ -524,6 +557,7 @@ check_drift() {
 
 run_level3() {
     check_hooks_autosetup
+    check_shipped_checkpoints
     check_pr_template
     check_drift
 }

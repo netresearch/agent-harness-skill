@@ -38,18 +38,32 @@ When artefacts are missing, create them from templates:
 | `.github/workflows/harness-verify.yml` | `templates/harness-verify.yml.tmpl` | GitHub |
 | `.gitlab-ci.yml` (harness-verify job) | `templates/gitlab-ci-harness-verify.yml.tmpl` | GitLab |
 | `.forgejo/workflows/harness-verify.yml` | `templates/forgejo-harness-verify.yml.tmpl` | Forgejo/Gitea |
+| `.github/workflows/harness-checkpoints.yml` | `templates/harness-checkpoints.yml.tmpl` | GitHub |
+| `.gitlab-ci.yml` (harness-checkpoints job) | `templates/gitlab-ci-harness-checkpoints.yml.tmpl` | GitLab |
+| `.forgejo/workflows/harness-checkpoints.yml` | `templates/forgejo-harness-checkpoints.yml.tmpl` | Forgejo/Gitea |
 | `.github/pull_request_template.md` | `templates/pull_request_template.md.tmpl` | GitHub |
 | `.gitlab/merge_request_templates/Default.md` | `templates/merge_request_template.md.tmpl` | GitLab |
 | `.forgejo/pull_request_template.md` | `templates/pull_request_template.md.tmpl` | Forgejo/Gitea |
 | `.envrc` | `templates/envrc.tmpl` | All |
 | Makefile harness targets | `templates/Makefile.harness.tmpl` | All |
 | `scripts/verify-harness.sh` | `${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh` (copy directly) | All |
+| `.harness/checkpoints.yml` | see `references/enforcement-mechanisms.md` § 12 | All |
 
 Populate with repo-specific values; never overwrite existing files without confirmation.
 
 ### 3. Audit
 
 Report the repo's maturity level (1, 2, or 3) and show what is needed to reach the next level. See `references/maturity-levels.md` for detailed criteria.
+
+## Running the checks that skills ship
+
+A skill's own validator is run by an agent only if the agent decides to, and measured over six trials on the case where it was most obviously relevant, it was run once ([#61](https://github.com/netresearch/agent-harness-skill/issues/61)). A repository therefore declares in `.harness/checkpoints.yml` which skills' checkpoints apply to it, pinned by ref, and a CI job runs them:
+
+```bash
+${CLAUDE_SKILL_DIR}/scripts/run-shipped-checkpoints.sh
+```
+
+It fails the job on a failing checkpoint of severity `error`, reports the rest, and exits 2 on a declaration it cannot resolve rather than passing quietly. `verify-harness.sh` errors when a declaration has no job, and when a job has no declaration.
 
 ## Key Principles
 
@@ -74,5 +88,5 @@ See `references/maturity-levels.md` for the full breakdown.
 - `references/maturity-levels.md` -- Maturity criteria and progression
 - `references/harness-engineering-overview.md` -- Theory: four functions, patterns
 - `references/agent-first-architecture.md` -- Legibility, layered deps, agent-first tech
-- `references/enforcement-mechanisms.md` -- 10-mechanism table (CI, hooks, protection, drift)
+- `references/enforcement-mechanisms.md` -- 12-mechanism table (CI, hooks, protection, drift, shipped checkpoints)
 - `references/skill-integration-map.md` -- Skill routing map + integration contracts with companion skills

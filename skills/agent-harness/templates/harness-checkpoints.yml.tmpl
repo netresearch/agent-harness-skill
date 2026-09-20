@@ -1,0 +1,43 @@
+name: Shipped Checkpoints
+
+# Runs the checkpoints that skills ship, against this repository, whether or
+# not an agent asks. Measured reason: three levers inside a loaded skill —
+# a reference file, a step in its workflow, a checkpoint in its own validator —
+# changed nothing, and the validator that would have caught the defect was run
+# in one trial of six (agent-harness-skill#61).
+#
+# Which checkpoints run is declared in .harness/checkpoints.yml, with a pinned
+# ref per skill: an unpinned check changes what this gate means without a
+# commit here.
+
+on:
+  pull_request:
+    branches: [{{DEFAULT_BRANCH}}]
+  push:
+    branches: [{{DEFAULT_BRANCH}}]
+
+permissions:
+  contents: read
+
+jobs:
+  shipped-checkpoints:
+    name: Run checkpoints shipped by skills
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install yq
+        run: sudo snap install yq || { sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 && sudo chmod +x /usr/local/bin/yq; }
+
+      - name: Fetch the harness skill
+        run: git clone --depth 1 --branch {{HARNESS_SKILL_REF}} https://github.com/netresearch/agent-harness-skill.git "$RUNNER_HOME/agent-harness"
+        env:
+          RUNNER_HOME: ${{ runner.temp }}
+
+      - name: Run shipped checkpoints
+        run: bash "$RUNNER_HOME/agent-harness/skills/agent-harness/scripts/run-shipped-checkpoints.sh"
+        env:
+          RUNNER_HOME: ${{ runner.temp }}
+          # Pin the assessment runner as well — it decides what a checkpoint
+          # means, so an unpinned one moves the gate under the repository.
+          HARNESS_RUNNER_REF: {{ASSESSMENT_SKILL_REF}}
