@@ -501,7 +501,14 @@ check_pr_template() {
             return
         fi
         local org=""
-        org=$(git remote get-url origin 2>/dev/null | sed -n 's|.*github\.com[:/]\([^/]*\)/.*|\1|p')
+        # `|| true` is load-bearing under `set -euo pipefail`: with no origin
+        # remote, git exits non-zero, pipefail makes the whole pipeline
+        # non-zero, and set -e kills the script here — before anything is
+        # rendered and with git's message swallowed by 2>/dev/null. The
+        # verifier then produced zero bytes and exit 2, which reads as a
+        # broken harness rather than a missing remote. A repository being made
+        # agent-ready is exactly the case that has no remote yet.
+        org=$(git remote get-url origin 2>/dev/null | sed -n 's|.*github\.com[:/]\([^/]*\)/.*|\1|p' || true)
         if [[ -n "$org" ]]; then
             local api_result=""
             api_result=$(gh api "repos/${org}/.github/contents/pull_request_template.md" --jq '.name' 2>/dev/null || true)
