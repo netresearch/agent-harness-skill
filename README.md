@@ -105,7 +105,7 @@ Check maturity level:
 
 ### CLI (without skill)
 
-The verification script works standalone:
+The verification script works standalone. The bootstrap mode copies it to `scripts/verify-harness.sh` in your repository, which the examples use; in this repository it is `skills/agent-harness/scripts/verify-harness.sh`.
 
 ```bash
 # Full check
