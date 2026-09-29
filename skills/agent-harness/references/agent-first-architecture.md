@@ -1,3 +1,6 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
+
 # Agent-First Architecture
 
 Design choices that make a repository legible and predictable for AI coding agents. These complement the four system functions (constrain, inform, verify, correct) by addressing what the agent sees when it runs the system, not just when it reads about it.

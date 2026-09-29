@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: Netresearch DTT GmbH
 # tests/shipped-checkpoints.sh — execute run-shipped-checkpoints.sh.
 #
 # The script exists because a check an agent may choose to skip is not a

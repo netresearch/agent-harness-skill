@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: Netresearch DTT GmbH
 # .github/workflows/pr-quality.yml
 # Solo-maintainer auto-approve: approves PRs from repo collaborators
 # so that required_approving_review_count >= 1 is satisfied without

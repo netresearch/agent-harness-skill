@@ -1,3 +1,6 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
+
 # Skill Integration Map
 
 The agent-harness skill does not operate in isolation. It delegates specialised work to other skills in the ecosystem and verifies that the output of those skills meets harness requirements. This document defines the integration contract for each skill.

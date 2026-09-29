@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: Netresearch DTT GmbH
 # tests/verify-harness-runs.sh — the verifier must produce a report.
 #
 # It ran under `set -euo pipefail` with an unguarded `git remote get-url

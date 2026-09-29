@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: Netresearch DTT GmbH
 # run-shipped-checkpoints.sh — run the checkpoints that skills ship, against
 # this repository, without asking an agent.
 #

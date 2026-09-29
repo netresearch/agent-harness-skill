@@ -1,3 +1,6 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
+
 # Agent Harness Skill
 
 Agent skill for bootstrapping, verifying, and enforcing agent-harness infrastructure in repositories.

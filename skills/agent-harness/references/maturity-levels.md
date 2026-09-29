@@ -1,3 +1,6 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
+
 # Harness Maturity Levels
 
 The harness maturity model defines three levels of agent-readiness for a repository. Each level builds on the previous one, adding stronger enforcement and more comprehensive verification. Levels are measured mechanically via checkpoints -- there is no subjective assessment.

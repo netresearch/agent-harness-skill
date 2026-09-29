@@ -1,3 +1,6 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
+
 # Agent Harness Skill
 
 [![Lint](https://github.com/netresearch/agent-harness-skill/actions/workflows/lint.yml/badge.svg)](https://github.com/netresearch/agent-harness-skill/actions/workflows/lint.yml)
