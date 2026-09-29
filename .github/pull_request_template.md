@@ -10,6 +10,7 @@
 - [ ] AGENTS.md updated (if commands or repo structure changed)
 - [ ] docs/ updated (if architecture or design changed)
 - [ ] New subsystems/directories documented
+- [ ] Tests added or updated under `tests/` for new or changed script behaviour (required, see CONTRIBUTING.md, "Tests are required for new behaviour")
 - [ ] Exec plan created in `docs/exec-plans/active/` (if multi-file change)
 
 ## Retro

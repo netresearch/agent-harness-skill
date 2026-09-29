@@ -187,10 +187,9 @@ See [skill-integration-map.md](skills/agent-harness/references/skill-integration
 
 ## Contributing
 
-Contributions are welcome. Please ensure:
+Contributions are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) describes the setup, how to run the tests, where CI runs them, and the rule that new behaviour comes with tests. In addition:
 
-- Changes pass `bash skills/agent-harness/scripts/verify-harness.sh`
-- SKILL.md stays under 500 words
+- The SKILL.md body stays under 500 lines (`validate-skill.sh` in the Lint workflow enforces it)
 - Templates remain self-contained and portable
 
 ## License
