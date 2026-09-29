@@ -14,7 +14,8 @@ This document states what a user can expect from this repository in terms of sec
 | Templates | `skills/agent-harness/templates/*.tmpl` | Copied by the agent into the user's repository (CI workflows, PR templates, `.envrc`, Makefile targets) |
 | Harness verifier | `skills/agent-harness/scripts/verify-harness.sh` | On the user's machine or in the user's CI, from the root of the repository it checks; bootstrap copies it to `scripts/verify-harness.sh` |
 | Shipped-checkpoint runner | `skills/agent-harness/scripts/run-shipped-checkpoints.sh` | In the user's CI (job from `templates/harness-checkpoints.yml.tmpl` and its GitLab and Forgejo variants) |
-| Repository checks | `tests/*.sh`, `Build/Scripts/check-plugin-version.sh`, `Build/hooks/*`, `.pre-commit-config.yaml` | In this repository's CI and on contributors' machines |
+| Repository checks | `tests/*.sh`, `.pre-commit-config.yaml` | In this repository's CI and on contributors' machines |
+| Unwired scripts | `Build/Scripts/check-plugin-version.sh`, `Build/hooks/*` | Not called by any workflow or hook configuration (see [ARCHITECTURE.md](ARCHITECTURE.md)) |
 
 The skill has no server component, stores no data, and handles no user accounts or credentials of its own.
 
@@ -47,7 +48,7 @@ The skill has no server component, stores no data, and handles no user accounts 
 | Shell defects in the scripts | ShellCheck runs in CI on every `*.sh` file at severity `error`, and in the pre-commit hook on every shell script at its default severity `style`; all seven shell files in this repository pass `shellcheck -x -S style` with no finding | `.github/workflows/lint.yml`, `.pre-commit-config.yaml` |
 | A secret is committed | Betterleaks scans every push to `main` and every pull request to `main` | `.github/workflows/security.yml` |
 | A vulnerable or malicious dependency is added | Dependency review fails on high or critical vulnerabilities in a pull request; Composer Audit fails on known advisories; Renovate proposes updates | `.github/workflows/security.yml`, `renovate.json` |
-| Insecure code or workflow patterns | Opengrep fails a pull request on findings of severity WARNING or higher; zizmor and CodeQL analyse the workflows | `.github/workflows/security.yml` |
+| Insecure code or workflow patterns | Opengrep fails a pull request on findings of severity WARNING or higher; zizmor and CodeQL analyse the workflows | `.github/workflows/security.yml`; CodeQL runs as GitHub default setup, a repository setting described in `.github/template.yaml` |
 | A workflow token is misused | Top-level `permissions: {}`; each job grants only what its reusable workflow needs | `.github/workflows/*.yml` |
 
 ## Secure design principles applied
@@ -60,7 +61,7 @@ The skill has no server component, stores no data, and handles no user accounts 
 ## What a user cannot expect
 
 - `run-shipped-checkpoints.sh` is not a sandbox. It executes the checkpoint runner and the commands of every declared `checkpoints.yaml` with the CI job's permissions.
-- The checkpoint runner is not pinned by default: `HARNESS_RUNNER_REF` defaults to the `main` branch of `netresearch/automated-assessment-skill`, although the comment above that line in `run-shipped-checkpoints.sh` calls it pinned. Set `HARNESS_RUNNER_REF` to a tag or commit to pin it.
-- The `repo` and `ref` values of a declaration entry are passed to `git clone` and `git fetch` without validation. The declaration has to be reviewed like the CI configuration it drives.
+- The checkpoint runner is not pinned by default: `HARNESS_RUNNER_REF` defaults to the `main` branch of `netresearch/automated-assessment-skill`, although the comment above that line in `run-shipped-checkpoints.sh` calls it pinned. The CI job templates (`templates/*harness-checkpoints.yml.tmpl`) set `HARNESS_RUNNER_REF` from the `{{ASSESSMENT_SKILL_REF}}` placeholder; a direct call without it uses `main`.
+- The declaration has to be reviewed like the CI configuration it drives: its values decide what is fetched and run, and the script does not restrict them.
 - The reusable workflows this repository calls are referenced by branch (`@main`), not by commit (`.github/workflows/*.yml`).
 - The verifier checks the structure and consistency of an agent harness. It is not a security scanner for the checked repository.

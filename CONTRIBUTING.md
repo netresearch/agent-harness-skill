@@ -34,7 +34,7 @@ pre-commit run --all-files
 | Workflow | What it runs |
 | --- | --- |
 | `.github/workflows/tests.yml` (Skill Tests) | Every `tests/**/*.sh` file, through the `tests.yml` reusable workflow of `netresearch/skill-repo-skill`. A failing file fails the job. |
-| `.github/workflows/lint.yml` (Skill Validation) | `validate-skill.sh`, markdownlint, yamllint, actionlint, a JSON syntax check, ShellCheck on every `*.sh` file, and the checkpoint schema check. |
+| `.github/workflows/lint.yml` (Skill Validation) | `validate-skill.sh`, the plugin manifest sync check, markdownlint on the root Markdown files, yamllint, actionlint, a JSON syntax check, the plugin version format and SKILL.md version match, ShellCheck on every `*.sh` file, Python lint, and the checkpoint schema check. |
 | `.github/workflows/harness-verify.yml` (Harness Verification) | AGENTS.md length, the links in AGENTS.md, the documented commands, documentation drift, and `docs/ARCHITECTURE.md`. |
 | `.github/workflows/security.yml` | See [Governance and policies](README.md#governance-and-policies). |
 
