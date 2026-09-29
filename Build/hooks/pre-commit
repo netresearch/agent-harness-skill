@@ -5,12 +5,13 @@ set -euo pipefail
 
 # Pre-commit hook: basic checks before committing
 
-# Check SKILL.md word count
+# Check SKILL.md body size: the same limit and the same count as
+# validate-skill.sh in netresearch/skill-repo-skill — at most 500 lines after
+# the closing front-matter delimiter.
 if [ -f skills/agent-harness/SKILL.md ]; then
-  BODY=$(sed -n '/^---$/,/^---$/d; p' skills/agent-harness/SKILL.md)
-  WORDS=$(echo "$BODY" | wc -w)
-  if [ "$WORDS" -gt 500 ]; then
-    echo "ERROR: SKILL.md body exceeds 500 words ($WORDS words)"
+  LINES=$(awk 'BEGIN{d=0} /^---$/{d++; next} d>=2{print}' skills/agent-harness/SKILL.md | wc -l)
+  if [ "$LINES" -gt 500 ]; then
+    echo "ERROR: SKILL.md body exceeds 500 lines ($LINES lines)"
     exit 1
   fi
 fi
