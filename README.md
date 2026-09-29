@@ -212,6 +212,8 @@ Dependency and static security checks that run on every pull request to `main` (
 
 Branch protection of `main` requires Composer Audit, Opengrep and Betterleaks to pass, together with Skill Validation (`.github/workflows/lint.yml`), CodeQL's analysis of the workflows, SonarCloud and the DCO check. Dependency review and zizmor run on every pull request but are not required checks.
 
+What you can and cannot expect from this repository in terms of security, with its threat model: [docs/SECURITY-ASSURANCE.md](docs/SECURITY-ASSURANCE.md).
+
 ## License
 
 Split licensing:
