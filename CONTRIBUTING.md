@@ -15,6 +15,14 @@ pre-commit install
 
 The hooks are listed in `.pre-commit-config.yaml`.
 
+### Scripts in `Build/`
+
+`pre-commit install` does not install the three scripts in `Build/`, and no workflow runs them. Use them as follows, from the repository root:
+
+- `Build/hooks/pre-push` checks that `.claude-plugin/plugin.json`, `composer.json` and `renovate.json` parse as JSON and that `.claude-plugin/plugin.json` and `SKILL.md` state the same version. Install it as the Git pre-push hook with `ln -s "$PWD/Build/hooks/pre-push" "$(git rev-parse --git-path hooks)/pre-push"`. The pre-push slot is free because `.pre-commit-config.yaml` installs only the pre-commit hook.
+- `Build/hooks/pre-commit` checks that the `SKILL.md` body has at most 500 lines, the limit `validate-skill.sh` enforces. The pre-commit slot belongs to the pre-commit framework, so run it by hand: `bash Build/hooks/pre-commit`.
+- `Build/Scripts/check-plugin-version.sh v<version>` checks that a release tag matches the version in `.claude-plugin/plugin.json`. Run it before pushing a `v*` tag.
+
 ## Tests
 
 ### Running them locally
@@ -24,6 +32,7 @@ From the repository root:
 ```bash
 bash tests/shipped-checkpoints.sh
 bash tests/verify-harness-runs.sh
+bash tests/build-pre-commit-hook.sh
 pre-commit run --all-files
 ```
 
@@ -44,6 +53,7 @@ All four run on every pull request to `main`.
 
 - `tests/shipped-checkpoints.sh` runs `skills/agent-harness/scripts/run-shipped-checkpoints.sh` against a stub checkpoint runner, without network access. It asserts the exit code and the output for a passing skill, a failing checkpoint of severity `error` (gates) and of severity `warning` (does not gate), a blocked checkpoint, a skill that does not apply, and every broken declaration (missing file, unfetchable repository, entry without `ref`). It also runs `verify-harness.sh` on four fixture repositories and asserts the severity of the `.harness/checkpoints.yml` finding for each combination of declaration and CI job.
 - `tests/verify-harness-runs.sh` asserts that `skills/agent-harness/scripts/verify-harness.sh` prints a complete report in a repository with and without an `origin` remote.
+- `tests/build-pre-commit-hook.sh` runs `Build/hooks/pre-commit` against fixture skills and asserts that it accepts a body of 500 lines, rejects one of 501 lines, and accepts this repository's `SKILL.md`.
 
 The other checks in `verify-harness.sh` (Level 1 and 2, drift, hooks, PR template) have no test of their own.
 

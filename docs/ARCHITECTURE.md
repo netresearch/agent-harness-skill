@@ -25,7 +25,7 @@ agent-harness-skill is an agent skill: Markdown instructions, templates and two 
 | Tests | `tests/*.sh` | Execute the two scripts against fixture repositories |
 | Package manifests | `plugin.json`, `.claude-plugin/plugin.json`, `composer.json`, `package.json` | Distribution through the Claude Code marketplace, Composer and npm |
 
-`Build/Scripts/check-plugin-version.sh` and `Build/hooks/pre-commit` and `Build/hooks/pre-push` are not called by any workflow or hook configuration in this repository; the hooks that run are those in `.pre-commit-config.yaml`.
+`Build/Scripts/check-plugin-version.sh` and `Build/hooks/pre-commit` and `Build/hooks/pre-push` are not called by any workflow or hook configuration in this repository; the hooks that run are those in `.pre-commit-config.yaml`. [CONTRIBUTING.md](../CONTRIBUTING.md#scripts-in-build) describes how to install or run them.
 
 ## Data flows
 
