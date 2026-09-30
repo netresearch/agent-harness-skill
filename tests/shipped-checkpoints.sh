@@ -134,6 +134,16 @@ EOF
 out=$(run "$WORK/d-incomplete.yml"); rc=$?
 check "an entry without a ref is an error" 2 "$rc"
 
+printf 'skills: [\n  - repo: ok\n' > "$WORK/d-unparseable.yml"
+out=$(run "$WORK/d-unparseable.yml"); rc=$?
+check "a declaration that does not parse is an error" 2 "$rc"
+check "and says so" 1 "$(grep -c 'is not valid YAML' <<<"$out")"
+
+printf 'skill:\n  - repo: ok\n    ref: v1\n    path: skills/x/checkpoints.yaml\n' > "$WORK/d-misnamed.yml"
+out=$(run "$WORK/d-misnamed.yml"); rc=$?
+check "a declaration without a skills list is an error" 2 "$rc"
+check "and names the key" 1 "$(grep -c "needs a top-level 'skills' list" <<<"$out")"
+
 out=$(run "$WORK/d-absent.yml"); rc=$?
 check "no declaration at all exits 0" 0 "$rc"
 
