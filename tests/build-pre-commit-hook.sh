@@ -61,7 +61,11 @@ check "a 501-line body fails" 1 "$(run_hook "$r")"
 check "and says why" "ERROR: SKILL.md body exceeds 500 lines (501 lines)" \
     "$( cd "$r" && bash "$HOOK" 2>&1 | head -1 )"
 
-check "this repository's own SKILL.md passes" 0 "$(run_hook "$ROOT")"
+# In a fixture repository, not in $ROOT: the hook also checks the staged
+# index, and a developer's own staged work must not decide this case.
+r=$(mk_skill own-skill 0 0)
+cp "$ROOT/skills/agent-harness/SKILL.md" "$r/skills/agent-harness/SKILL.md"
+check "this repository's own SKILL.md passes" 0 "$(run_hook "$r")"
 
 # The whitespace check sat in an if-block with an empty body, so a staged
 # line with trailing whitespace passed.
