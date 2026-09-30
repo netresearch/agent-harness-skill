@@ -22,7 +22,7 @@ agent-harness-skill is an agent skill: Markdown instructions, templates and two 
 | Templates | `skills/agent-harness/templates/*.tmpl` | Files the bootstrap mode instantiates in the user's repository |
 | Harness verifier | `skills/agent-harness/scripts/verify-harness.sh` | Checks the harness of the repository in the working directory in three levels; output as text, GitHub annotations or GitLab sections |
 | Shipped-checkpoint runner | `skills/agent-harness/scripts/run-shipped-checkpoints.sh` | Runs the checkpoints that `.harness/checkpoints.yml` declares, through the automated-assessment runner |
-| Tests | `tests/*.sh` | Execute the two scripts against fixture repositories |
+| Tests | `tests/*.sh` | Execute the two scripts and `Build/hooks/pre-commit` against fixture repositories |
 | Package manifests | `plugin.json`, `.claude-plugin/plugin.json`, `composer.json`, `package.json` | Distribution through the Claude Code marketplace, Composer and npm |
 
 `Build/Scripts/check-plugin-version.sh` and `Build/hooks/pre-commit` and `Build/hooks/pre-push` are not called by any workflow or hook configuration in this repository; the hooks that run are those in `.pre-commit-config.yaml`. [CONTRIBUTING.md](../CONTRIBUTING.md#scripts-in-build) describes how to install or run them.
