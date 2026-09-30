@@ -36,7 +36,7 @@ bash tests/build-pre-commit-hook.sh
 pre-commit run --all-files
 ```
 
-`pre-commit run --all-files` currently reports markdownlint findings in `docs/plans/` and in five files under `skills/agent-harness/references/`. They predate the hooks; CI's markdown lint checks only the Markdown files in the repository root, so it does not report them.
+CI's markdown lint checks only the Markdown files in the repository root; `pre-commit run --all-files` checks every Markdown file.
 
 ### Where CI runs them
 

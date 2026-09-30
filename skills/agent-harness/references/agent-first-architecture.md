@@ -23,7 +23,7 @@ These belong in the project's dev-environment scripts and Makefile/composer/npm 
 
 OpenAI enforces a strict layered architecture. Their canonical stack:
 
-```
+```text
 Types -> Config -> Repo -> Service -> Runtime -> UI
 ```
 
@@ -61,7 +61,7 @@ This is not a license to NIH everything. It is a deliberate trade-off: pay imple
 ## How These Relate to the Four Functions
 
 | Concept | Function | Where it lives |
-|---|---|---|
+| --- | --- | --- |
 | Application legibility | Inform + Verify | Dev-environment scripts, observability tooling, Makefile targets |
 | Layered dependency model | Constrain | `docs/ARCHITECTURE.md` + custom linter |
 | Boring technology choices | Constrain | Dependency policy in AGENTS.md, ADRs documenting reimplementation decisions |

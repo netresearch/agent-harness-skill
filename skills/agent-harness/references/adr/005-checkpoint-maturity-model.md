@@ -14,7 +14,7 @@
 Suitable for any repo at any team size. The minimum bar for agent-readiness.
 
 | Checkpoint | ID | Verification |
-|---|---|---|
+| --- | --- | --- |
 | AGENTS.md exists | AH-01 | File exists at repo root |
 | AGENTS.md is index-format | AH-02 | Under 150 lines (see ADR-004) |
 | Commands are documented | AH-03 | AGENTS.md contains a commands section |
@@ -25,7 +25,7 @@ Suitable for any repo at any team size. The minimum bar for agent-readiness.
 Suitable for team repos with CI. Adds consistency checks.
 
 | Checkpoint | ID | Verification |
-|---|---|---|
+| --- | --- | --- |
 | All Level 1 checkpoints pass | -- | Prerequisite |
 | All AGENTS.md references resolve | AH-11 | Every referenced path exists |
 | Documented commands match actual targets | AH-12 | Commands listed in AGENTS.md exist in Makefile, composer.json, or package.json |
@@ -37,7 +37,7 @@ Suitable for team repos with CI. Adds consistency checks.
 Suitable for production repos with full enforcement. Adds server-side guarantees.
 
 | Checkpoint | ID | Verification |
-|---|---|---|
+| --- | --- | --- |
 | All Level 2 checkpoints pass | -- | Prerequisite |
 | harness-verify is a required check | AH-21 | Branch protection or ruleset includes harness-verify as required status check |
 | Git hooks auto-activate on clone | AH-22 | `.envrc` sets `core.hooksPath` or equivalent mechanism exists |
