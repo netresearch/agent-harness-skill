@@ -107,6 +107,7 @@ check "but is still reported" 1 "$(grep -c '::warning::warn: failing checkpoints
 mk_skill "blk__v1"  "$BLOCKED"; decl "$WORK/d-blk.yml"  "blk"  "v1"
 out=$(run "$WORK/d-blk.yml"); rc=$?
 check "a blocked checkpoint does not gate" 0 "$rc"
+check "but is counted as blocked" 1 "$(grep -c 'blk@v1: pass 0 fail 0 skip 0 blocked 1' <<<"$out")"
 
 mk_skill "na__v1"   "$NOTAPPL"; decl "$WORK/d-na.yml"   "na"   "v1"
 out=$(run "$WORK/d-na.yml"); rc=$?
@@ -125,6 +126,7 @@ check "and names the path" 1 "$(grep -c 'has no skills/nope/checkpoints.yaml' <<
 decl "$WORK/d-unfetchable.yml" "no-such-skill-repo" "v1"
 out=$(run "$WORK/d-unfetchable.yml"); rc=$?
 check "an unfetchable skill is an error, not a skip" 2 "$rc"
+check "and names the repository" 1 "$(grep -c '::error::cannot fetch no-such-skill-repo@v1' <<<"$out")"
 
 cat > "$WORK/d-incomplete.yml" <<'EOF'
 skills:
@@ -133,6 +135,7 @@ skills:
 EOF
 out=$(run "$WORK/d-incomplete.yml"); rc=$?
 check "an entry without a ref is an error" 2 "$rc"
+check "and says what is missing" 1 "$(grep -c 'entry 0 needs repo, ref and path' <<<"$out")"
 
 printf 'skills: [\n  - repo: ok\n' > "$WORK/d-unparseable.yml"
 out=$(run "$WORK/d-unparseable.yml"); rc=$?
