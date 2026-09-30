@@ -1,3 +1,6 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
+
 # Agent Harness Skill
 
 [![Lint](https://github.com/netresearch/agent-harness-skill/actions/workflows/lint.yml/badge.svg)](https://github.com/netresearch/agent-harness-skill/actions/workflows/lint.yml)
@@ -102,7 +105,7 @@ Check maturity level:
 
 ### CLI (without skill)
 
-The verification script works standalone:
+The verification script works standalone. The bootstrap mode copies it to `scripts/verify-harness.sh` in your repository, which the examples use; in this repository it is `skills/agent-harness/scripts/verify-harness.sh`.
 
 ```bash
 # Full check
@@ -184,11 +187,32 @@ See [skill-integration-map.md](skills/agent-harness/references/skill-integration
 
 ## Contributing
 
-Contributions are welcome. Please ensure:
+Contributions are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) describes the setup, how to run the tests, where CI runs them, and the rule that new behaviour comes with tests. In addition:
 
-- Changes pass `bash skills/agent-harness/scripts/verify-harness.sh`
-- SKILL.md stays under 500 words
+- The SKILL.md body stays under 500 lines (`validate-skill.sh` in the Lint workflow enforces it)
 - Templates remain self-contained and portable
+
+## Governance and policies
+
+This repository follows the organisation-wide policies of `netresearch`:
+
+- [Governance](https://github.com/netresearch/.github/blob/main/GOVERNANCE.md): roles, how changes are decided and disputes resolved, and who controls access to sensitive resources.
+- [Roadmap](https://github.com/netresearch/.github/blob/main/ROADMAP.md): the maintenance work planned and excluded for the coming year.
+- [Handling of dependency and code analysis findings](https://github.com/netresearch/.github/blob/main/SECURITY.md#handling-of-dependency-and-code-analysis-findings): which vulnerability, licence and static-analysis findings block a change, the deadlines for the others, and how exceptions are recorded.
+- [Secret management](https://github.com/netresearch/.github/blob/main/SECURITY.md#secret-management): where CI secrets are stored, who can access them, and when they are rotated.
+- [Access roster](https://github.com/netresearch/.github/blob/main/docs/access-roster.md): the accounts with admin, maintain and write access to this repository.
+
+Dependency and static security checks that run on every pull request to `main` (`.github/workflows/security.yml`):
+
+- Dependency review: fails on a known vulnerability of severity high or critical in a dependency the pull request adds or changes.
+- Composer Audit: installs the Composer dependencies from `composer.json` and fails on a known vulnerability in them.
+- Opengrep: static security analysis of the repository's code; fails on a finding from an Opengrep rule of severity WARNING (the shared workflow's default `--severity WARNING` selects only those rules).
+- Betterleaks: fails on a committed secret.
+- zizmor: static analysis of the GitHub Actions workflows.
+
+Branch protection of `main` requires Composer Audit, Opengrep and Betterleaks to pass, together with Skill Validation (`.github/workflows/lint.yml`), CodeQL's analysis of the workflows, SonarCloud and the DCO check. Dependency review and zizmor run on every pull request but are not required checks.
+
+What you can and cannot expect from this repository in terms of security, with its threat model: [docs/SECURITY-ASSURANCE.md](docs/SECURITY-ASSURANCE.md).
 
 ## License
 

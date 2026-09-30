@@ -1,7 +1,10 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
+
 # Plan: retro-skill Implementation
 
 | | |
-|---|---|
+| --- | --- |
 | **Spec** | [`docs/specs/retro-skill.md`](../specs/retro-skill.md) |
 | **Status** | Phase 2 (PLAN) — for review |
 | **Date** | 2026-05-11 |
@@ -11,7 +14,7 @@
 5 repos, 6 logical components.
 
 | # | Component | Repo | Type | Depends on |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | C1 | feedback-memory schema reference | `agent-rules-skill` | Contract doc | none |
 | C2 | materialization contract (skill PRs) | `skill-repo-skill` | Contract doc | none |
 | C3 | learning-derived checkpoints reference | `automated-assessment-skill` | Contract doc | none |
@@ -21,12 +24,12 @@
 
 ## Implementation Order
 
-```
+```text
 Phase 2.A (parallel — contract docs in companion repos)
 ├── C1: agent-rules-skill / feedback-memory-schema.md
 ├── C2: skill-repo-skill / materialization-contract.md + issue template + PR block
 └── C3: automated-assessment-skill / learning-derived-checkpoints.md
-    
+
    ↓  Gate: 3 PRs open with stable doc structure (text can iterate)
 
 Phase 2.B (sequential — retro-skill build)
@@ -50,7 +53,7 @@ Phase 2.C (sequential — harness integration in agent-harness-skill)
 ├── C5.3: references/harness-engineering-overview.md addendum
 ├── C5.4: templates/{pull_request,merge_request}_template.md.tmpl retro question
 └── C5.5: checkpoints.yaml AH-22 + AH-23
-    
+
    ↓  Gate: AH-22 + AH-23 green against test repo with retro-skill installed
 
 Phase 2.D (smoke test + integration)
@@ -71,7 +74,7 @@ Phase 2.D (smoke test + integration)
 ## Risk Table
 
 | # | Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | R1 | GitHub repo creation requires explicit user action | High | Low | User triggers `gh repo create netresearch/retro-skill` before B1; document in plan as prerequisite |
 | R2 | Skill-discovery keyword match produces false positives | Medium | Medium | Ask user on ambiguity; log decisions; cache per session |
 | R3 | Token budget unknown without prototype | Medium | Medium | Run early measurement after B7+B8; gate further work if >2× Coach baseline |
@@ -86,7 +89,7 @@ Phase 2.D (smoke test + integration)
 ## Verification Gates
 
 | Gate | When | What to verify | Pass = |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **G0 → A** | Before Phase A | Spec is approved | User explicit OK |
 | **A → B** | After Phase A | 3 contract docs merged or merge-ready | `gh pr list` shows 3 open/merged across companion repos with stable section structure |
 | **B7 measurement** | After B7+B8 | Token cost of `/retro` against synthetic session | Cost ≤ target (TBD after first measurement, document floor) |
@@ -108,7 +111,7 @@ User actions required (cannot be automated):
 Approximations only — refine after Phase 3 (TASKS) decomposition.
 
 | Phase | Subagents possible | Sequential elapsed | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | A | 3 parallel | ~1 hour | Three contract docs, modest prose |
 | B | 7+ parallel (B3, scripts) | ~3 hours | retro-skill is the bulk; B4+B6 are Python with logic |
 | C | 1 sequential | ~30 min | Mostly editing existing files |

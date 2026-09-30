@@ -1,3 +1,6 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
+
 # Enforcement Mechanisms Reference
 
 This document covers all 10 enforcement instruments available for making repositories agent-ready. Mechanisms are ordered by enforcement strength, from hardest (server-side, nobody bypasses) to softest (convention-based, reminder only).

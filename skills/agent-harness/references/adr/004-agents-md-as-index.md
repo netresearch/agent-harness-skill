@@ -1,8 +1,11 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
+
 # ADR-004: AGENTS.md as Index
 
 **Status:** Accepted
 **Date:** 2026-03-22
-**Context:** AGENTS.md files in practice tend to grow into encyclopedias -- long documents with detailed instructions, code patterns, API documentation, and architectural detail. This wastes agent context window (AGENTS.md is read every session), makes drift harder to detect, and duplicates information better stored elsewhere. OpenAI's harness engineering paper (https://openai.com/index/harness-engineering/) explicitly recommends AGENTS.md as a "table of contents" that points to detailed documentation elsewhere.
+**Context:** AGENTS.md files in practice tend to grow into encyclopedias -- long documents with detailed instructions, code patterns, API documentation, and architectural detail. This wastes agent context window (AGENTS.md is read every session), makes drift harder to detect, and duplicates information better stored elsewhere. OpenAI's harness engineering paper (<https://openai.com/index/harness-engineering/>) explicitly recommends AGENTS.md as a "table of contents" that points to detailed documentation elsewhere.
 **Decision:** AGENTS.md must be a compact index (hard limit: under 150 lines), not an encyclopedia. Detail lives in `docs/` and other referenced files.
 **Consequences:** The verification script enforces the line limit and checks that all internal references resolve.
 

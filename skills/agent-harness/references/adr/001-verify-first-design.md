@@ -1,3 +1,6 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
+
 # ADR-001: Verify-First Design
 
 **Status:** Accepted
@@ -10,7 +13,7 @@
 
 - Verification works on repos that built their harness manually -- no lock-in to skill-generated artefacts.
 - It does not enforce a specific genesis path -- teams can adopt gradually.
-- OpenAI's harness engineering paper (https://openai.com/index/harness-engineering/) emphasises mechanical verification over generation.
+- OpenAI's harness engineering paper (<https://openai.com/index/harness-engineering/>) emphasises mechanical verification over generation.
 - Existing skills (agent-rules, github-project) already handle generation of specific artefacts.
 - Verify-first means `make verify-harness` works even without the skill installed at runtime.
 

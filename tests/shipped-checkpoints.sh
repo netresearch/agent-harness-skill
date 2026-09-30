@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: Netresearch DTT GmbH
 # tests/shipped-checkpoints.sh — execute run-shipped-checkpoints.sh.
 #
 # The script exists because a check an agent may choose to skip is not a
@@ -105,6 +107,7 @@ check "but is still reported" 1 "$(grep -c '::warning::warn: failing checkpoints
 mk_skill "blk__v1"  "$BLOCKED"; decl "$WORK/d-blk.yml"  "blk"  "v1"
 out=$(run "$WORK/d-blk.yml"); rc=$?
 check "a blocked checkpoint does not gate" 0 "$rc"
+check "but is counted as blocked" 1 "$(grep -c 'blk@v1: pass 0 fail 0 skip 0 blocked 1' <<<"$out")"
 
 mk_skill "na__v1"   "$NOTAPPL"; decl "$WORK/d-na.yml"   "na"   "v1"
 out=$(run "$WORK/d-na.yml"); rc=$?
@@ -123,6 +126,7 @@ check "and names the path" 1 "$(grep -c 'has no skills/nope/checkpoints.yaml' <<
 decl "$WORK/d-unfetchable.yml" "no-such-skill-repo" "v1"
 out=$(run "$WORK/d-unfetchable.yml"); rc=$?
 check "an unfetchable skill is an error, not a skip" 2 "$rc"
+check "and names the repository" 1 "$(grep -c '::error::cannot fetch no-such-skill-repo@v1' <<<"$out")"
 
 cat > "$WORK/d-incomplete.yml" <<'EOF'
 skills:
@@ -131,6 +135,22 @@ skills:
 EOF
 out=$(run "$WORK/d-incomplete.yml"); rc=$?
 check "an entry without a ref is an error" 2 "$rc"
+check "and says what is missing" 1 "$(grep -c 'entry 0 needs repo, ref and path' <<<"$out")"
+
+printf 'skills: [\n  - repo: ok\n' > "$WORK/d-unparseable.yml"
+out=$(run "$WORK/d-unparseable.yml"); rc=$?
+check "a declaration that does not parse is an error" 2 "$rc"
+check "and says so" 1 "$(grep -c 'is not valid YAML' <<<"$out")"
+
+printf 'skill:\n  - repo: ok\n    ref: v1\n    path: skills/x/checkpoints.yaml\n' > "$WORK/d-misnamed.yml"
+out=$(run "$WORK/d-misnamed.yml"); rc=$?
+check "a declaration without a skills list is an error" 2 "$rc"
+check "and names the key" 1 "$(grep -c "needs a top-level 'skills' list" <<<"$out")"
+
+printf -- '- repo: ok\n  ref: v1\n  path: skills/x/checkpoints.yaml\n' > "$WORK/d-list.yml"
+out=$(run "$WORK/d-list.yml"); rc=$?
+check "a declaration whose top level is a list is an error" 2 "$rc"
+check "and is not called invalid YAML" 1 "$(grep -c "needs a top-level 'skills' list" <<<"$out")"
 
 out=$(run "$WORK/d-absent.yml"); rc=$?
 check "no declaration at all exits 0" 0 "$rc"

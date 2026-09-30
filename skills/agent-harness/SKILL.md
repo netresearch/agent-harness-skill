@@ -1,4 +1,6 @@
 ---
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# SPDX-FileCopyrightText: Netresearch DTT GmbH
 name: agent-harness
 description: "Use when making a repo agent-ready, verifying harness consistency, checking for documentation drift, bootstrapping harness infrastructure (AGENTS.md as index, docs/ structure, CI verification, enforcement mechanisms), or auditing repo agent-readiness maturity level."
 license: "(MIT AND CC-BY-SA-4.0). See LICENSE-MIT and LICENSE-CC-BY-SA-4.0"

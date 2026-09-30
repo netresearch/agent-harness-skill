@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: Netresearch DTT GmbH
 # run-shipped-checkpoints.sh — run the checkpoints that skills ship, against
 # this repository, without asking an agent.
 #
@@ -21,7 +23,8 @@
 # The ref is pinned deliberately: an unpinned check changes what the gate means
 # without a commit in this repository.
 #
-# Exit code: 1 when a checkpoint of severity `error` failed, 0 otherwise. A
+# Exit code: 2 when the declaration or an entry in it cannot be resolved, 1 when
+# a checkpoint of severity `error` failed, 0 otherwise. A
 # `warning`/`info` failure is reported and does not gate — the same split the
 # assessment skill's severities already declare. `blocked` never gates either:
 # it reports a broken checkpoint, not a broken project.
@@ -73,8 +76,20 @@ for tool in git yq jq; do
     command -v "$tool" >/dev/null 2>&1 || { echo "run-shipped-checkpoints: $tool is required" >&2; exit 2; }
 done
 
-COUNT=$(yq -r '.skills | length' "$DECL" 2>/dev/null || echo 0)
-if [[ "$COUNT" == "null" || -z "$COUNT" || "$COUNT" -eq 0 ]]; then
+# A file that does not parse, or has no `skills` list, is a broken declaration,
+# not an empty one: reading either as "no skills" would pass a repository whose
+# declared checks never run. Only an explicit `skills: []` declares nothing.
+if ! yq '.' "$DECL" >/dev/null 2>&1; then
+    echo "::error::$DECL is not valid YAML" >&2
+    exit 2
+fi
+KIND=$(yq -r 'select(tag == "!!map") | .skills | type' "$DECL" 2>/dev/null)
+if [[ "$KIND" != "!!seq" ]]; then
+    echo "::error::$DECL needs a top-level 'skills' list" >&2
+    exit 2
+fi
+COUNT=$(yq -r '.skills | length' "$DECL")
+if [[ "$COUNT" -eq 0 ]]; then
     echo "$DECL declares no skills." >&2
     exit 0
 fi

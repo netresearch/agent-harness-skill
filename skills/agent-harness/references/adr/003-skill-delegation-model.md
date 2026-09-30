@@ -1,3 +1,6 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
+
 # ADR-003: Skill Delegation Model
 
 **Status:** Accepted
@@ -9,7 +12,7 @@
 ## Delegation Map
 
 | Task | Delegate To | Expected Artefact | Harness Verifies |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | AGENTS.md content | agent-rules-skill | AGENTS.md file | Is it index-format? Under 150 lines? No dead refs? |
 | Branch protection | github-project-skill | Ruleset/protection config | Is harness-verify a required check? |
 | Quality gates | enterprise-readiness-skill | Quality gate config | Are quality gates present? |
