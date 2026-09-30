@@ -144,6 +144,11 @@ out=$(run "$WORK/d-misnamed.yml"); rc=$?
 check "a declaration without a skills list is an error" 2 "$rc"
 check "and names the key" 1 "$(grep -c "needs a top-level 'skills' list" <<<"$out")"
 
+printf -- '- repo: ok\n  ref: v1\n  path: skills/x/checkpoints.yaml\n' > "$WORK/d-list.yml"
+out=$(run "$WORK/d-list.yml"); rc=$?
+check "a declaration whose top level is a list is an error" 2 "$rc"
+check "and is not called invalid YAML" 1 "$(grep -c "needs a top-level 'skills' list" <<<"$out")"
+
 out=$(run "$WORK/d-absent.yml"); rc=$?
 check "no declaration at all exits 0" 0 "$rc"
 

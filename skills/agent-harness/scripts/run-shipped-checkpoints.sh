@@ -79,10 +79,11 @@ done
 # A file that does not parse, or has no `skills` list, is a broken declaration,
 # not an empty one: reading either as "no skills" would pass a repository whose
 # declared checks never run. Only an explicit `skills: []` declares nothing.
-if ! KIND=$(yq -r '.skills | type' "$DECL" 2>/dev/null); then
+if ! yq '.' "$DECL" >/dev/null 2>&1; then
     echo "::error::$DECL is not valid YAML" >&2
     exit 2
 fi
+KIND=$(yq -r 'select(tag == "!!map") | .skills | type' "$DECL" 2>/dev/null)
 if [[ "$KIND" != "!!seq" ]]; then
     echo "::error::$DECL needs a top-level 'skills' list" >&2
     exit 2
