@@ -9,7 +9,7 @@ agent-harness-skill is an agent skill: Markdown instructions, templates and two 
 
 - **Agent** (Claude Code or another skill-aware agent): loads `skills/agent-harness/SKILL.md`, runs the scripts, copies templates into the user's repository.
 - **User**: asks the agent to verify, bootstrap or audit a repository, or runs the scripts directly.
-- **User's CI**: runs `verify-harness.sh` and `run-shipped-checkpoints.sh` through the workflows bootstrapped from the templates.
+- **User's CI**: runs `run-shipped-checkpoints.sh`, and on GitLab and Forgejo also `verify-harness.sh`, through the workflows bootstrapped from the templates; the GitHub `harness-verify.yml` template repeats the checks inline.
 - **Maintainers and this repository's CI**: change the skill through pull requests; the workflows in `.github/workflows/` validate and release it.
 
 ## Components
