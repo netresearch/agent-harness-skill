@@ -25,7 +25,7 @@ The skill has no server component, stores no data, and handles no user accounts 
 2. `run-shipped-checkpoints.sh` fetches only the checkpoint runner and the repositories that the repository's own `.harness/checkpoints.yml` names, and fails the job instead of passing when a declared entry cannot be fetched or resolved.
 3. The workflows of this repository run with no token permission unless a job names it.
 4. Nothing committed to the repository contains a secret.
-5. The required checks of a pull request fail when it adds a Composer dependency with a known vulnerability or introduces a finding from an Opengrep rule of severity WARNING.
+5. The required checks of a pull request fail when it adds a Composer dependency with a known vulnerability or introduces an Opengrep finding that the [organisation's static analysis rule](https://github.com/netresearch/.github/blob/main/SECURITY.md#static-analysis-sast) makes blocking.
 
 ## Actors and trust boundaries
 
@@ -48,7 +48,7 @@ The skill has no server component, stores no data, and handles no user accounts 
 | Shell defects in the scripts | ShellCheck runs in CI on every `*.sh` file at severity `error`, and in the pre-commit hook on every shell script at its default severity `style`; all eight shell files in this repository pass `shellcheck -x -S style` with no finding | `.github/workflows/lint.yml`, `.pre-commit-config.yaml` |
 | A secret is committed | Betterleaks scans every push to `main` and every pull request to `main` | `.github/workflows/security.yml` |
 | A vulnerable or malicious dependency is added | Dependency review fails on high or critical vulnerabilities in a pull request; Composer Audit fails on known advisories; Renovate proposes updates | `.github/workflows/security.yml`, `renovate.json` |
-| Insecure code or workflow patterns | Opengrep fails a pull request on findings from rules of severity WARNING (the default `--severity WARNING` selects only those rules); zizmor and CodeQL analyse the workflows | `.github/workflows/security.yml`; CodeQL runs as GitHub default setup, a repository setting described in `.github/template.yaml` |
+| Insecure code or workflow patterns | Opengrep fails a pull request on the findings the [organisation's static analysis rule](https://github.com/netresearch/.github/blob/main/SECURITY.md#static-analysis-sast) makes blocking; zizmor and CodeQL analyse the workflows | `.github/workflows/security.yml`; CodeQL runs as GitHub default setup, a repository setting described in `.github/template.yaml` |
 | A workflow token is misused | Top-level `permissions: {}`; each job grants only what its reusable workflow needs | `.github/workflows/*.yml` |
 
 ## Secure design principles applied
