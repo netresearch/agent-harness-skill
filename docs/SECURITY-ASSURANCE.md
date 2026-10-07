@@ -61,7 +61,7 @@ The skill has no server component, stores no data, and handles no user accounts 
 ## What a user cannot expect
 
 - `run-shipped-checkpoints.sh` is not a sandbox. It executes the checkpoint runner and the commands of every declared `checkpoints.yaml` with the CI job's permissions.
-- The checkpoint runner is not pinned by default: `HARNESS_RUNNER_REF` defaults to the `main` branch of `netresearch/automated-assessment-skill`, although the comment above that line in `run-shipped-checkpoints.sh` calls it pinned. The CI job templates (`templates/*harness-checkpoints.yml.tmpl`) set `HARNESS_RUNNER_REF` from the `{{ASSESSMENT_SKILL_REF}}` placeholder; a direct call without it uses `main`.
+- The checkpoint runner is not pinned by default: `HARNESS_RUNNER_REF` defaults to the `main` branch of `netresearch/automated-assessment-skill`, as the comment above that line in `run-shipped-checkpoints.sh` says. The CI job templates (`templates/*harness-checkpoints.yml.tmpl`) set `HARNESS_RUNNER_REF` from the `{{ASSESSMENT_SKILL_REF}}` placeholder; a direct call without it uses `main`.
 - The declaration has to be reviewed like the CI configuration it drives: its values decide what is fetched and run, and the script does not restrict them. A `ref` that names a branch or a tag is not pinned: the next run executes whatever that name points to then.
 - The reusable workflows this repository calls are referenced by branch (`@main`), not by commit (`.github/workflows/*.yml`).
 - The verifier checks the structure and consistency of an agent harness. It is not a security scanner for the checked repository.
