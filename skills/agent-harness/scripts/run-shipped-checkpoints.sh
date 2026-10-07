@@ -32,8 +32,11 @@
 set -uo pipefail
 
 DECL="${HARNESS_CHECKPOINTS_FILE:-.harness/checkpoints.yml}"
-# The runner lives in the automated-assessment skill. Pinned, for the same
-# reason the skill refs are.
+# The runner lives in the automated-assessment skill. Not pinned by default:
+# without HARNESS_RUNNER_REF the runner comes from `main`. The CI job templates
+# (templates/*harness-checkpoints.yml.tmpl) set HARNESS_RUNNER_REF from
+# {{ASSESSMENT_SKILL_REF}}; set it to a tag for the same reason the skill refs
+# are pinned.
 RUNNER_REPO="${HARNESS_RUNNER_REPO:-https://github.com/netresearch/automated-assessment-skill.git}"
 RUNNER_REF="${HARNESS_RUNNER_REF:-main}"
 RUNNER_PATH="skills/automated-assessment/scripts/run-checkpoints.sh"
