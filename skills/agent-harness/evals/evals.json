@@ -299,6 +299,32 @@
         ]
       },
       "expected_output": "REPLACE_INDEX=NO\nREPEAT_APPROVAL=NOT_NEEDED\nRun verify-harness first, preserve the existing index and add the approved command reference. Check its target and related documentation without replacing unrelated content or reopening authorization."
+    },
+    {
+      "id": 11,
+      "eval_name": "configured-write-role-bypass-is-not-admin-only",
+      "prompt": "Audit an active GitHub branch ruleset whose bypass list grants the write role always-allow bypass. A contributor has write access but no administrator role. The harness documentation claims only administrators can bypass the merge gate. State BYPASS_POSSIBLE=YES or NO and explain which configuration determines enforcement for this contributor. Do not change settings or exercise the bypass.",
+      "assertions": [
+        {
+          "type": "content_regex",
+          "pattern": "^BYPASS_POSSIBLE=YES$"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "bypass.list|bypass.permission|ruleset.*config"
+        },
+        {
+          "type": "must_not",
+          "pattern": "^BYPASS_POSSIBLE=NO$"
+        }
+      ],
+      "samples": {
+        "passing": "BYPASS_POSSIBLE=YES\nThe configured ruleset bypass list grants the write role always-allow bypass. Admin status alone does not determine whether this contributor must satisfy the gate. Inspect the actual rule scope and bypass permissions without exercising them.",
+        "failing": [
+          "BYPASS_POSSIBLE=NO\nOnly an administrator can bypass branch protection, so this writer cannot."
+        ]
+      },
+      "expected_output": "BYPASS_POSSIBLE=YES\nThe configured ruleset bypass list grants the write role always-allow bypass. Admin status alone does not determine whether this contributor must satisfy the gate. Inspect the actual rule scope and bypass permissions without exercising them."
     }
   ]
 }
