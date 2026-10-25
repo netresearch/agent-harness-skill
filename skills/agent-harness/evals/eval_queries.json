@@ -1,0 +1,10 @@
+[
+  {"query":"Make this repository usable by coding agents and verify its instruction index and documented commands.","should_trigger":true},
+  {"query":"Audit whether our harness declaration is actually connected to a required CI job.","should_trigger":true},
+  {"query":"Review the integration contract between an automated reviewer, execution evidence and our merge gate.","should_trigger":true},
+  {"query":"Check which project rules and supporting resources reach our delegated review workers.","should_trigger":true},
+  {"query":"Find the logic bug in this standalone sorting function.","should_trigger":false},
+  {"query":"Rewrite these release notes for clarity without changing project configuration.","should_trigger":false},
+  {"query":"Explain the difference between a unit test and an integration test.","should_trigger":false},
+  {"query":"Generate a color palette for an event poster.","should_trigger":false}
+]

@@ -67,6 +67,16 @@ A pull request that adds or changes behaviour of a script under `skills/agent-ha
 
 Changes that touch only Markdown content (SKILL.md, references, docs) need no test. The reviewer checks this rule; the pull request template has a checklist item for it.
 
+### Skill behavior cases
+
+`skills/agent-harness/evals/evals.json` contains text-regression scenarios with
+passing and failing samples. Validate their structure and sample assertions with
+the `validate-evals.sh` shipped by `skill-repo-skill`, passing this file explicitly.
+The adjacent `eval_queries.json` labels realistic selection requests and near
+misses. These files do not run models or prove routing, tool execution, enforced
+permissions or outcome quality. Those claims require separate isolated agent
+runs with the skill installed normally and the actual transcript/outcome checked.
+
 ## Governance and security policies
 
 See [Governance and policies](README.md#governance-and-policies) in the README.

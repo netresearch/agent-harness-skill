@@ -3,7 +3,10 @@
 
 # Enforcement Mechanisms Reference
 
-This document covers all 10 enforcement instruments available for making repositories agent-ready. Mechanisms are ordered by enforcement strength, from hardest (server-side, nobody bypasses) to softest (convention-based, reminder only).
+This document covers enforcement instruments for making repositories agent-ready.
+Mechanisms are ordered from server-side rules to convention-based reminders.
+Their effective coverage depends on the configured scope, identities and bypass
+permissions; server-side enforcement does not mean that nobody can bypass it.
 
 ## Why prose is not a mechanism
 
@@ -196,7 +199,7 @@ question with the measurement rather than the intuition.
 
 | # | Mechanism | Triggers | Affects | Strength |
 | --- | ----------- | ---------- | --------- | ---------- |
-| 1 | Branch Protection / Rulesets | Merge attempt | Everyone | Hard |
+| 1 | Branch Protection / Rulesets | Merge attempt | Configured scope and actors | Hard, subject to configured bypass |
 | 2 | CI Workflows | PR push | Everyone | Hard |
 | 3 | Git Hooks | Commit / push | Local devs | Automatic |
 | 4 | .envrc (direnv) | `cd` into repo | Local devs with direnv | Automatic |
@@ -217,9 +220,16 @@ question with the measurement rather than the intuition.
 
 **When it triggers:** On merge attempt (merge button, API merge call, `gh pr merge`).
 
-**Who it affects:** Everyone -- humans, agents, CI bots. No bypass without admin override.
+**Who it affects:** Humans, agents and automation covered by the active rule's
+scope. Bypass depends on the host configuration, not only on admin access. A
+ruleset can grant bypass to the write or maintain role, custom write-based roles,
+teams or GitHub Apps. Inspect the actual bypass list and whether it permits
+always-on or pull-request-only bypass before treating the gate as enforced for
+a particular actor. See [GitHub's ruleset bypass documentation](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository#granting-bypass-permissions-for-your-branch-or-tag-ruleset).
 
-**Strength:** Hard. Server-side enforcement cannot be circumvented locally.
+**Strength:** Hard for covered actions without a configured bypass. Local hook
+flags do not disable a server-side rule, but that does not remove the host's
+bypass permissions.
 
 **Setup:**
 
@@ -227,9 +237,14 @@ question with the measurement rather than the intuition.
 - Configure via API: `gh api repos/OWNER/REPO/branches/main/protection -X PUT`.
 - Configure via `github-project-skill`: delegates branch protection setup.
 
-**Key configuration:** Add `harness-verify` as a required status check. This means the CI workflow from mechanism 2 must pass before any PR can merge.
+**Key configuration:** Add `harness-verify` as a required status check for the
+intended branches and confirm applicable bypass rules. For covered merge
+attempts without bypass, the CI job's result must satisfy the host's
+required-check policy.
 
-**Limitations:** Requires repository admin access. Does not provide fast local feedback.
+**Limitations:** Setup requires repository admin access or a custom role with
+permission to edit repository rules. Enforcement depends on the enabled rules,
+their scope and bypass settings. Does not provide fast local feedback.
 
 **GitLab equivalent:**
 
@@ -584,7 +599,11 @@ Then: `pre-commit install`
 
 **Who it affects:** AI agents on the machine where it is installed. Not teammates, and not CI.
 
-**Strength:** Automatic and unbypassable *by the agent* — unlike every other mechanism here, there is no `--no-verify` equivalent the agent can reach for.
+**Strength:** Automatic for the tools and actions the trusted host actually
+intercepts. Its coverage depends on the installed hook, effective permissions
+and whether alternate tools or delegated workers can perform the same action.
+Verify those paths before claiming the rule cannot be bypassed; prompt text or
+the existence of a hook is not that proof.
 
 **When to reach for it:** Mechanisms 1-10 gate a *repo*. This one gates the *agent*, so it is the right instrument for a rule the agent keeps violating across every repo — where a per-repo hook would have to be installed everywhere and would still miss commands run outside any repo.
 
@@ -796,7 +815,12 @@ Developer clones repo
           +---> Merge succeeds or is blocked
 ```
 
-Each layer catches issues that earlier layers missed or that bypassed them. The chain is designed so that the last layer (branch protection) is impossible to bypass without admin access.
+Each layer catches issues that earlier layers missed or that bypassed them.
+The last layer depends on the host's actual branch protection, bypass identities
+and required-check configuration. Inspect those settings when enforcement is in
+scope; a workflow file alone does not establish them. Automated review comments
+or neutral check results need a separately configured gate when they must block
+merging. Required human approval must remain bound to the reviewed revision.
 
 ## Choosing Mechanisms for Your Project
 
