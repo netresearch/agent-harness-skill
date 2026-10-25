@@ -584,7 +584,11 @@ Then: `pre-commit install`
 
 **Who it affects:** AI agents on the machine where it is installed. Not teammates, and not CI.
 
-**Strength:** Automatic and unbypassable *by the agent* — unlike every other mechanism here, there is no `--no-verify` equivalent the agent can reach for.
+**Strength:** Automatic for the tools and actions the trusted host actually
+intercepts. Its coverage depends on the installed hook, effective permissions
+and whether alternate tools or delegated workers can perform the same action.
+Verify those paths before claiming the rule cannot be bypassed; prompt text or
+the existence of a hook is not that proof.
 
 **When to reach for it:** Mechanisms 1-10 gate a *repo*. This one gates the *agent*, so it is the right instrument for a rule the agent keeps violating across every repo — where a per-repo hook would have to be installed everywhere and would still miss commands run outside any repo.
 
@@ -796,7 +800,12 @@ Developer clones repo
           +---> Merge succeeds or is blocked
 ```
 
-Each layer catches issues that earlier layers missed or that bypassed them. The chain is designed so that the last layer (branch protection) is impossible to bypass without admin access.
+Each layer catches issues that earlier layers missed or that bypassed them.
+The last layer depends on the host's actual branch protection, bypass identities
+and required-check configuration. Inspect those settings when enforcement is in
+scope; a workflow file alone does not establish them. Automated review comments
+or neutral check results need a separately configured gate when they must block
+merging. Required human approval must remain bound to the reviewed revision.
 
 ## Choosing Mechanisms for Your Project
 

@@ -13,6 +13,7 @@ Agent skill for bootstrapping, verifying, and enforcing agent-harness infrastruc
 - [skills/agent-harness/scripts/run-shipped-checkpoints.sh](skills/agent-harness/scripts/run-shipped-checkpoints.sh) — Runs the checkpoints declared in `.harness/checkpoints.yml`
 - [skills/agent-harness/references/](skills/agent-harness/references/) — Maturity levels, skill integration map, enforcement mechanisms, ADRs
 - [skills/agent-harness/templates/](skills/agent-harness/templates/) — Files the bootstrap mode copies into a repository
+- [skills/agent-harness/evals/](skills/agent-harness/evals/) — Review-integration text regressions and labelled selection queries; not proof of live model behavior
 - [tests/](tests/) — Tests that execute the two scripts and `Build/hooks/pre-commit`
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — Architecture overview
 - [docs/SECURITY-ASSURANCE.md](docs/SECURITY-ASSURANCE.md) — Security assurance case

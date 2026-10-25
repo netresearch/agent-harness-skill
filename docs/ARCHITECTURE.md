@@ -20,6 +20,7 @@ agent-harness-skill is an agent skill: Markdown instructions, templates and two 
 | References | `skills/agent-harness/references/` | Maturity levels, enforcement mechanisms, skill integration map, ADRs; read on demand |
 | Checkpoints | `skills/agent-harness/checkpoints.yaml` | Mechanical and LLM checkpoints in the automated-assessment schema |
 | Templates | `skills/agent-harness/templates/*.tmpl` | Files the bootstrap mode instantiates in the user's repository |
+| Evaluation cases | `skills/agent-harness/evals/` | Text regressions with samples and labelled selection queries; actual tool/outcome evidence requires separate agent runs |
 | Harness verifier | `skills/agent-harness/scripts/verify-harness.sh` | Checks the harness of the repository in the working directory in three levels; output as text, GitHub annotations or GitLab sections |
 | Shipped-checkpoint runner | `skills/agent-harness/scripts/run-shipped-checkpoints.sh` | Runs the checkpoints that `.harness/checkpoints.yml` declares, through the automated-assessment runner |
 | Tests | `tests/*.sh` | Execute the two scripts and `Build/hooks/pre-commit` against fixture repositories |

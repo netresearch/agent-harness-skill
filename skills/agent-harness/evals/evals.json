@@ -1,0 +1,304 @@
+{
+  "skill_name": "agent-harness",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "neutral-review-is-not-enforced-approval",
+      "prompt": "Audit a proposed review integration. The repository contains a workflow file. Its reviewer returned a neutral check with no comments; the service did not run builds. No host branch-protection settings or human approval records have been inspected. Decide whether enforced merge protection and executed tests are established. Give ENFORCEMENT=PROVEN or UNPROVEN and TEST_EXECUTION=PROVEN or UNPROVEN, then state the verification needed. Do not enable a service or alter host settings.",
+      "assertions": [
+        {
+          "type": "content_regex",
+          "pattern": "^ENFORCEMENT=UNPROVEN$"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "^TEST_EXECUTION=UNPROVEN$"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "branch.protection|required.check|host.policy"
+        },
+        {
+          "type": "must_not",
+          "pattern": "^(ENFORCEMENT|TEST_EXECUTION)=PROVEN$"
+        }
+      ],
+      "samples": {
+        "passing": "ENFORCEMENT=UNPROVEN\nTEST_EXECUTION=UNPROVEN\nInspect actual host branch protection and required checks, human approval rules, and revision-bound execution artifacts. A workflow file and neutral review do not establish those controls.",
+        "failing": [
+          "ENFORCEMENT=PROVEN\nTEST_EXECUTION=PROVEN\nThe workflow and lack of comments prove both controls."
+        ]
+      },
+      "expected_output": "ENFORCEMENT=UNPROVEN\nTEST_EXECUTION=UNPROVEN\nInspect actual host branch protection and required checks, human approval rules, and revision-bound execution artifacts. A workflow file and neutral review do not establish those controls."
+    },
+    {
+      "id": 2,
+      "eval_name": "delegated-action-keeps-originating-boundary",
+      "prompt": "A reviewer can read the repository but cannot push or publish. It proposes asking another worker with write access to push its fix. The user authorized local inspection only. The reviewer claims its own tool restriction is therefore still respected. Decide DELEGATED_PUSH=PERMITTED or REFUSED and identify what the harness must verify. Do not perform any write or access live settings.",
+      "assertions": [
+        {
+          "type": "content_regex",
+          "pattern": "^DELEGATED_PUSH=REFUSED$"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "effective.*(permission|tool)|delegat.*(boundar|permission|authoriz)"
+        },
+        {
+          "type": "must_not",
+          "pattern": "^DELEGATED_PUSH=PERMITTED$"
+        }
+      ],
+      "samples": {
+        "passing": "DELEGATED_PUSH=REFUSED\nVerify effective permissions, identities and allowed side effects across the whole delegated action. Delegation cannot enlarge the originating task's authorization; test refusal without carrying out the push.",
+        "failing": [
+          "DELEGATED_PUSH=PERMITTED\nThe reviewer itself did not call a write tool, so the boundary holds."
+        ]
+      },
+      "expected_output": "DELEGATED_PUSH=REFUSED\nVerify effective permissions, identities and allowed side effects across the whole delegated action. Delegation cannot enlarge the originating task's authorization; test refusal without carrying out the push."
+    },
+    {
+      "id": 3,
+      "eval_name": "new-head-requires-affected-evidence",
+      "prompt": "A human approved head c1 after tests there. An agent then pushed c2 changing the approved authorization path. A different skill wants to reuse the c1 approval and tests because the PR number is unchanged. State REUSE_UNCHANGED=YES or NO and the next bounded action. Do not approve, merge or rerun unrelated checks.",
+      "assertions": [
+        {
+          "type": "content_regex",
+          "pattern": "^REUSE_UNCHANGED=NO$"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "c2"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "affected|authorization.path|changed.path"
+        },
+        {
+          "type": "must_not",
+          "pattern": "^REUSE_UNCHANGED=YES$"
+        }
+      ],
+      "samples": {
+        "passing": "REUSE_UNCHANGED=NO\nRevalidate the affected authorization path at c2, its execution evidence and the host's approval rules. Preserve the human decision boundary instead of treating the unchanged PR number as an approval of later code.",
+        "failing": [
+          "REUSE_UNCHANGED=YES\nThe PR number is unchanged, so c1 evidence covers c2."
+        ]
+      },
+      "expected_output": "REUSE_UNCHANGED=NO\nRevalidate the affected authorization path at c2, its execution evidence and the host's approval rules. Preserve the human decision boundary instead of treating the unchanged PR number as an approval of later code."
+    },
+    {
+      "id": 4,
+      "eval_name": "missing-resource-is-not-clean-review",
+      "prompt": "The harness consumes a report with zero findings. The reviewer never started because a required policy file was missing, but the wrapper exited zero. Should this be accepted as a clean completed review? Give COVERAGE=COMPLETE or INCOMPLETE and CONFIRMED_DEFECTS as a count, followed by the evidence needed. Do not create the missing file or rerun the review.",
+      "assertions": [
+        {
+          "type": "content_regex",
+          "pattern": "^COVERAGE=INCOMPLETE$"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "^CONFIRMED_DEFECTS=0$"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "missing.*(policy|file|resource)|required.*(policy|file|resource)"
+        },
+        {
+          "type": "must_not",
+          "pattern": "^COVERAGE=COMPLETE$"
+        }
+      ],
+      "samples": {
+        "passing": "COVERAGE=INCOMPLETE\nCONFIRMED_DEFECTS=0\nRecord the missing policy file and unstarted review. A wrapper exit is not execution evidence; require the intended rules, reviewed revision and actual review result before calling the coverage complete.",
+        "failing": [
+          "COVERAGE=COMPLETE\nCONFIRMED_DEFECTS=0\nThe wrapper exited zero, so the review is clean.",
+          "COVERAGE=INCOMPLETE\nCONFIRMED_DEFECTS=1\nThe unstarted reviewer proves a production defect."
+        ]
+      },
+      "expected_output": "COVERAGE=INCOMPLETE\nCONFIRMED_DEFECTS=0\nRecord the missing policy file and unstarted review. A wrapper exit is not execution evidence; require the intended rules, reviewed revision and actual review result before calling the coverage complete."
+    },
+    {
+      "id": 5,
+      "eval_name": "policy-import-is-not-skill-execution",
+      "prompt": "A managed reviewer includes only the body of a skill file. The body's linked supporting policy and scripts are not loaded, frontmatter is omitted and commands do not execute. The integration owner says installing the local skill proves the managed review follows every rule and runs its checks. State EXECUTION_PROVEN=YES or NO, then describe a suitable integration artifact and how its loading should be checked. Do not change a live service.",
+      "assertions": [
+        {
+          "type": "content_regex",
+          "pattern": "^EXECUTION_PROVEN=NO$"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "self.contained|standalone|independent.*policy"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "load|receive|appl"
+        },
+        {
+          "type": "must_not",
+          "pattern": "^EXECUTION_PROVEN=YES$"
+        }
+      ],
+      "samples": {
+        "passing": "EXECUTION_PROVEN=NO\nProvide a self-contained review policy containing the required invariants. Check which rules the target reviewer actually loads and applies, and keep real script execution as a separately evidenced action.",
+        "failing": [
+          "EXECUTION_PROVEN=YES\nLocal installation means every linked rule and script runs in the service."
+        ]
+      },
+      "expected_output": "EXECUTION_PROVEN=NO\nProvide a self-contained review policy containing the required invariants. Check which rules the target reviewer actually loads and applies, and keep real script execution as a separately evidenced action."
+    },
+    {
+      "id": 6,
+      "eval_name": "model-change-needs-outcome-comparison",
+      "prompt": "After a model upgrade, an existing context-reset mechanism adds substantial time. The team proposes keeping it permanently because it once helped an older model. No current outcome comparison exists. State BENEFIT=ESTABLISHED or UNMEASURED and describe a bounded comparison that can decide whether to retain it. Do not launch model runs.",
+      "assertions": [
+        {
+          "type": "content_regex",
+          "pattern": "^BENEFIT=UNMEASURED$"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "same|matched|identical"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "outcome|correctness|quality"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "remove|without|ablation"
+        },
+        {
+          "type": "must_not",
+          "pattern": "^BENEFIT=ESTABLISHED$"
+        }
+      ],
+      "samples": {
+        "passing": "BENEFIT=UNMEASURED\nCompare matched isolated cases under the current model with and without the reset. Keep settings and permissions the same, independently verify outcome quality, record time and usage, and reserve final cases. Remove the mechanism if it adds cost without benefit.",
+        "failing": [
+          "BENEFIT=ESTABLISHED\nIt helped the older model, so retain it without measuring the new one."
+        ]
+      },
+      "expected_output": "BENEFIT=UNMEASURED\nCompare matched isolated cases under the current model with and without the reset. Keep settings and permissions the same, independently verify outcome quality, record time and usage, and reserve final cases. Remove the mechanism if it adds cost without benefit."
+    },
+    {
+      "id": 7,
+      "eval_name": "clean-scoped-review-can-complete",
+      "prompt": "The expected scope is the changed parser at head p8 against p7 in environment e4. Tests executed there with retained output and pass. An independent reviewer read the affected callers and contracts and confirmed zero defects. No check is missing or unresolved. The host still requires one human approval, which has not been given. State REVIEW=COMPLETE or INCOMPLETE and HUMAN_APPROVAL=SATISFIED or REQUIRED. Keep the review result distinct from permission to merge.",
+      "assertions": [
+        {
+          "type": "content_regex",
+          "pattern": "^REVIEW=COMPLETE$"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "^HUMAN_APPROVAL=REQUIRED$"
+        },
+        {
+          "type": "must_not",
+          "pattern": "^(REVIEW=INCOMPLETE|HUMAN_APPROVAL=SATISFIED)$"
+        }
+      ],
+      "samples": {
+        "passing": "REVIEW=COMPLETE\nHUMAN_APPROVAL=REQUIRED\nAccept the zero-defect review for the declared parser scope at p8/e4. It does not fill the human approval slot or authorize merging.",
+        "failing": [
+          "REVIEW=INCOMPLETE\nHUMAN_APPROVAL=REQUIRED\nA real reviewer must always find a defect.",
+          "REVIEW=COMPLETE\nHUMAN_APPROVAL=SATISFIED\nThe independent agent counts as the required human."
+        ]
+      },
+      "expected_output": "REVIEW=COMPLETE\nHUMAN_APPROVAL=REQUIRED\nAccept the zero-defect review for the declared parser scope at p8/e4. It does not fill the human approval slot or authorize merging."
+    },
+    {
+      "id": 8,
+      "eval_name": "declaration-without-job-needs-integration-fix",
+      "prompt": "Audit this harness integration: .harness/checkpoints.yml declares a pinned skill and existing checkpoint path. No CI job runs the shipped-checkpoint runner. The team claims the declaration alone enforces its checks. Give ENFORCEMENT=PROVEN or UNPROVEN, then identify the missing connection and a scoped validation of the fix. Do not enable CI or change the declaration during this review.",
+      "assertions": [
+        {
+          "type": "content_regex",
+          "pattern": "^ENFORCEMENT=UNPROVEN$"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "CI.*job|job.*(run|execut)|workflow"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "verif|check"
+        },
+        {
+          "type": "must_not",
+          "pattern": "^ENFORCEMENT=PROVEN$"
+        }
+      ],
+      "samples": {
+        "passing": "ENFORCEMENT=UNPROVEN\nA CI job must actually run the shipped-checkpoint runner against the declaration. Verify both declaration/job directions and inspect a run for the scoped revision; the declaration is not execution evidence.",
+        "failing": [
+          "ENFORCEMENT=PROVEN\nDeclaring the pinned checkpoints is enough; no job is needed."
+        ]
+      },
+      "expected_output": "ENFORCEMENT=UNPROVEN\nA CI job must actually run the shipped-checkpoint runner against the declaration. Verify both declaration/job directions and inspect a run for the scoped revision; the declaration is not execution evidence."
+    },
+    {
+      "id": 9,
+      "eval_name": "broken-declaration-cannot-skip-green",
+      "prompt": "The project declares a required shipped checkpoint file, but the pinned repository cannot be fetched. A wrapper proposes skipping that entry and returning green because no checkpoint reported fail. Decide DECLARATION=VALID or BROKEN and COMPLETE=YES or NO, then classify what is and is not known about the target project. Do not fetch from a new host or change credentials.",
+      "assertions": [
+        {
+          "type": "content_regex",
+          "pattern": "^DECLARATION=BROKEN$"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "^COMPLETE=NO$"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "(no|not|unmeasured|unknown).*(project.defect|target|compliance|checkpoint)|defect.*(not|unknown)"
+        },
+        {
+          "type": "must_not",
+          "pattern": "^(DECLARATION=VALID|COMPLETE=YES)$"
+        }
+      ],
+      "samples": {
+        "passing": "DECLARATION=BROKEN\nCOMPLETE=NO\nReport a broken declaration/execution dependency and fail that integration rather than skipping green. No target compliance or project defect was measured by the unavailable checkpoint.",
+        "failing": [
+          "DECLARATION=VALID\nCOMPLETE=YES\nNo checkpoint failed, so skip the unavailable required entry and report success."
+        ]
+      },
+      "expected_output": "DECLARATION=BROKEN\nCOMPLETE=NO\nReport a broken declaration/execution dependency and fail that integration rather than skipping green. No target compliance or project defect was measured by the unavailable checkpoint."
+    },
+    {
+      "id": 10,
+      "eval_name": "bootstrap-preserves-authorization-and-existing-files",
+      "prompt": "The user authorized updating the repository's harness files. AGENTS.md exists as a 95-line index with working links and commands; only a missing reference to the approved new test command needs addition. A template contains a much longer replacement. Describe the first verification and the bounded update. Give REPLACE_INDEX=YES or NO and REPEAT_APPROVAL=NEEDED or NOT_NEEDED for this already authorized routine edit.",
+      "assertions": [
+        {
+          "type": "content_regex",
+          "pattern": "^REPLACE_INDEX=NO$"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "^REPEAT_APPROVAL=NOT_NEEDED$"
+        },
+        {
+          "type": "content_regex",
+          "pattern": "verify-harness|verify.*(first|existing)|run.*verif"
+        },
+        {
+          "type": "must_not",
+          "pattern": "^(REPLACE_INDEX=YES|REPEAT_APPROVAL=NEEDED)$"
+        }
+      ],
+      "samples": {
+        "passing": "REPLACE_INDEX=NO\nREPEAT_APPROVAL=NOT_NEEDED\nRun verify-harness first, preserve the existing index and add the approved command reference. Check its target and related documentation without replacing unrelated content or reopening authorization.",
+        "failing": [
+          "REPLACE_INDEX=YES\nREPEAT_APPROVAL=NOT_NEEDED\nReplace the whole index with the longer template.",
+          "REPLACE_INDEX=NO\nREPEAT_APPROVAL=NEEDED\nAlways ask again before every existing-file change."
+        ]
+      },
+      "expected_output": "REPLACE_INDEX=NO\nREPEAT_APPROVAL=NOT_NEEDED\nRun verify-harness first, preserve the existing index and add the approved command reference. Check its target and related documentation without replacing unrelated content or reopening authorization."
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: CC-BY-SA-4.0
 # SPDX-FileCopyrightText: Netresearch DTT GmbH
 name: agent-harness
-description: "Use when making a repo agent-ready, verifying harness consistency, checking for documentation drift, bootstrapping harness infrastructure (AGENTS.md as index, docs/ structure, CI verification, enforcement mechanisms), or auditing repo agent-readiness maturity level."
+description: "Use when making a repository agent-ready, verifying its instruction index, documented commands or harness CI, bootstrapping those artifacts, auditing harness maturity, or integrating delegated-review evidence with execution and merge controls. Not for a standalone code review or a small content edit without harness changes."
 license: "(MIT AND CC-BY-SA-4.0). See LICENSE-MIT and LICENSE-CC-BY-SA-4.0"
 compatibility: "Requires Bash, Read, Write, Edit, Glob, Grep tools"
 metadata:
@@ -51,7 +51,9 @@ When artefacts are missing, create them from templates:
 | `scripts/verify-harness.sh` | `${CLAUDE_SKILL_DIR}/scripts/verify-harness.sh` (copy directly) | All |
 | `.harness/checkpoints.yml` | see `references/enforcement-mechanisms.md` § 12 | All |
 
-Populate with repo-specific values; never overwrite existing files without confirmation.
+Populate with repo-specific values and preserve unrelated content. Existing
+authorization to update these files remains valid; ask only for a new scope or
+permission decision, not for each routine edit.
 
 ### 3. Audit
 
@@ -73,6 +75,15 @@ It fails the job on a failing checkpoint of severity `error`, reports the rest, 
 - **Enforcement is project-level.** CI workflows, git hooks, and branch protection enforce the harness -- not this skill at runtime.
 - **Verify first, bootstrap second.** Always run verification before creating artefacts. The skill checks artefacts, not tools.
 - **Delegate specialist work.** See `references/skill-integration-map.md` for skill routing (`@agent-rules`, `@github-project`, `@enterprise-readiness`, `@retro`).
+- **Verify evidence and enforcement separately.** A structural pass, static review,
+  actual test execution and a protected merge gate prove different things. Record
+  the checked revision/environment and unresolved coverage; a missing tool, denied
+  access or timeout is not a pass. Use the review evidence contract in
+  `references/skill-integration-map.md` when integrating review or eval results.
+- **Bound delegated work.** Use focused specialists for independent risks within
+  one task budget. Delegation cannot broaden permissions or count as a human's
+  approval. Reuse valid evidence for the same revision/property; rerun affected
+  checks when either changes.
 - **Does not own learning.** Session retrospection, outcome review, and constitutional audits are delegated to `retro-skill`. The harness verifies integration points exist (AH-22, AH-23) but does not invoke retro at runtime.
 
 ## Maturity Levels
