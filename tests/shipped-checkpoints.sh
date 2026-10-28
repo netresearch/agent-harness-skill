@@ -200,6 +200,31 @@ yq -i '.skills[0].require_pass = ["X-02"]' "$WORK/d-required-warning.yml"
 out=$(run "$WORK/d-required-warning.yml"); rc=$?
 check "an explicitly required failure gates regardless of severity" 1 "$rc"
 
+# A demonstrated required failure keeps its classification when another
+# obligation is incomplete; the output must still retain both outcomes.
+MIXED_REQUIRED=$(printf '%s' "$WARNFAIL" | jq '.checkpoints[0].status = "blocked" | .summary.pass = 0 | .summary.blocked = 1')
+mk_skill "mixed-required__v1" "$MIXED_REQUIRED"
+decl "$WORK/d-required-mixed.yml" "mixed-required" "v1"
+yq -i '.skills[0].require_pass = ["X-01", "X-02"]' "$WORK/d-required-mixed.yml"
+out=$(run "$WORK/d-required-mixed.yml"); rc=$?
+check "a required failure takes precedence over a blocked required result" 1 "$rc"
+check "mixed results report both failure and incomplete coverage" 1 "$(grep -c '1 explicitly required failure(s); 1 incomplete obligation(s)' <<<"$out")"
+
+for ids in '["X-02", "ABSENT-01"]' '["ABSENT-01", "X-02"]'; do
+    yq -i ".skills[0].require_pass = $ids" "$WORK/d-required-warning.yml"
+    out=$(run "$WORK/d-required-warning.yml"); rc=$?
+    check "a required failure takes precedence over a missing result in order $ids" 1 "$rc"
+done
+
+# Ordinary severity handling is unchanged: an unrelated error failure does
+# not turn incomplete required coverage into a demonstrated required failure.
+ORDINARY_MIXED=$(printf '%s' "$ERRFAIL" | jq '.checkpoints[1].status = "blocked" | .summary.pass = 0 | .summary.blocked = 1')
+mk_skill "ordinary-mixed__v1" "$ORDINARY_MIXED"
+decl "$WORK/d-ordinary-mixed.yml" "ordinary-mixed" "v1"
+yq -i '.skills[0].require_pass = ["X-02"]' "$WORK/d-ordinary-mixed.yml"
+out=$(run "$WORK/d-ordinary-mixed.yml"); rc=$?
+check "ordinary error failure retains incomplete required coverage semantics" 2 "$rc"
+
 decl "$WORK/d-required-invalid.yml" "ok" "v1"
 yq -i '.skills[0].require_pass = "X-01"' "$WORK/d-required-invalid.yml"
 out=$(run "$WORK/d-required-invalid.yml"); rc=$?

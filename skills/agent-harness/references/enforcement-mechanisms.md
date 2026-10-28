@@ -783,9 +783,11 @@ skills:
 
 Each named ID must appear exactly once with `status: pass` in the freshly
 executed result. A failed required checkpoint gates with exit 1 regardless of
-its severity. Missing, skipped, blocked or ambiguous required results produce
-exit 2: verification is incomplete, not a confirmed product defect. Whole-skill
-preconditions cannot silently remove these obligations. Omit the list, or use
+its severity. When collected results include both a required failure and
+incomplete required coverage, exit 1 takes precedence; the output still reports
+both outcomes. Otherwise missing, skipped, blocked or ambiguous required results
+produce exit 2: verification is incomplete, not a confirmed product defect.
+Whole-skill preconditions cannot silently remove these obligations. Omit the list, or use
 an empty list, to retain ordinary assessment severity/skip/blocked semantics.
 
 The shipped runner executes the `mechanical` section of a checkpoint file.

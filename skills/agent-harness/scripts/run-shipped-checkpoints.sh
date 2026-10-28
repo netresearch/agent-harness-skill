@@ -28,8 +28,9 @@
 # `warning`/`info` failure is reported and does not gate — the same split the
 # assessment skill's severities already declare. An optional `require_pass`
 # list on an entry requires exactly one passing result for each named ID.
-# A required failure gates (1); missing/skip/blocked/ambiguous evidence is
-# incomplete (2), not a confirmed project defect. Ordinary blocked results
+# A required failure gates (1), including mixed failure/incomplete results;
+# otherwise missing/skip/blocked/ambiguous evidence is incomplete (2), not a
+# confirmed project defect. Ordinary blocked results
 # retain their non-gating assessment meaning.
 
 set -uo pipefail
@@ -239,6 +240,7 @@ echo "----------------------------------------"
 echo "ran $ran of $COUNT declared skill(s); $gate_failures with an error-severity failure, $soft_failures with warnings only"
 echo "$required_failures explicitly required failure(s); $incomplete incomplete obligation(s)"
 
+[[ "$required_failures" -eq 0 ]] || exit 1
 [[ "$incomplete" -eq 0 ]] || exit 2
-[[ "$gate_failures" -eq 0 && "$required_failures" -eq 0 ]] || exit 1
+[[ "$gate_failures" -eq 0 ]] || exit 1
 exit 0
