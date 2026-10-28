@@ -788,6 +788,11 @@ exit 2: verification is incomplete, not a confirmed product defect. Whole-skill
 preconditions cannot silently remove these obligations. Omit the list, or use
 an empty list, to retain ordinary assessment severity/skip/blocked semantics.
 
+The shipped runner executes the `mechanical` section of a checkpoint file.
+Use IDs from that section for `require_pass`; it does not execute `llm_reviews`
+such as Enterprise Readiness `ER-76`. Run those reviews through the assessment
+workflow. Requiring a review ID here produces incomplete coverage, not a review.
+
 The project checkpoint must run a suitable domain verifier against the actual
 property, configuration and target inputs. For model claims, that verifier must
 interpret the native completed search, intended negative trace and reachability
