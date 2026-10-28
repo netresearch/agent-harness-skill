@@ -69,6 +69,11 @@ ${CLAUDE_SKILL_DIR}/scripts/run-shipped-checkpoints.sh
 
 It fails the job on a failing checkpoint of severity `error`, reports the rest, and exits 2 on a declaration it cannot resolve rather than passing quietly. `verify-harness.sh` errors when a declaration has no job, and when a job has no declaration.
 
+For explicitly required results, set `require_pass` on the declaration entry.
+Only one passing result per named ID fulfills that obligation; skipped, blocked
+or missing results leave verification incomplete. See
+`references/enforcement-mechanisms.md`, section 12, for the contract and limits.
+
 ## Key Principles
 
 - **AGENTS.md is an index, not an encyclopedia.** Keep it under 150 lines. Put detail in `docs/`.

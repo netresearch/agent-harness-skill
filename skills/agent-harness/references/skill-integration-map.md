@@ -17,6 +17,21 @@ This means:
 
 ## Review Evidence Contract
 
+When a task asserts a formal guarantee, record the property and its boundary,
+assumptions, selected method, relevant input revision and result or open limit
+in the execution plan. When the
+[Formal Model Checking skill](https://github.com/netresearch/formal-model-checking-skill)
+is available and installed, delegate bounded state exploration to it; otherwise
+use an available project/domain verifier or record the missing capability.
+Choose that work for an actual ordering/persistence/recovery question, not every
+routine edit. A completed bounded search, an implementation test and a theorem
+with its trusted assumptions support different claims.
+
+For expressly required project checks, use `require_pass` in the shipped
+checkpoint declaration (see `enforcement-mechanisms.md`, section 12). This binds
+the required IDs to freshly executed results and rejects incomplete coverage;
+the domain verifier remains responsible for interpreting actual checker output.
+
 Apply this contract when a task adds or consumes automated review, an evaluation
 report or a merge gate. It does not require a new review service for every task.
 
