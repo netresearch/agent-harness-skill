@@ -195,7 +195,7 @@ for i in $(seq 0 $((COUNT - 1))); do
     if [[ "$skipped" == "skipped" ]]; then
         echo "— $repo@$ref: not applicable ($(printf '%s' "$json" | jq -r '.reason // ""'))"
         if [[ "$required" != "[]" ]]; then
-            echo "::error::$repo: required checkpoints were not run: $required (verification incomplete)"
+            echo "::error::$repo: required checkpoints were not run: $required (verification incomplete)" >&2
             incomplete=$((incomplete + 1))
         fi
         continue

@@ -167,7 +167,8 @@ check "an empty declaration exits 0" 0 "$rc"
 # Explicitly required results are a completeness obligation. The default
 # blocked/skip semantics above remain useful for an ordinary assessment.
 require_pass() {
-    yq -i '.skills[0].require_pass = ["X-01"]' "$1"
+    local declaration="$1"
+    yq -i '.skills[0].require_pass = ["X-01"]' "$declaration"
 }
 
 decl "$WORK/d-required-pass.yml" "ok" "v1"
