@@ -37,9 +37,13 @@
 For an explicit formal claim or a consequential ordering, retry or persistence
 guarantee, name the property and boundary, choose the evidence method and record
 the relevant input revision. A bounded model result, implementation tests and a
-formal proof are different artifacts. Use the Netresearch formal-model-checking
-skill when systematic state exploration is warranted; otherwise record why the
-ordinary checks fit. A design-only task can finish with a counterexample.
+formal proof are different artifacts. When systematic state exploration is
+warranted, use the
+[Netresearch Formal Model Checking skill](https://github.com/netresearch/formal-model-checking-skill)
+if it is available and installed; otherwise use an available project/domain
+verifier or record the missing capability.
+When ordinary checks suffice, record why. A design-only task can finish with a
+counterexample.
 
 | Claim and boundary | Required check/artifact | Input revision | Result or open limit |
 |---|---|---|---|

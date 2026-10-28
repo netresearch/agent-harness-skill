@@ -799,9 +799,11 @@ The project checkpoint must run a suitable domain verifier against the actual
 property, configuration and target inputs. For model claims, that verifier must
 interpret the native completed search, intended negative trace and reachability
 controls; schema validity or a self-reported aggregate success flag is not a
-substitute. Use the [Formal Model Checking skill](https://github.com/netresearch/formal-model-checking-skill)
-when that work is requested. The harness consumes checkpoint results; it does
-not validate the mathematical specification or prove runtime conformance.
+substitute. When the [Formal Model Checking skill](https://github.com/netresearch/formal-model-checking-skill)
+is available and installed, delegate requested state exploration to it; otherwise
+use an available project/domain verifier or record the missing capability. The harness consumes
+checkpoint results; it does not validate the mathematical specification or prove
+runtime conformance.
 
 Choose the checkpoint's contract for the assignment: a valid counterexample
 can satisfy a design-investigation task, while disproving a positive release

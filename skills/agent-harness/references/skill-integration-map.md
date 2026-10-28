@@ -19,8 +19,10 @@ This means:
 
 When a task asserts a formal guarantee, record the property and its boundary,
 assumptions, selected method, relevant input revision and result or open limit
-in the execution plan. Route bounded state-exploration work to the
-[Formal Model Checking skill](https://github.com/netresearch/formal-model-checking-skill).
+in the execution plan. When the
+[Formal Model Checking skill](https://github.com/netresearch/formal-model-checking-skill)
+is available and installed, delegate bounded state exploration to it; otherwise
+use an available project/domain verifier or record the missing capability.
 Choose that work for an actual ordering/persistence/recovery question, not every
 routine edit. A completed bounded search, an implementation test and a theorem
 with its trusted assumptions support different claims.
