@@ -51,6 +51,9 @@ for a in "$@"; do case "$a" in --json) ;; *) last="$a" ;; esac; done
 cp_file=""
 for a in "$@"; do [[ "$a" == *.yaml ]] && cp_file="$a"; done
 cat "${cp_file%.yaml}.json"
+if [[ -f "${cp_file%.yaml}.exit" ]]; then
+    exit "$(cat "${cp_file%.yaml}.exit")"
+fi
 STUB
 
 mk_skill() { # mk_skill <slug> <json-payload>
@@ -171,6 +174,25 @@ decl "$WORK/d-required-pass.yml" "ok" "v1"
 require_pass "$WORK/d-required-pass.yml"
 out=$(run "$WORK/d-required-pass.yml"); rc=$?
 check "a required passing checkpoint is accepted" 0 "$rc"
+
+# JSON alone does not show that the runner completed. Exit 1 is its normal
+# aggregate checkpoint-failure result; other failures leave coverage incomplete.
+for runner_rc in 2 143; do
+    mk_skill "interrupted__v1" "$PASSING"
+    printf '%s\n' "$runner_rc" > "$CACHE/interrupted__v1/skills/x/checkpoints.exit"
+    decl "$WORK/d-required-interrupted.yml" "interrupted" "v1"
+    require_pass "$WORK/d-required-interrupted.yml"
+    out=$(run "$WORK/d-required-interrupted.yml"); rc=$?
+    check "a runner exit $runner_rc cannot substantiate passing required results" 2 "$rc"
+    check "an incomplete runner reports its exit status" 1 "$(grep -c "runner exited $runner_rc" <<<"$out")"
+done
+
+mk_skill "warning-exit__v1" "$WARNFAIL"
+printf '1\n' > "$CACHE/warning-exit__v1/skills/x/checkpoints.exit"
+decl "$WORK/d-required-warning-exit.yml" "warning-exit" "v1"
+require_pass "$WORK/d-required-warning-exit.yml"
+out=$(run "$WORK/d-required-warning-exit.yml"); rc=$?
+check "runner exit 1 retains required-pass and ordinary warning semantics" 0 "$rc"
 
 decl "$WORK/d-required-blocked.yml" "blk" "v1"
 require_pass "$WORK/d-required-blocked.yml"

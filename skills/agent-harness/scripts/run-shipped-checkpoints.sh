@@ -172,7 +172,15 @@ for i in $(seq 0 $((COUNT - 1))); do
         exit 2
     fi
 
-    json=$(bash "$RUNNER" --json "$cp_file" "$PROJECT_ROOT" 2>/dev/null)
+    runner_rc=0
+    json=$(bash "$RUNNER" --json "$cp_file" "$PROJECT_ROOT" 2>/dev/null) || runner_rc=$?
+    # Exit 1 is the runner's aggregate checkpoint-failure result, which this
+    # consumer reclassifies by severity and require_pass. Other nonzero exits
+    # cannot establish a completed run even if JSON was emitted beforehand.
+    if [[ "$runner_rc" -gt 1 ]]; then
+        echo "::error::$repo@$ref runner exited $runner_rc (verification incomplete)" >&2
+        exit 2
+    fi
     if [[ -z "$json" ]]; then
         echo "::error::the runner produced no output for $repo@$ref" >&2
         exit 2

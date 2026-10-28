@@ -789,6 +789,8 @@ both outcomes. Otherwise missing, skipped, blocked or ambiguous required results
 produce exit 2: verification is incomplete, not a confirmed product defect.
 Whole-skill preconditions cannot silently remove these obligations. Omit the list, or use
 an empty list, to retain ordinary assessment severity/skip/blocked semantics.
+Runner exits above 1 indicate incomplete execution (exit 2), even when JSON was
+already emitted; exit 1 remains the runner's aggregate checkpoint-failure status.
 
 The shipped runner executes the `mechanical` section of a checkpoint file.
 Use IDs from that section for `require_pass`; it does not execute `llm_reviews`
