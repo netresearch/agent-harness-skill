@@ -768,6 +768,40 @@ skills:
 
 `scripts/run-shipped-checkpoints.sh` reads that file, fetches each skill at its pinned ref, runs the assessment runner against this repository and fails the job when a checkpoint of severity `error` failed. Warnings are reported and do not gate; `blocked` never gates, because it reports a broken checkpoint rather than a broken project. Templates for the job: `templates/harness-checkpoints.yml.tmpl`, `templates/gitlab-ci-harness-checkpoints.yml.tmpl`, `templates/forgejo-harness-checkpoints.yml.tmpl`.
 
+### Explicitly required checkpoint results
+
+When a project promises a particular verification result, add an optional
+`require_pass` list to the corresponding entry:
+
+```yaml
+skills:
+  - repo: YOUR_ORG/YOUR_PROJECT
+    ref: MODEL_CHECK_COMMIT_SHA
+    path: .harness/model-checkpoints.yaml
+    require_pass: [APP-FORMAL-01]
+```
+
+Each named ID must appear exactly once with `status: pass` in the freshly
+executed result. A failed required checkpoint gates with exit 1 regardless of
+its severity. Missing, skipped, blocked or ambiguous required results produce
+exit 2: verification is incomplete, not a confirmed product defect. Whole-skill
+preconditions cannot silently remove these obligations. Omit the list, or use
+an empty list, to retain ordinary assessment severity/skip/blocked semantics.
+
+The project checkpoint must run a suitable domain verifier against the actual
+property, configuration and target inputs. For model claims, that verifier must
+interpret the native completed search, intended negative trace and reachability
+controls; schema validity or a self-reported aggregate success flag is not a
+substitute. Use the [Formal Model Checking skill](https://github.com/netresearch/formal-model-checking-skill)
+when that work is requested. The harness consumes checkpoint results; it does
+not validate the mathematical specification or prove runtime conformance.
+
+Choose the checkpoint's contract for the assignment: a valid counterexample
+can satisfy a design-investigation task, while disproving a positive release
+claim. Bind evidence to the inputs and revision, and invalidate it when those
+change. The CI job must itself be a required host check before this becomes a
+merge control; the declaration alone does not enforce host policy.
+
 Three properties worth keeping when this is adapted:
 
 **Every ref is pinned.** An unpinned skill ref changes what the gate means without a commit in the repository being gated — the check would tighten or loosen itself behind the maintainer's back.

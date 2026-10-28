@@ -161,6 +161,90 @@ EOF
 out=$(run "$WORK/d-empty.yml"); rc=$?
 check "an empty declaration exits 0" 0 "$rc"
 
+# Explicitly required results are a completeness obligation. The default
+# blocked/skip semantics above remain useful for an ordinary assessment.
+require_pass() {
+    yq -i '.skills[0].require_pass = ["X-01"]' "$1"
+}
+
+decl "$WORK/d-required-pass.yml" "ok" "v1"
+require_pass "$WORK/d-required-pass.yml"
+out=$(run "$WORK/d-required-pass.yml"); rc=$?
+check "a required passing checkpoint is accepted" 0 "$rc"
+
+decl "$WORK/d-required-blocked.yml" "blk" "v1"
+require_pass "$WORK/d-required-blocked.yml"
+out=$(run "$WORK/d-required-blocked.yml"); rc=$?
+check "a required blocked result is incomplete" 2 "$rc"
+check "incomplete output names the required checkpoint" 1 "$(grep -c 'required checkpoint X-01' <<<"$out")"
+
+SKIPPED='{"summary":{"total":1,"pass":0,"fail":0,"skip":1,"blocked":0},"checkpoints":[{"id":"X-01","status":"skip","severity":"error"}]}'
+mk_skill "skip__v1" "$SKIPPED"
+decl "$WORK/d-required-skip.yml" "skip" "v1"
+require_pass "$WORK/d-required-skip.yml"
+out=$(run "$WORK/d-required-skip.yml"); rc=$?
+check "a required skipped result is incomplete" 2 "$rc"
+
+decl "$WORK/d-required-precondition.yml" "na" "v1"
+require_pass "$WORK/d-required-precondition.yml"
+out=$(run "$WORK/d-required-precondition.yml"); rc=$?
+check "preconditions cannot silently remove a required checkpoint" 2 "$rc"
+
+decl "$WORK/d-required-absent.yml" "ok" "v1"
+yq -i '.skills[0].require_pass = ["ABSENT-01"]' "$WORK/d-required-absent.yml"
+out=$(run "$WORK/d-required-absent.yml"); rc=$?
+check "an absent required ID is incomplete" 2 "$rc"
+
+decl "$WORK/d-required-warning.yml" "warn" "v1"
+yq -i '.skills[0].require_pass = ["X-02"]' "$WORK/d-required-warning.yml"
+out=$(run "$WORK/d-required-warning.yml"); rc=$?
+check "an explicitly required failure gates regardless of severity" 1 "$rc"
+
+decl "$WORK/d-required-invalid.yml" "ok" "v1"
+yq -i '.skills[0].require_pass = "X-01"' "$WORK/d-required-invalid.yml"
+out=$(run "$WORK/d-required-invalid.yml"); rc=$?
+check "require_pass must be a list" 2 "$rc"
+
+for value in null false '[123]' '["X-01", "X-01"]'; do
+    decl "$WORK/d-required-invalid.yml" "ok" "v1"
+    yq -i ".skills[0].require_pass = $value" "$WORK/d-required-invalid.yml"
+    out=$(run "$WORK/d-required-invalid.yml"); rc=$?
+    check "invalid require_pass value $value is rejected" 2 "$rc"
+done
+
+decl "$WORK/d-required-empty.yml" "blk" "v1"
+yq -i '.skills[0].require_pass = []' "$WORK/d-required-empty.yml"
+out=$(run "$WORK/d-required-empty.yml"); rc=$?
+check "an empty requirement list preserves assessment semantics" 0 "$rc"
+
+DUPLICATE='{"summary":{"total":2,"pass":2,"fail":0,"skip":0,"blocked":0},"checkpoints":[{"id":"X-01","status":"pass","severity":"error"},{"id":"X-01","status":"pass","severity":"error"}]}'
+mk_skill "duplicate__v1" "$DUPLICATE"
+decl "$WORK/d-required-duplicate-result.yml" "duplicate" "v1"
+require_pass "$WORK/d-required-duplicate-result.yml"
+out=$(run "$WORK/d-required-duplicate-result.yml"); rc=$?
+check "a duplicated required result is ambiguous" 2 "$rc"
+
+mk_skill "malformed__v1" '{"checkpoints":'
+decl "$WORK/d-required-malformed.yml" "malformed" "v1"
+require_pass "$WORK/d-required-malformed.yml"
+out=$(run "$WORK/d-required-malformed.yml"); rc=$?
+check "malformed required results are incomplete" 2 "$rc"
+
+for bad_status in 'pass\n' 'pa\u0000ss' 'fail\n'; do
+    payload='{"summary":{"pass":0,"fail":0,"skip":0,"blocked":0},"checkpoints":[{"id":"X-01","status":"'"$bad_status"'","severity":"error"}]}'
+    mk_skill "bad-status__v1" "$payload"
+    decl "$WORK/d-required-bad-status.yml" "bad-status" "v1"
+    require_pass "$WORK/d-required-bad-status.yml"
+    out=$(run "$WORK/d-required-bad-status.yml"); rc=$?
+    check "status $bad_status must match its JSON value exactly" 2 "$rc"
+done
+
+mk_skill "multi-result__v1" $'{"checkpoints":null}\n{"checkpoints":[{"id":"X-01","status":"pass","severity":"error"}]}'
+decl "$WORK/d-required-multi-result.yml" "multi-result" "v1"
+require_pass "$WORK/d-required-multi-result.yml"
+out=$(run "$WORK/d-required-multi-result.yml"); rc=$?
+check "multiple result documents are incomplete" 2 "$rc"
+
 # --- the declaration and the job must imply each other --------------------
 # A declaration nobody runs reads as enforcement and buys false trust; a job
 # with nothing to run is a green check that measures nothing. Three states,

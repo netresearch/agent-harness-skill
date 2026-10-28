@@ -26,8 +26,11 @@
 # Exit code: 2 when the declaration or an entry in it cannot be resolved, 1 when
 # a checkpoint of severity `error` failed, 0 otherwise. A
 # `warning`/`info` failure is reported and does not gate — the same split the
-# assessment skill's severities already declare. `blocked` never gates either:
-# it reports a broken checkpoint, not a broken project.
+# assessment skill's severities already declare. An optional `require_pass`
+# list on an entry requires exactly one passing result for each named ID.
+# A required failure gates (1); missing/skip/blocked/ambiguous evidence is
+# incomplete (2), not a confirmed project defect. Ordinary blocked results
+# retain their non-gating assessment meaning.
 
 set -uo pipefail
 
@@ -133,6 +136,8 @@ RUNNER="$RUNNER_DIR/$RUNNER_PATH"
 
 gate_failures=0
 soft_failures=0
+incomplete=0
+required_failures=0
 ran=0
 
 for i in $(seq 0 $((COUNT - 1))); do
@@ -141,6 +146,15 @@ for i in $(seq 0 $((COUNT - 1))); do
     path=$(yq -r ".skills[$i].path" "$DECL")
     if [[ "$repo" == "null" || "$ref" == "null" || "$path" == "null" ]]; then
         echo "::error::$DECL entry $i needs repo, ref and path" >&2
+        exit 2
+    fi
+    required=$(yq -o=json ".skills[$i]" "$DECL" | jq -c 'if has("require_pass") then .require_pass else [] end')
+    if ! printf '%s' "$required" | jq -e '
+        type == "array" and
+        all(.[]; type == "string" and test("^[A-Za-z0-9][A-Za-z0-9_.:-]*$")) and
+        (length == (unique | length))
+    ' >/dev/null 2>&1; then
+        echo "::error::$DECL entry $i require_pass must be a list of unique checkpoint IDs" >&2
         exit 2
     fi
 
@@ -163,12 +177,48 @@ for i in $(seq 0 $((COUNT - 1))); do
         exit 2
     fi
     ran=$((ran + 1))
+    if ! printf '%s' "$json" | jq -se 'length == 1 and (.[0] | type == "object")' >/dev/null 2>&1; then
+        echo "::error::$repo@$ref returned invalid checkpoint results" >&2
+        exit 2
+    fi
 
     skipped=$(printf '%s' "$json" | jq -r '.status // ""' 2>/dev/null)
     if [[ "$skipped" == "skipped" ]]; then
         echo "— $repo@$ref: not applicable ($(printf '%s' "$json" | jq -r '.reason // ""'))"
+        if [[ "$required" != "[]" ]]; then
+            echo "::error::$repo: required checkpoints were not run: $required (verification incomplete)"
+            incomplete=$((incomplete + 1))
+        fi
         continue
     fi
+    if ! printf '%s' "$json" | jq -e '.checkpoints | type == "array"' >/dev/null 2>&1; then
+        echo "::error::$repo@$ref returned no checkpoint result list" >&2
+        exit 2
+    fi
+
+    while IFS= read -r id; do
+        matches=$(printf '%s' "$json" | jq -c --arg id "$id" '[.checkpoints[] | select(.id == $id)]')
+        if [[ $(printf '%s' "$matches" | jq 'length') != 1 ]]; then
+            echo "::error::$repo: required checkpoint $id has missing or ambiguous evidence (verification incomplete)"
+            incomplete=$((incomplete + 1))
+            continue
+        fi
+        status=$(printf '%s' "$matches" | jq -r '
+            .[0].status | if . == "pass" then "pass" elif . == "fail" then "fail" else "incomplete" end
+        ')
+        case "$status" in
+            pass) ;;
+            fail)
+                echo "::error::$repo: required checkpoint $id failed"
+                required_failures=$((required_failures + 1))
+                ;;
+            *)
+                detail=$(printf '%s' "$matches" | jq -c '.[0].status')
+                echo "::error::$repo: required checkpoint $id has status $detail (verification incomplete)"
+                incomplete=$((incomplete + 1))
+                ;;
+        esac
+    done < <(printf '%s' "$required" | jq -r '.[]')
 
     errs=$(printf '%s' "$json" | jq -r '[.checkpoints[] | select(.status == "fail" and .severity == "error") | .id] | join(" ")')
     softs=$(printf '%s' "$json" | jq -r '[.checkpoints[] | select(.status == "fail" and .severity != "error") | .id] | join(" ")')
@@ -187,6 +237,8 @@ done
 
 echo "----------------------------------------"
 echo "ran $ran of $COUNT declared skill(s); $gate_failures with an error-severity failure, $soft_failures with warnings only"
+echo "$required_failures explicitly required failure(s); $incomplete incomplete obligation(s)"
 
-[[ "$gate_failures" -eq 0 ]] || exit 1
+[[ "$incomplete" -eq 0 ]] || exit 2
+[[ "$gate_failures" -eq 0 && "$required_failures" -eq 0 ]] || exit 1
 exit 0
