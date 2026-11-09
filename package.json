@@ -1,6 +1,7 @@
 {
   "name": "@netresearch/agent-harness-skill",
   "version": "0.0.0-source",
+  "private": true,
   "description": "Netresearch AI skill for bootstrapping, verifying, and enforcing agent-harness infrastructure in repositories.",
   "license": "(MIT AND CC-BY-SA-4.0)",
   "author": "Netresearch DTT GmbH (https://www.netresearch.de/)",
