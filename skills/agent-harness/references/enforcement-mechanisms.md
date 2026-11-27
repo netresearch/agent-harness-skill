@@ -477,7 +477,7 @@ harness-status:
 
 **What it is:** A markdown file at the repo root read by AI agents at the start of every session.
 
-**When it triggers:** Agent session start, in each agent that reads it. OpenAI Codex and GitHub Copilot read `AGENTS.md` at session start; Gemini CLI reads it through a `GEMINI.md` symlink or its `context.fileName` setting. Claude Code reads it from v2.1.277, and under its default setting only while no `CLAUDE.md`, `.claude/CLAUDE.md` or `CLAUDE.local.md` exists in the working directory or above it. See [Level 1 in maturity-levels.md](maturity-levels.md) for what this means for a repository.
+**When it triggers:** Agent session start, in each agent that reads it. OpenAI Codex and GitHub Copilot read `AGENTS.md` at session start; Gemini CLI reads it through a `GEMINI.md` symlink or its `context.fileName` setting. Claude Code reads it from v2.1.277, and under its default setting only while no `CLAUDE.md`, `.claude/CLAUDE.md` or `CLAUDE.local.md` exists in the working directory or above it. Before v2.1.281, Claude Code sessions on Amazon Bedrock, Google Vertex AI, Microsoft Foundry or an LLM gateway, and sessions with telemetry disabled, read `CLAUDE.md` files only: update Claude Code to v2.1.281 or later; where a session cannot update, the [documented workaround](https://code.claude.com/docs/en/memory#when-agents-md-support-is-unavailable) is a `CLAUDE.md` that imports `@AGENTS.md`. See [Level 1 in maturity-levels.md](maturity-levels.md) for what this means for a repository.
 
 **Who it affects:** AI agents. Humans can read it but it is optimised for agent consumption.
 
