@@ -45,6 +45,7 @@ The harness maturity model defines three levels of agent-readiness for a reposit
 1. Create `AGENTS.md` at the repo root. Use the index format -- keep it under 150 lines. Include sections for repo structure, commands, and rules.
 2. Create a `docs/` directory. Add at least a placeholder file.
 3. Document your build, test, and lint commands in AGENTS.md.
+4. For Gemini CLI, which reads `GEMINI.md` by default, set `context.fileName` to `AGENTS.md` in the project's `.gemini/settings.json` (`{"context": {"fileName": "AGENTS.md"}}`). This adds no second instruction file. A `GEMINI.md` symlink to `AGENTS.md` is the alternative.
 
 **With skill bootstrap:**
 
