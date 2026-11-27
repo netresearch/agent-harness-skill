@@ -477,7 +477,7 @@ harness-status:
 
 **What it is:** A markdown file at the repo root read by AI agents at the start of every session.
 
-**When it triggers:** Agent session start. Claude Code, OpenAI Codex, GitHub Copilot, Gemini CLI, and other agents look for this file automatically.
+**When it triggers:** Agent session start, in each agent that reads it. OpenAI Codex and GitHub Copilot read `AGENTS.md` at session start; Gemini CLI reads it through a `GEMINI.md` symlink or its `context.fileName` setting. Claude Code reads it from v2.1.277, and under its default setting only while no `CLAUDE.md`, `.claude/CLAUDE.md` or `CLAUDE.local.md` exists in the working directory or above it. See [Level 1 in maturity-levels.md](maturity-levels.md) for what this means for a repository.
 
 **Who it affects:** AI agents. Humans can read it but it is optimised for agent consumption.
 
